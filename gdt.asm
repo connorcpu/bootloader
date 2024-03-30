@@ -1,11 +1,12 @@
 gdt_nulldesc:
     dd 0, 0
 
+;both segments are very similair, only 1 bit is diffrent
 gdt_codedesc:
     dw 0xFFFF
     dw 0x0000
     db 0x00
-    db 10011010b
+    db 10011010b ;this line contains under more that we want 32 bit
     db 11001111b
     db 0x00
 
@@ -28,6 +29,7 @@ codeseg equ gdt_codedesc - gdt_nulldesc
 dataseg equ gdt_datadesc - gdt_nulldesc
 
 [bits 32]
+;edit gdt to make the sectors 64 bit
 edit_gdt:
     mov [gdt_codedesc + 6], byte 10101111b
     mov [gdt_datadesc + 6], byte 10101111b

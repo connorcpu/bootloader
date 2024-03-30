@@ -25,7 +25,7 @@ jmp programSpace
 %include "utils.asm"
 
 helloMsg: db "Booting your operating system...", 0xD, 0xA, 0x00
-postReadMsg: db "the kernel was read into memory", 0xd, 0xa, 0x00
+postReadMsg: db "the second stage was read into memory", 0xd, 0xa, 0x00
 
 times 510 - ($ - $$) db 0
 dw 0xaa55

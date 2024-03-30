@@ -1,1 +1,1 @@
-floppya: 720k=image.img, status=inserted
+floppya: 720k=bin/qemu.img, status=inserted
