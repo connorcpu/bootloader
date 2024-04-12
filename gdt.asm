@@ -35,4 +35,4 @@ edit_gdt:
     mov [gdt_datadesc + 6], byte 10101111b
     ret
 
-[bits 16]
+[bits 16] ;without this line no 32 bit code execution

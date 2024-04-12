@@ -1,9 +1,11 @@
-.PHONY: default compile iso
-default: bin/qemu.img
+.PHONY: default compile iso run image
+default: run
 
-bin/qemu.img: compile
+image: compile
 	dd if=bin/comb.o of=bin/qemu.img
 	truncate -s 720K bin/qemu.img
+
+run: image
 	qemu-system-x86_64 bin/qemu.img > /dev/null 2>&1
 
 compile:
