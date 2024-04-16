@@ -73,6 +73,8 @@ startProtecMode:
 ;   cli
 ;   hlt
 
+
+
    ;TODO
    ;ignore checking cpuid and long mode
    call checkCpuid
@@ -81,12 +83,18 @@ startProtecMode:
 
    ;edit gdt so it has 64 bit sectors
    call edit_gdt
+   ;lgdt [GDT.Pointer]
 
    ;jump to long mode
-   jmp codeseg:startLongMode
+  jmp 0x0008:startLongMode
 
    cli
    hlt
+
+ALIGN 4
+IDT: 
+   .Length     dw 0
+   .Base       dd 0
 
 barMsg: db "---------------------------------- 32-bits ------------------------------------", 0x0
 msg: db "Welcome to connOS", 0x0
@@ -108,6 +116,7 @@ printVGA:
       mov al, [bx]
       cmp al, 0x0
       je .exit
+     ;mov byte [0xB8000 + (2 * ((80 * y) + ecx))], al
       mov byte [0xB8000 + (2 * edi)], al ; mov al into the desired memory address
      ;mov byte [0xB8000 + 2 * ((13 * 80) + ecx)], al
      ;mov byte [0xB8000 + 2 * ((y * 80) + x){OPT: + 1}, al ;add opt +1 if you wanna set the color
@@ -150,13 +159,19 @@ shit:
 paging_table_entry equ 0x1000
 setupPaging:
    
-   ;create a paging table
+   ;clear the memory of the paging table 
+   mov edi, paging_table_entry
+   mov cr3, edi 
+   xor eax, eax 
+   mov ecx, 0x1000 
+   rep stosd ;clear memory 
+   mov edi, cr3
    
-   ;fill cr3 with 0x1000, paging table will be at 0x1000?
+   ;fill cr3 with 0x1000, pml4t will be at 0x1000
    mov edi, paging_table_entry
    mov cr3, edi
 
-   ;no clue what this does
+   ;a table is 512 entries of 8 bytes, thats 4kb or 0x1000 in hex so every table has space to grow to full size
    mov dword [edi], 0x2003
    add edi, 0x1000
    mov dword [edi], 0x3003
@@ -170,32 +185,76 @@ setupPaging:
 
    ;add 0xn000 every 8 bytes starting at 0x4000, incrementing n every loop
    ;this does something and is important
-   .set_entry:
-      mov dword [edi], ebx
-      add ebx, 0x1000 
-      add edi, 8
-      loop .set_entry
+.set_entry:
+   mov dword [edi], ebx
+   add ebx, 0x1000 
+   add edi, 8
+   loop .set_entry
+
+   ;disable IRQs whatever those are 
+   mov al, 0xFF 
+   out 0xA1, al 
+   out 0x21, al 
+
+   nop 
+   nop 
+
+   lidt [IDT]
 
    ;we skip disabing paging because we were in gdt mode 
    ;asm garbage for switch bit num 5 in cr0
    mov edx, cr4 
    or edx, (1 << 5)
-   mov cr4, ebx
+   mov cr4, edx
 
    ;asm garbage for switch bit num 8 in the model spcific register 
    ;no clue what ecx does: consult wikipedia
    mov ecx, 0xC0000080
-   rdmsr
-   or eax, 1 << 8
+   rdmsr ;read model specific register into eax
+   ;both of these work
+   ;or eax, 1 << 8
+   or eax, 0x00000100
    wrmsr
 
    ;set paging bit in cr0
    ;cr0 also has our protected mode bit so we can do this or with (1 << 31) | (1 <<0) wich can be done without first extracing cr0 into eax
-   mov eax, cr0 
-   or eax, 1 << 31
-   mov cr0, eax
+   ;both of these work
+   ;mov eax, cr0 
+   ;or eax, 1 << 31
+   ;mov cr0, eax
+   mov ebx, cr0 
+   or ebx, 0x80000001
+   mov cr0, ebx
 
    ret
+
+GDT:
+.Null:
+   dq 0x0000000000000000
+
+.Code: 
+   dw 0x0 
+   dw 0x0 
+   db 00000000b 
+   db 10011000b 
+   db 00100000b 
+   db 00100000b 
+   db 00000000b
+
+.Data 
+   dw 0x0 
+   dw 0x0 
+   db 00000000b 
+   db 10010000b 
+   db 00000000b 
+   db 00000000b
+
+ALIGN 4 
+   dw 0
+
+.Pointer:
+   dw $ - GDT - 1
+   dd GDT
 
 ;start long mode
 [bits 64]
@@ -207,10 +266,10 @@ startLongMode:
    mov fs, ax
    mov gs, ax
 
-   mov edi, 0xb8000 
-   mov rax, 0x0f200f200f20
-   mov ecx, 500
-   rep stosq
+;   mov edi, 0xb8000 
+;   mov rax, 0x0f200f200f20
+;   mov ecx, 500
+;   rep stosq
 
    mov rax, 0xABCDEF12345689
    mov byte [0xB8000], 'C'
@@ -233,10 +292,12 @@ print64:
 
    .loop:
 
-      mov ax, [ebx]
-      cmp ax, 0x0
+      mov byte al, [ebx]
+      cmp al, 0x0
       je .exit
-      mov byte [0xB8000 + 2 * ((14 * 80) + rcx)], al
+      mov byte [0xB8000 + 2 * ((18 * 80) + rcx)], al
+     ;mov byte [0xB8000 + (2 * edi)], al ; mov al into the desired memory address
+     ;mov byte [0xB8000 + (2 * ((80 * y) + ecx))], al
       inc ebx 
       inc rcx
       jmp .loop
