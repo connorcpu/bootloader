@@ -1,4 +1,4 @@
-[org 0x8000]
+;[org 0x8000]
 jmp do_shit
 
 %include "gdt.asm"
@@ -241,7 +241,7 @@ GDT:
    db 00100000b 
    db 00000000b
 
-.Data 
+.Data: 
    dw 0x0 
    dw 0x0 
    db 00000000b 
@@ -258,6 +258,8 @@ ALIGN 4
 
 ;start long mode
 [bits 64]
+[extern _start]
+
 startLongMode:
    mov ax, dataseg
    mov ds, ax
@@ -267,40 +269,62 @@ startLongMode:
    mov gs, ax
 
 ;   mov edi, 0xb8000 
-;   mov rax, 0x0f200f200f20
+;   mov rax, 0x0f200f200f20 ;clear screen but causes printing issues
 ;   mov ecx, 500
 ;   rep stosq
 
    mov rax, 0xABCDEF12345689
    mov byte [0xB8000], 'C'
    mov byte [0xB8002], 'O'
-   ;cli 
-   ;hlt
+
+   ;STACK IS WORKING WHOOOOO
+   push rsi 
+   xor rsi, rsi 
+   mov ebx, connos
+   call printVGA64
+   pop rsi
+
+
+   inc rsi
+   mov ebx, bar64Msg
+   call printVGA64
    mov ebx, msg64
-   call print64
+   call printVGA64
+
+   mov rsp, 0x90000
+   call _start
 
    cli 
    hlt
    jmp $
 
+connos: db "connOS ", 0x0
 msg64: db "we have reached 64-bits, congratulations!", 0x0
+bar64Msg: db "---------------------------------- 64-bits ------------------------------------", 0x0
 
-
-print64:
+printVGA64:
 
    xor rcx, rcx
+   xor rax, rax 
+   xor rdi, rdi
 
    .loop:
 
+      mov rax, rsi ;esi wil be 13 or whatever line we want
+      mov rdi, 0x50 ;edi will be 80
+      mul rdi
+      add rax, rcx ;add ecx which is where the x value goes
+      mov rdi, rax
       mov byte al, [ebx]
       cmp al, 0x0
       je .exit
-      mov byte [0xB8000 + 2 * ((18 * 80) + rcx)], al
-     ;mov byte [0xB8000 + (2 * edi)], al ; mov al into the desired memory address
-     ;mov byte [0xB8000 + (2 * ((80 * y) + ecx))], al
+      mov byte [0xB8000 + (2 * rdi)], al ; mov al into the desired memory address
       inc ebx 
       inc rcx
       jmp .loop
 
    .exit:
+      inc rsi
       ret
+
+times 4096 - ($ - $$) db 0
