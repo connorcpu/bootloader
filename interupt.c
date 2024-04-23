@@ -44,6 +44,8 @@ void registerInterupt(uint8_t vector, void* handler){
 //__attribute__((noreturn))
 void exception_handler(){
 
+   print("we recieved an interupt\0");
+
    __asm__ volatile ("cli; hlt"); //halt when exception comes in
 
 }

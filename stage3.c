@@ -1,6 +1,7 @@
 #include "io.h"
 #include "interupt.h"
 #include "keyboard.h"
+#include <stdint.h>
 
 extern int _start() {
 
@@ -15,7 +16,11 @@ extern int _start() {
 
    print("------------------------------------- C code ------------------------------------\0");
    print("connOS rules\0");
-   //print("test\0");
+
+   __asm__ volatile ("xor %edi, %edi; div %edi");
+   //__asm__ volatile ("cli; hlt");
+
+   print("test\0");
    //print("test\0");
    //print("test\0");
    //print("test\0");
