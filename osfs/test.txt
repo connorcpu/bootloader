@@ -1,1 +1,1 @@
-this text was read for a text file on the disk
+this file was stored on the disk

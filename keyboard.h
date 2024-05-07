@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include "io.h"
+
 #define PIC1         0x20 //offset because design mistake, 0-32 are for intel stuff so keyboard being 1 is not gonna work
 #define PIC2         0xA0
 #define PIC1_COMMAND PIC1
@@ -19,6 +21,8 @@
 #define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
-                        
+
 void PIC_sendEOI(uint8_t irq);
 void PIC_remap(int offset1, int offset2);
+
+void keyboardHandler(registers_t);

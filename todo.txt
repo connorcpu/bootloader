@@ -1,5 +1,21 @@
-interrups DONE (ig)
-keyboard 
-terminal
+interrups DONE
+keyboard  DONE
+restructure
+makefile upgrade (learn make)
+cross compiler (low priority)
 filesystem
-graphics
+   - FAT
+      - no large files 
+      - microsoft 
+   - ext2
+      - complex
+      - large overhead
+   - bmfs
+      - compilation is a lil complex
+      - less control over source
+
+   we have chosen FAT32
+   we are going to need to do MBR ourselves in boot.asm to put the partions right :)
+terminal
+graphics 
+   kill yourself it aint happening (probs)

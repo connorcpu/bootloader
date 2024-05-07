@@ -8,10 +8,17 @@ default: run
 
 image: compile
 	dd if=bin/comb.o of=bin/qemu.img
-	truncate -s 720K bin/qemu.img
+	#truncate -s 720K bin/qemu.img
+	truncate -s 100M bin/qemu.img
+	sudo kpartx -a bin/qemu.img 
+	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4'
+	sudo mount /dev/mapper/loop0p4 /media/osfat 
+	sudo cp osfs/* /media/osfat 
+	sudo umount /media/osfat
+	sudo kpartx -d bin/qemu.img
 
 run: clean image
-	qemu-system-x86_64 bin/qemu.img > /dev/null 2>&1
+	qemu-system-x86_64 bin/qemu.img  > /dev/null 2>&1
 
 compile: ${OBJ} 
 	nasm boot.asm -f bin -o bin/boot.o
@@ -29,7 +36,7 @@ iso: bin/os.iso
 bin/os.iso: compile
 	dd if=bin/comb.o of=osfs/iso.o
 	truncate -s 1200K osfs/iso.o
-	mkisofs -jcharset ASCII -o bin/os.iso -b iso.o osfs/ 
+	mkisofs -no-emul-boot -jcharset ASCII -o bin/os.iso -b iso.o osfs/ 
 
 clean:
 	rm bin/* -f

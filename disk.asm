@@ -3,10 +3,10 @@ programSpace equ 0x8000 ;make ABSOLUTELY DUBBLY SURE that this number is the sam
 
 read_disk:
    mov ah, 0x02 ; read sectors
-   mov al, 0x12; should be enough, dunno how much space we have tho
+   mov al, 0x16 ; read 16 sectors
    mov ch, 0x0 
-   mov cl, 0x02
-   mov dh, 0x0 ;read from the very first sector?? idk man
+   mov cl, 0x02; read from the second sector
+   mov dh, 0x0 ; from first disk thingys
    mov dl, [diskNum]
    mov bx, programSpace
    int 13h

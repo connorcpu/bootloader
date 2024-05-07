@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en-US' lang='en-US'>
+<head>
+<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
+<title>GParted Details</title>
+<style type='text/css'>
+table {border:0}
+th {text-align:left}
+.number_col {text-align:right}
+</style>
+</head>
+<body>
+<p>GParted 1.6.0</p>
+<p>configuration --enable-libparted-dmraid --enable-online-resize</p>
+<p>libparted 3.6</p>
+<p>========================================</p>
+<table>
+<tr><th>Device:</th><td>/dev/loop0</td></tr>
+<tr><th>Model:</th><td>Loopback device</td></tr>
+<tr><th>Serial:</th><td></td></tr>
+<tr><th>Sector size:</th><td>512</td></tr>
+<tr><th>Total sectors:</th><td>204800</td></tr>
+<tr><td colspan='2'>&nbsp;</td></tr>
+<tr><th>Heads:</th><td>255</td></tr>
+<tr><th>Sectors/track:</th><td>2</td></tr>
+<tr><th>Cylinders:</th><td>401</td></tr>
+<tr><td colspan='2'>&nbsp;</td></tr>
+<tr><th>Partition table:</th><td>msdos</td></tr>
+<tr><td colspan='2'>&nbsp;</td></tr>
+</table>
+<table>
+<tr><th>Partition</th><th>Type</th><th class='number_col'>Start</th><th class='number_col'>End</th><th>Flags</th><th>Partition Name</th><th>File System</th><th>Label</th><th>Mount Point</th></tr>
+<tr><td>/dev/loop0p4</td><td>Primary</td><td class='number_col'>24</td><td class='number_col'>184343</td><td>boot</td><td></td><td>unknown</td><td></td><td></td></tr>
+</table>
+<p>========================================</p>
+<table>
+<tr>
+<td colspan='2'>
+<b>Format /dev/loop0p4 as fat32</b>&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( ERROR )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+calibrate /dev/loop0p4&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+<i>path: /dev/loop0p4 (partition)<br />start: 24<br />end: 184343<br />size: 184320 (90.00 MiB)</i>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+clear old file system signatures in /dev/loop0p4&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+write 512.00 KiB of zeros at byte offset 0&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+write 4.00 KiB of zeros at byte offset 67108864&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+write 512.00 B of zeros at byte offset 92791296&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+write 512.00 KiB of zeros at byte offset 93847552&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+flush operating system cache of /dev/loop0&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+set partition type on /dev/loop0p4&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( SUCCESS )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+<i>new partition type: fat32</i>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+create new fat32 file system&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( ERROR )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+<b><i>mkfs.fat -F32 -v -I &apos;/dev/loop0p4&apos;</i></b>&nbsp;&nbsp;00:00:00&nbsp;&nbsp;&nbsp;&nbsp;( ERROR )
+</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<table>
+<tr>
+<td colspan='2'>
+<i>mkfs.fat 4.2 (2021-01-31)<br /></i>
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td colspan='2'>
+<i>mkfs.fat: unable to open /dev/loop0p4: Device or resource busy<br /></i>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

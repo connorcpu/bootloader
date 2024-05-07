@@ -8,54 +8,70 @@ idt_entry_t idt[256]; //256 idt entries
 
 //the idtr thing
 idtr_t idtr;
-extern void* isr_stub_table[];
+extern uint64_t isr_stub_table[];
 
-uint64_t routineHandlers[255];
+isr_t routineHandlers[256];
 
 void createTable(){
 
    idtr.base = (uintptr_t)&idt[0];
-   idtr.limit = (uint16_t)sizeof(idt_entry_t) * 255;
+   idtr.limit = (uint16_t)sizeof(idt_entry_t) * 40;
 
    for (uint8_t vector = 0; vector < 32; vector++) {
 
-      idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
-      //vectors[vector] = true;
+      idt_set_descriptor(vector, (void*)isr_stub_table[vector], 0x8E);
    
+   }
+
+   PIC_remap(0x20, 0x28);
+
+   for (uint8_t vector = 32; vector < 39; vector++){
+
+      idt_set_descriptor(vector, (void*)isr_stub_table[vector], 0x8E);
+
    }
 
    __asm__ volatile ("lidt %0" : : "m"(idtr)); //load idt
    __asm__ volatile ("sti"); //enable interupts
+   inb(0x60);
 
-   registerInterupt(33, &keyboardHandler);
-
-}
-
-void registerInterupt(uint8_t vector, void* handler){
-
-   //keyboardHandler
-   //idt_set_descriptor(0x21, &keyboardHandler, 0b11100001); //1110 for interupt gate, 0, 00 for highest privalage, 1 for present
-   //idt_set_descriptor(0x21, &keyboardHandler, 0x8E); //1110 for interupt gate, 0, 00 for highest privalage, 1 for present
-   routineHandlers[vector] = (uint64_t)handler;
-   idt_set_descriptor(vector, isr_stub_table[vector], (0x0E | 0x80) | 001);
+   registerInterupt(1, &keyboardHandler);
 
 }
 
-//__attribute__((noreturn))
-void exception_handler(){
+void registerInterupt(uint8_t vector, isr_t handler){
+
+   routineHandlers[vector] = handler;
+
+}
+
+void exception_handler(registers_t r){
 
    print("we recieved an interupt\0");
 
+   uint64_t int_ch = r.int_no + '0';
+   putch(int_ch, 2, 0);           //set 3e character to the error code (single digit only)
    __asm__ volatile ("cli; hlt"); //halt when exception comes in
 
 }
 
-//__attribute__((noreturn))
-void keyboardHandler(){
+void irq_handler(registers_t r){
 
-   print("recieved keypress\0");
+   if(r.int_no > 0){
 
-   __asm__ volatile ("iret"); //halt when exception comes in
+      //resolve and call handler
+      isr_t handler = routineHandlers[r.int_no];
+      handler(r);
+
+   } 
+
+   //set 2e character to irq number
+   uint64_t int_ch = r.int_no + '0';
+   putch(int_ch, 1, 0); 
+
+   PIC_sendEOI(1);
+
+   return;
 
 }
 
@@ -64,7 +80,7 @@ void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags){
    idt_entry_t* descriptor = &idt[vector];
 
    descriptor->isr_low     = (uint64_t)isr & 0xFFFF;
-   descriptor->kernel_cs   = 0x08; //maybe dont hard code??
+   descriptor->kernel_cs   = 0x08; //hardcoded because kernel cs is always 0x08 and we always want 0x08
    descriptor->ist         = 0;
    descriptor->attributes  = flags; 
    descriptor->isr_mid     = ((uint64_t)isr >> 16) & 0xFFFF;

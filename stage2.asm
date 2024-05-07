@@ -19,6 +19,9 @@ do_shit:
    call loadGDT
    mov bx, gdtMsg
    call print
+   
+   ;set vga mode to 160x50 text
+   call setVga
 
    ;set first bit of cr0 which means protected mode
    mov eax, cr0
@@ -48,6 +51,15 @@ loadGDT:
    cli
    lgdt [gdt_descriptor]
   ; sti
+   ret
+
+setVga:
+   
+   ;mov al, 0x2f
+   mov al, 27h
+   mov ah, 00h
+   int 10h
+
    ret
 
 ;enable protected mode 
@@ -294,9 +306,9 @@ startLongMode:
    mov rsp, 0x90000
    call _start
 
-   cli 
-   hlt
    jmp $
+   ;cli 
+   ;hlt
 
 connos: db "connOS ", 0x0
 msg64: db "we have reached 64-bits, congratulations!", 0x0
@@ -330,15 +342,115 @@ printVGA64:
 
 %macro isr_err_stub 1
 isr_stub_%+%1:
-   call exception_handler
-   iretq
-%endmacro
-%macro isr_no_err_stub 1
-isr_stub_%+%1:
-   call exception_handler
-   iretq
+   cli
+   push qword %1
+   jmp isr_common
 %endmacro
 
+%macro isr_no_err_stub 1
+isr_stub_%+%1:
+   cli
+   push qword 0
+   push qword %1
+   jmp isr_common
+%endmacro
+
+%macro irq_stub 2
+irq_stub_%+%1:
+   cli
+
+   push qword 0
+   push qword %2 
+
+   ;call irq_handler
+   jmp irq_common
+%endmacro
+
+isr_common:
+    push rdi
+    push rsi
+    push rbp
+    push rsp
+    push rbx
+    push rdx
+    push rcx
+    push rax
+
+    mov ax, ds
+    push rax
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    call exception_handler
+
+    pop rax
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    pop rax
+    pop rcx
+    pop rdx
+    pop rbx
+    pop rsp
+    pop rbp
+    pop rsi
+    pop rdi
+
+    add rsp, 16
+    sti
+    iretq
+
+irq_common:
+   push rdi 
+   push rsi 
+   push rbp 
+   push rsp 
+   push rbx 
+   push rdx 
+   push rcx 
+   push rax 
+
+   mov ax, ds 
+   push rax 
+
+   ;make sure we are running in kernel level data segment (gdt)
+   mov ax, 0x10 
+   mov ds, ax 
+   mov es, ax 
+   mov fs, ax 
+   mov gs, ax
+
+   call irq_handler
+
+   ;restore saved ax
+   pop rax 
+   mov ds, ax 
+   mov es, ax 
+   mov fs, ax 
+   mov gs, ax 
+
+   pop rax 
+   pop rcx 
+   pop rdx 
+   pop rbx 
+   pop rsp 
+   pop rbp 
+   pop rsi 
+   pop rdi
+
+   add rsp, 16
+   sti 
+   iretq
+
+
+
+[extern irq_handler]
 [extern exception_handler]
 isr_no_err_stub 0
 isr_no_err_stub 1
@@ -372,12 +484,25 @@ isr_no_err_stub 28
 isr_no_err_stub 29
 isr_err_stub    30 
 isr_no_err_stub 31
+irq_stub 32, 0
+irq_stub 33, 1
+irq_stub 34, 2
+irq_stub 35, 3
+irq_stub 36, 4
+irq_stub 37, 5
+irq_stub 38, 6
 
 global isr_stub_table
 isr_stub_table: 
 %assign i 0
 %rep 32
    dq isr_stub_%+i
+%assign i i+1
+%endrep
+
+%assign i 32
+%rep 7
+   dq irq_stub_%+i
 %assign i i+1
 %endrep
 

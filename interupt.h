@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include "utils.h"
+#include "keyboard.h"
 
 typedef struct {
    
@@ -18,10 +20,11 @@ typedef struct {
    uint64_t base;
 
 } __attribute__((packed)) idtr_t;
+
+typedef void (*isr_t)(registers_t);
+
 void createTable(void);
-void registerInterupt(uint8_t vector, void* handler);
-__attribute__((noreturn))
-void exception_handler(void);
-__attribute__((noreturn))
-void keyboardHandler();
+void exception_handler(registers_t r);
+void irq_handler(registers_t r);
 void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags);
+void registerInterupt(uint8_t vector, isr_t handler);
