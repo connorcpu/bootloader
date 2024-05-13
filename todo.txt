@@ -15,7 +15,13 @@ filesystem
       - less control over source
 
    we have chosen FAT32
-   we are going to need to do MBR ourselves in boot.asm to put the partions right :)
+   we are going to need to do MBR ourselves in boot.asm to put the partions right :) DONE (see makefile)
+   figuere out how to read sectors (smt with ide and CHS -> LBA convertion)
+   fuguere out how to read FS
 terminal
 graphics 
    kill yourself it aint happening (probs)
+   dunno what mode it is
+   dunno what mode i want
+   dunno how to set mode (int 13h seems to not be working)
+memory map

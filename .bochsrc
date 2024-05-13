@@ -1,1 +1,2 @@
-floppya: 720k=bin/qemu.img, status=inserted
+ata0-master: type=disk, path="bin/qemu.img", mode=flat, cylinders=792, heads=8, spt=32
+boot: disk

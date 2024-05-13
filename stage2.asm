@@ -21,7 +21,7 @@ do_shit:
    call print
    
    ;set vga mode to 160x50 text
-   call setVga
+   ;call setVga
 
    ;set first bit of cr0 which means protected mode
    mov eax, cr0
@@ -506,4 +506,4 @@ isr_stub_table:
 %assign i i+1
 %endrep
 
-times 4096 - ($ - $$) db 0
+

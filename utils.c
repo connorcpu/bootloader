@@ -24,6 +24,12 @@ uint8_t inb(uint16_t port){
 
 }
 
+void insl(int32_t port, void *addr, int32_t cnt){
+
+  asm volatile("cld; rep insl" : "=D" (addr), "=c" (cnt) : "d" (port), "0" (addr), "1" (cnt) : "memory", "cc"); 
+
+}
+
 void io_wait(void){
 
    outb(0x80, 0);
