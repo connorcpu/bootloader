@@ -54,3 +54,4 @@ typedef struct fileEntry{
 #define ROOTADDR 0x74000
 void fatInit();
 uint32_t clusterToLba(uint32_t clusterIndx);
+uint8_t getFileName(fileHeader_t* file, uint8_t* name);
