@@ -1,6 +1,7 @@
 interrups DONE
 keyboard  DONE
 restructure
+fix io.c (printf & itoa)
 makefile upgrade (learn make)
 cross compiler (low priority)
 filesystem

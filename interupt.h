@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include "utils.h"
-#include "keyboard.h"
 
 typedef struct {
    
@@ -21,6 +20,14 @@ typedef struct {
 
 } __attribute__((packed)) idtr_t;
 
+typedef struct {
+
+   uint64_t ds;
+   uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
+   uint64_t int_no, err_code;
+   uint64_t rip, cs, eflags, userrsp, ss;
+
+} registers_t;
 typedef void (*isr_t)(registers_t);
 
 void createTable(void);
@@ -28,3 +35,5 @@ void exception_handler(registers_t r);
 void irq_handler(registers_t r);
 void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags);
 void registerInterupt(uint8_t vector, isr_t handler);
+
+

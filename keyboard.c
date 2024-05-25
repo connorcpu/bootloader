@@ -1,48 +1,7 @@
 #include "keyboard.h"
 #include <stdint.h>
-#include "utils.h"
 #include <stdbool.h>
-
-void PIC_sendEOI(uint8_t irq){
-
-   if(irq >= 8){
-      outb(PIC2_COMMAND, PIC_EOI);
-   }
-
-   outb(PIC1_COMMAND, PIC_EOI);
-
-}
-
-void PIC_remap(int offset1, int offset2){
-
-   uint8_t a1, a2; 
-
-   a1 = inb(PIC1_DATA);
-   a2 = inb(PIC2_DATA);
-
-   outb(PIC1_COMMAND, 0x11);
-   io_wait(); //boomer computers are a thing
-   outb(PIC2_COMMAND, 0x11);
-   io_wait();
-   outb(PIC1_DATA, offset1);
-   io_wait();
-   outb(PIC2_DATA, offset2);
-   io_wait();
-   outb(PIC1_DATA, 4); //tell master it has a slave ready at irq 2
-   io_wait();
-   outb(PIC2_DATA, 2); //tell slave to be a slave
-   io_wait();
-
-   outb(PIC1_DATA, ICW4_8086);   //tell master pic mode
-   io_wait();
-   outb(PIC2_DATA, ICW4_8086); // tell slave pic mode
-   io_wait();                              
-
-   outb(PIC1_DATA, 0x01);
-   io_wait();
-   outb(PIC2_DATA, 0x0);
-
-}
+#include "io.h"
 
 void keyboardHandler(registers_t r){
 
@@ -53,7 +12,7 @@ void keyboardHandler(registers_t r){
          print("ERROR");
          break;
       case 0x1:
-         print("ESC");
+         //print("ESC");
          break;
       case 0x2:
          printch('1');
@@ -139,7 +98,7 @@ void keyboardHandler(registers_t r){
          enter();
          break;
       case 0x1D:
-         print("LCtrl");
+         setmod(3, true);
          break;
       case 0x1E:
          printch('a');
@@ -178,7 +137,7 @@ void keyboardHandler(registers_t r){
          printch('`');
          break;
       case 0x2A:
-         setShift(true);
+         setmod(1, true);
          break;
       case 0x2B:
          print("\\");
@@ -214,33 +173,47 @@ void keyboardHandler(registers_t r){
          printch('/');
          break;
       case 0x36:
-         setShift(true);
+         setmod(1, true);
          break;
       case 0x37:
          print("Keypad *");
          break;
       case 0x38:
-         print("LAlt");
+         setmod(2, true);
          break;
       case 0x39:
          printch(0x20);
          break;
       case 0x36 + 0x80:
-         setShift(false);
+         setmod(1, false);
          break;
       case 0x2A + 0x80:
-         setShift(false);
+         setmod(1, false);
+         break;
+      case 0x1D + 0x80:
+         setmod(3, false);
+         break;
+      case 0x38 + 0x80:
+         setmod(2, false);
          break;
       default:
          /* 'keuyp' event corresponds to the 'keydown' + 0x80 
           * it may still be a scancode we haven't implemented yet, or
           * maybe a control/escape sequence */
          if (scancode <= 0x7f) {
-            print("Unknown key down");
+            kprintf("Unknown key down\n");
          } else if (scancode <= 0x39 + 0x80) {
            // print("key up ");
-         } else print("Unknown key up");
+         } else kprintf("Unknown key up\n");
          break;
    }
+
+   return;
+
+}
+
+void registerkdbint(){
+
+   registerInterupt(1, &keyboardHandler);
 
 }

@@ -11,14 +11,16 @@ image: compile
 	#truncate -s 720K bin/qemu.img
 	truncate -s 100M bin/qemu.img
 	sudo kpartx -a bin/qemu.img 
-	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4'
+	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4' -n 'AUTISM FS  '
 	sudo mount /dev/mapper/loop0p4 /media/osfat 
 	sudo cp osfs/* /media/osfat 
 	sudo umount /media/osfat
 	sudo kpartx -d bin/qemu.img
 
 run: clean image
-	qemu-system-x86_64 bin/qemu.img  > /dev/null 2>&1
+#	qemu-system-x86_64 -hda bin/qemu.img  > /dev/null 2>&1
+	#-hdd does funcy shit
+	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw > /dev/null 2>&1
 
 compile: ${OBJ} 
 	nasm boot.asm -f bin -o bin/boot.o
@@ -28,7 +30,8 @@ compile: ${OBJ}
 	cat bin/boot.o bin/kernel.bin > bin/comb.o
 
 bin/%.o: %.c ${HEADERS}
-	gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@
+#	gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@
+	x86_64-elf-gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@
 #	clang -std=c17 -ffreestanding -mno-red-zone -mcmodel=kernel -fno-stack-protector -fpic -fpie -gdwarf -fwrapv -Werror -pipe -c $< -o $@
 	
 iso: bin/os.iso

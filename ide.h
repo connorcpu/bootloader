@@ -77,7 +77,19 @@
 #define ATA_REG_ALTSTATUS  0x0C       //ro
 #define ATA_REG_DEVADDRESS 0x0D       //unknown by even OSDEV 
 
+//channels
+#define ATA_PRIMARY 0x00
+#define ATA_SECONDARY 0x01
+
+//directions
+#define ATA_READ 0x00
+#define ATA_WRITE 0x01
+
 void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_t bar4);
 uint8_t ide_read(uint8_t channel, uint8_t reg);
 void ide_write(uint8_t channel, uint8_t reg, uint8_t data);
 void ide_read_buffer(uint8_t channel, uint8_t reg, uint32_t buffer, uint32_t quads);
+uint8_t ide_polling(uint8_t channel, uint32_t advanced_check);
+uint8_t ide_print_error(uint32_t drive, uint8_t err);
+uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t numSects, uint16_t selector, uint32_t edi);
+uint8_t ide_read_sectors(uint8_t drive, uint8_t numssects, uint32_t lba, uint16_t es, uint32_t edi);

@@ -5,11 +5,3 @@ uint8_t inb(uint16_t port);
 void insl(int32_t port, void *addr, int32_t cnt);
 void io_wait(void);
 
-typedef struct {
-
-   uint64_t ds;
-   uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
-   uint64_t int_no, err_code;
-   uint64_t rip, cs, eflags, userrsp, ss;
-
-} registers_t;

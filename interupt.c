@@ -1,6 +1,7 @@
 #include "interupt.h"
 #include "io.h"
 #include <stdint.h>
+#include "pic.h"
 
 //the idt table
 __attribute__((aligned(0x10))) //this makes it go vroom
@@ -35,7 +36,7 @@ void createTable(){
    __asm__ volatile ("sti"); //enable interupts
    inb(0x60);
 
-   registerInterupt(1, &keyboardHandler);
+//   registerInterupt(1, &keyboardHandler);
 
 }
 

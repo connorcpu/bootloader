@@ -1,11 +1,28 @@
 #include "io.h"
 #include <stdint.h>
-#include "utils.h"
 
 uint8_t lineNum;
 uint8_t x;
 unsigned char* vidmem;
-bool shift = false;
+bool shift, alt, ctrl = false;
+
+void setmod(uint8_t modkeyindx, bool enabled){
+
+   //1 = shift; 2 = alt; 3 = ctrl 
+   switch (modkeyindx) {
+      case 1:
+         shift = enabled;
+         break;
+      case 2:
+         alt = enabled;
+         break;
+      case 3:
+         ctrl = enabled;
+         break;
+   
+   }
+
+}
 
 int ioInit(){
 
@@ -21,11 +38,17 @@ int putch(char character, uint8_t x, uint8_t y){
 
 }
 
-int putst(char* string, uint8_t y){
+int putst(char* string, uint8_t x, uint8_t y){
 
-   for (int i = 0; string[i] != '\0'; i++) {
+   for (int i = 0; string[i] != 0; i++) {
 
-      putch(string[i], i, y);
+      putch(string[i], x, y);
+      if(x >= 79){
+         x = 0;
+         lineNum++;
+      }else {
+         x++;
+      }
 
    }
 
@@ -33,19 +56,95 @@ int putst(char* string, uint8_t y){
 
 int print(char* string){
 
-   putst(string, lineNum);
+   for(int i = 0; string[i] != 0; i++){
+      printch(string[i]);
+   }
    if (lineNum > 24) {
       lineNum = 0; 
    }else {
-      lineNum++;
+     // lineNum++;
    }
    
    x = 0;
    movCursor(x, lineNum);
 }
 
+void kprintf(char * string, ...){
+
+   va_list args;
+   va_start(args, string);
+   format(string, args);
+   va_end(args);
+
+}
+
+void format(char *string, va_list args){
+   
+   char buf[48] = {0};
+   char ch; 
+
+   while((ch = *(string++))){
+
+      if(ch != '%') printch(ch);
+      if(ch == '%'){
+
+         ch = *(string++);
+         
+         switch (ch) {
+         case 0: return;
+         case 'c':
+            printch(va_arg(args, int));
+            break;
+         case 's':
+            print(va_arg(args, char*));
+            break;
+         case 'd':
+            i2a(va_arg(args, long int), buf);
+            print(buf); 
+            break;
+         case '%':
+            printch(ch);
+            break;
+         
+         }
+
+      }
+
+   }
+
+   return;
+
+}
+
+void i2a(uint64_t num, char* buffer){
+
+   uint64_t n = 0;
+   uint64_t dgt;
+   uint64_t d = 1;
+
+   while((num / d) >= 10) d *= 10; 
+   while(d != 0){
+
+      dgt = num / d;
+      num %= d; 
+      d /= 10;
+      if (n || dgt > 0 || d == 0) {
+         *buffer++ = dgt + (dgt < 10 ? '0' : 'a' - 10);
+         ++n;
+      
+      }
+
+   }
+   *buffer == 0;
+
+}
+
 void printch(char ch){
 
+   if(ch == '\n'){
+      enter();
+      return;
+   }
    if(shift) ch -= ' ';
    putch(ch, x, lineNum);
    if(x >= 79){
@@ -56,6 +155,8 @@ void printch(char ch){
    }
 
    movCursor(x, lineNum);
+
+   return;
 }
 
 void backspace(){
@@ -70,6 +171,9 @@ void backspace(){
    putch(0, x, lineNum);
 
    movCursor(x, lineNum);
+
+   return;
+
 }
 
 void enter(){
@@ -77,6 +181,8 @@ void enter(){
    x = 0;
    lineNum++;
    movCursor(x, lineNum);
+
+   return;
 
 }
 
@@ -106,10 +212,10 @@ void setShift(bool enable){
 
 void movCursor(uint8_t x, uint8_t y){
 
-   uint16_t pos = y * 80 + x;
-   outb(0x3D4, 0x0f);
-   outb(0x3D5, (uint8_t) (pos & 0xFF));
+   uint16_t pos = (y * 80) + x;
    outb(0x3D4, 0x0E);
    outb(0x3D5, (uint8_t) ((pos >> 8) && 0xFF));
+   outb(0x3D4, 0x0F);
+   outb(0x3D5, (uint8_t) (pos & 0xFF));
 
 }
