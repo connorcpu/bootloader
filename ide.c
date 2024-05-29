@@ -132,8 +132,6 @@ uint8_t ide_print_error(uint32_t drive, uint8_t err){
 
 void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_t bar4){
 
-   print("we are doing smt");
-
    int i, j, k, count = 0;
 
    //detect io ports
@@ -239,14 +237,15 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
    }
 
    //print summary
+   int drives = 0;
    for(i = 0; i < 4; i++){
 
       if(ide_devices[i].reserved == 1){
 
-         kprintf("found drive of type: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type]);
-         kprintf("size: %d\n", (ide_devices[i].size));
-         kprintf("model: %s\n", ide_devices[i].model);
-
+         //kprintf("found drive of type: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type]);
+         //kprintf("size: %d\n", (ide_devices[i].size));
+         //kprintf("model: %s\n", ide_devices[i].model);
+         drives++;
          
 
       }

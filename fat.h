@@ -55,3 +55,6 @@ typedef struct fileEntry{
 void fatInit();
 uint32_t clusterToLba(uint32_t clusterIndx);
 uint8_t getFileName(fileHeader_t* file, uint8_t* name);
+void recodeFileName(char* name, char* loadAddr);
+uint8_t openFile(char* fileName, fileHeader_t* loadAddr); //does not yet support subdirectories or files above 0.5KB
+

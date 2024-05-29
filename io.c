@@ -102,6 +102,10 @@ void format(char *string, va_list args){
             i2a(va_arg(args, long int), buf);
             print(buf); 
             break;
+         case 'i':
+            i2a(va_arg(args, int), buf);
+            print(buf);
+            break;
          case '%':
             printch(ch);
             break;
@@ -109,7 +113,12 @@ void format(char *string, va_list args){
          }
 
       }
+   
+      for(uint8_t i = 0; i < 48; i++){
 
+         buf[i] = 0;
+
+      }
    }
 
    return;

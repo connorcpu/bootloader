@@ -8,13 +8,15 @@ fatBootsector_t bootsect;
 fatEbr32_t ebrsect;
 uint32_t clusterBeginLba;
 fileHeader_t rootdir;
+fileHeader_t* rootFiles;
 
 void fatInit(){
 
    fatBootsector_t* bootaddr = (fatBootsector_t*) BOOTADDR; //0x70000
    fatEbr32_t* ebraddr = (fatEbr32_t*)(BOOTADDR + sizeof(fatBootsector_t));
    fileHeader_t* rootaddr = (fileHeader_t*) ROOTADDR; //0x74000
-   ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr);
+
+   ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
@@ -22,55 +24,76 @@ void fatInit(){
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
-   kprintf("oem name: %s\n", bootsect.oem_name);
-   kprintf("file system type: %s\n", ebrsect.fatID);
-   ebrsect.volumeLabel[10] = 0;
-   kprintf("volume label: %s\n", ebrsect.volumeLabel);
-   kprintf("resevered sectors: %d\n", bootsect.numReservedSects);
-   //kprintf("fatSize: %d\n", ebrsect.fatSize);
-   //kprintf("fats: %d\n", bootsect.numFats);
-   //kprintf("drive num: %d\n", ebrsect.driveNum);
-   //kprintf("available sectors: %d\n", bootsect.totalSectsLarge);
-   //kprintf("numRootDirs: %d\n", bootsect.numRootDirs);
-   //kprintf("rootDirCluster: %d\n", ebrsect.rootCluster);
-   //kprintf("fsinfo location: %d\n", ebrsect.fsinfoSect);
-   //kprintf("backupBootSect location: %d\n", ebrsect.backupBootSect);
-   kprintf("reading rootdir...\n");
-   //kprintf("clusterBeginLba: %d\n", clusterBeginLba);
-
    //load root dir
    uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, ROOTADDR);
-   kprintf("read status: %d\n", status);
+   rootFiles = rootaddr;
 
-   fileHeader_t* rootFiles = rootaddr;
+   
+}
 
-   for (int i = 0; i < 6; i += 2) {
+uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
 
-      //kprintf("file: %s\n", rootFiles[i].name);
-      //kprintf("file extension: %s\n", rootFiles[i].extension);
+   for (uint8_t i = 2; i < 6; i += 2) {
+
       uint8_t name[12] = {0};
       uint8_t lengthF = getFileName(&rootFiles[i], name);
-      kprintf("file: %s\n", name);
-   
-      if (strcmp(name, "test.txt") == 0) {
-      
-         //read file 
-         ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, 0x60000);
 
-         kprintf("file is in memory\n");
+      if (strcmp(name, fileName) == 0) {
+
+         return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+      
       }
+   
    }
 
-   fileHeader_t* testFile = (fileHeader_t *)0x60000;
-   kprintf("file addr: %d\n", testFile);
-   kprintf("file contents: %s\n", testFile);
-
-   
 }
 
 uint32_t clusterToLba(uint32_t clusterIndx){
 
    return clusterBeginLba + (clusterIndx - 2) * bootsect.sectsPerCluster;
+
+}
+
+void recodeFileName(char* name, char* loadAddr){
+
+   uint8_t i = 0;
+   uint8_t j;
+
+   while (i < 11) {
+
+      if (name[i] == '.') {
+
+         for(j = i; j < 8; j++){
+
+            loadAddr[j] = 0x20;
+
+         }
+
+         i++;
+         
+         for (int k = 0; k < 3; k++) {
+
+            loadAddr[j] = toupper(name[i]);
+            i++;
+            j++;
+         
+         }
+
+         return;
+
+      }else if (name[i] == 0) {
+
+         return;
+      
+      }else {
+      
+         loadAddr[i] = toupper(name[i]);
+
+      }
+
+      i++;
+   
+   }
 
 }
 

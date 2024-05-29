@@ -11,10 +11,8 @@ extern int _start() {
    PIC_sendEOI(0x03);
    //init basic io vars for printing
    ioInit();
-   //clear the screen
    cls();
 
-   uint8_t test = 5;
    print("------------------------------------- C code ------------------------------------\0");
    print("connOS rules\n\0");
    putch('C', 79, 24);
@@ -24,17 +22,24 @@ extern int _start() {
    createTable();
    __asm__ volatile ("sti");
 
+   //register keyboard interupt
    registerkdbint();
+
    //setup ide
    ideInit(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
 
-   kprintf("starting disk read...\n");
-   uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
-   //read filesystems first sector (VBR)
-   //uint8_t status = ide_read_sectors(0, 1, 0x000000800, 0x10, 0x70000);
-   kprintf("disk read operation complete, status code: %d\n", status);
+   //read MBR
+   //uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
 
+   //initalize the fat
    fatInit();
+
+   //test the filesystem
+   fileHeader_t* testFile = (fileHeader_t *)0x60000;
+   openFile("test.txt", testFile);
+   kprintf("test.txt: %s\n", testFile);
+   openFile("test2.txt", testFile);
+   kprintf("test2.txt: %s\n", testFile);
 
 
    for(int i = 0; 1 == 1; i++){

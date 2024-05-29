@@ -44,6 +44,14 @@ int tolower(int character){
 
 }
 
+int toupper(int character){
+
+   if(character < 0x7b && character > 0x60) return character -= 0x20;
+
+   return character;
+
+}
+
 int strcmp (const char* str1, const char* str2){
 
    while(*str1 && (*str1 == *str2)){
