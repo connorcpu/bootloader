@@ -36,8 +36,6 @@ void createTable(){
    __asm__ volatile ("sti"); //enable interupts
    inb(0x60);
 
-//   registerInterupt(1, &keyboardHandler);
-
 }
 
 void registerInterupt(uint8_t vector, isr_t handler){

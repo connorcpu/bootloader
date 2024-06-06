@@ -4,6 +4,7 @@
 #include "pic.h"
 #include <stdint.h>
 #include "fat.h"
+#include "memory.h"
 
 extern int _start() {
 
@@ -33,6 +34,9 @@ extern int _start() {
 
    //initalize the fat
    fatInit();
+
+   //init memory
+   pagingInit();
 
    //test the filesystem
    fileHeader_t* testFile = (fileHeader_t *)0x60000;
