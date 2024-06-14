@@ -4,22 +4,15 @@ restructure
 fix io.c (printf & itoa) DONE
 makefile upgrade (learn make)
 cross compiler (low priority) DONE (it started acting up so priority got upgraded)
-filesystem DONE
-   - FAT
-      - no large files 
-      - microsoft 
-   - ext2
-      - complex
-      - large overhead
-   - bmfs
-      - compilation is a lil complex
-      - less control over source
+filesystem REOPEND
+   - actually read FAT
+   - write loadClusterChain() function with FAT info
+   - rewrite openFile() to search subdirectories until file is found, then load the cluster chain
 
-   we have chosen FAT32
-   we are going to need to do MBR ourselves in boot.asm to put the partions right :) DONE (see makefile)
-   figuere out how to read sectors (smt with ide and CHS -> LBA convertion)
-   fuguere out how to read FS
-memory map
+
+
+
+memory map (did a primative one)
 terminal
 graphics 
    kill yourself it aint happening (probs)

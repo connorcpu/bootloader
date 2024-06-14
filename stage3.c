@@ -32,18 +32,18 @@ extern int _start() {
    //read MBR
    //uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
 
-   //initalize the fat
-   fatInit();
-
    //init memory
    pagingInit();
+
+   //initalize the fat
+   fatInit();
 
    //test the filesystem
    fileHeader_t* testFile = (fileHeader_t *)0x60000;
    openFile("test.txt", testFile);
-   kprintf("test.txt: %s\n", testFile);
+   kprintf("test.txt: %s", testFile);
    openFile("test2.txt", testFile);
-   kprintf("test2.txt: %s\n", testFile);
+   kprintf("test2.txt: %s", testFile);
 
 
    for(int i = 0; 1 == 1; i++){

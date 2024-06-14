@@ -3,18 +3,22 @@
 #include "ide.h"
 #include <stdint.h>
 #include "utils.h"
+#include "memory.h"
 
 fatBootsector_t bootsect;
 fatEbr32_t ebrsect;
 uint32_t clusterBeginLba;
 fileHeader_t rootdir;
 fileHeader_t* rootFiles;
+uint32_t pointer;
 
 void fatInit(){
 
-   fatBootsector_t* bootaddr = (fatBootsector_t*) BOOTADDR; //0x70000
-   fatEbr32_t* ebraddr = (fatEbr32_t*)(BOOTADDR + sizeof(fatBootsector_t));
-   fileHeader_t* rootaddr = (fileHeader_t*) ROOTADDR; //0x74000
+   kmalloc(512, (uint32_t*) &pointer);
+
+   fatBootsector_t* bootaddr = (fatBootsector_t*) pointer;
+   fatEbr32_t* ebraddr = (fatEbr32_t*) (pointer + sizeof(fatBootsector_t));
+   fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect, 0);
 
    ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
@@ -25,7 +29,7 @@ void fatInit(){
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
    //load root dir
-   uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, ROOTADDR);
+   uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);
    rootFiles = rootaddr;
 
    
@@ -45,6 +49,23 @@ uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
       }
    
    }
+
+}
+
+//function takes in index of first cluster, then loads that cluster to loadAddr, increment with clustersize and load next cluster in chain
+uint8_t loadClusterChain(uint32_t firstCluster, fileHeader_t* loadAddr){
+   
+   fileHeader_t* addr = loadAddr;
+   uint32_t currentCluster = firstCluster;
+   //1. load cluster
+   //2. increment loadAddr 
+   //3. load next cluster
+
+   do {
+   
+      ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(currentCluster), 0x10, (uint32_t)addr);
+
+   }while (0);
 
 }
 

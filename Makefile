@@ -31,7 +31,7 @@ compile: ${OBJ}
 
 bin/%.o: %.c ${HEADERS}
 #	gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@
-	x86_64-elf-gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@
+	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -c $< -o $@
 #	clang -std=c17 -ffreestanding -mno-red-zone -mcmodel=kernel -fno-stack-protector -fpic -fpie -gdwarf -fwrapv -Werror -pipe -c $< -o $@
 	
 iso: bin/os.iso

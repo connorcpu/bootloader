@@ -50,8 +50,8 @@ typedef struct fileEntry{
 
 }__attribute__((packed)) fileHeader_t;
 
-#define BOOTADDR 0x70000
-#define ROOTADDR 0x74000
+//#define BOOTADDR 0x70000
+//*#define ROOTADDR 0x74000
 void fatInit();
 uint32_t clusterToLba(uint32_t clusterIndx);
 uint8_t getFileName(fileHeader_t* file, uint8_t* name);
