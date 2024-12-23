@@ -18,12 +18,15 @@ void fatInit(){
 
    fatBootsector_t* bootaddr = (fatBootsector_t*) pointer;
    fatEbr32_t* ebraddr = (fatEbr32_t*) (pointer + sizeof(fatBootsector_t));
-   fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect, 0);
 
    ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
+
+   kprintf("bytes per sector: %d\n", bootsect.bytesPerSect);
+
+   fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect, 0);
    rootdir = *rootaddr;
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
@@ -31,13 +34,52 @@ void fatInit(){
    //load root dir
    uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);
    rootFiles = rootaddr;
-
    
 }
 
 uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
 
-   for (uint8_t i = 2; i < 6; i += 2) {
+/*   bool found = false;
+   fileHeader_t* currentDir = rootFiles;
+   uint8_t toSearch[] = fileName;
+   uint8_t searching[12] = {0};
+
+   while(!found){
+
+      //for(uint8_t j = 1; j < len(searchName); j++){
+      for(uint8_t j = 1; j < 11; j++){
+
+         if (searchName[i] == '/') {
+         
+            break;
+         }
+
+         searching[i] = searchName[i + 1];
+
+      }
+
+      uint16_t i = 0;
+      while(currentDir[i] != 0){
+
+         uint8_t name[12] = {0};
+         getFileName(&currentDir[i], name);
+
+         if (strcmp(name, fileName) == 0) {
+         
+            //found the file
+//            return loadClusterChain();
+            return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+
+         }
+
+         i++;
+
+      }
+
+   }
+*/
+   //one file takes 2x8bits, first file should be ignored cause that's the root dir, so i < 8 is 3 files max
+   for (uint8_t i = 2; i < 8; i += 2) {
 
       uint8_t name[12] = {0};
       uint8_t lengthF = getFileName(&rootFiles[i], name);

@@ -3,8 +3,9 @@
 #include "ide.h"
 #include "pic.h"
 #include <stdint.h>
-#include "fat.h"
 #include "memory.h"
+#include "ELF.h"
+#include "graphics.h"
 
 extern int _start() {
 
@@ -38,15 +39,20 @@ extern int _start() {
    //initalize the fat
    fatInit();
 
+   //initalize graphics
+   initFrame();
+
+ //  kprintf("hi\n");
+
    //test the filesystem
-   fileHeader_t* testFile = (fileHeader_t *)0x60000;
-   openFile("test.txt", testFile);
-   kprintf("test.txt: %s", testFile);
-   openFile("test2.txt", testFile);
-   kprintf("test2.txt: %s", testFile);
+   fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
+   openFile("game.exe", testFile);
+   kprintf("opened executable\n");
+//   executeRaw(testFile);
+//   openFile("test5.txt", testFile);
+   //executeElf(testFile);
 
-
-   for(int i = 0; 1 == 1; i++){
+/*   for(int i = 0; 1 == 1; i++){
 
       putch(i + 'A', 0, 1);
 
@@ -54,7 +60,7 @@ extern int _start() {
          i = 0;
       }
 
-   }
+   }*/
 
    return 0;
 }

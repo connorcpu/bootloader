@@ -19,3 +19,4 @@ graphics
    dunno what mode it is
    dunno what mode i want
    dunno how to set mode (int 13h seems to not be working)
+elf execution (needs FAT reading first)

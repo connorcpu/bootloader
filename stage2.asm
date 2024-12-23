@@ -1,4 +1,4 @@
-;[org 0x8000]
+;[eorg 0x8000]
 jmp do_shit
 
 %include "gdt.asm"
@@ -21,7 +21,14 @@ do_shit:
    call print
    
    ;set vga mode to 160x50 text
-   ;call setVga
+   call setVga
+
+   mov ebx, 0x0
+   mov di, memMap
+E820Marker:
+   call doE820
+   cmp ebx, 0x0
+   jne E820Marker
 
    ;set first bit of cr0 which means protected mode
    mov eax, cr0
@@ -34,6 +41,9 @@ do_shit:
 stage2Msg: db "stage 2 now operational", 0x0d, 0x0a, 0x0
 a20Msg: db "enabled A20 gate", 0x0d, 0x0a, 0x0
 gdtMsg: db "loaded gdt tabel", 0x0d, 0x0a, 0x0
+;global memMap
+memMap: ;this does not work at 256
+   times (3 * 10) dq 0
 
 ;enable a20
 enableA20:
@@ -55,10 +65,24 @@ loadGDT:
 
 setVga:
    
-   ;mov al, 0x2f
-   mov al, 27h
-   mov ah, 00h
+   ;mov al, 12h ;640x480@16
+   ;mov ah, 00h
+   mov ax, 4f02h
+   ;mov bx, 107h ;1280x1024@256
+   ;mov bx, 106h ;1280x1024@16
+   ;mov bx, 101h ;6400x480@256
+   mov bx, 011Ch ;1600x1200@256
    int 10h
+
+   ret
+
+doE820: 
+   mov ax, 0xe820
+   mov [es:di + 20], dword 1
+   mov edx, 534d4150h ;(SMAP)
+   mov ecx, 24
+   int 0x15
+   add di, 24
 
    ret
 
@@ -491,6 +515,7 @@ irq_stub 35, 3
 irq_stub 36, 4
 irq_stub 37, 5
 irq_stub 38, 6
+irq_stub 39, 7
 
 global isr_stub_table
 isr_stub_table: 
@@ -501,7 +526,7 @@ isr_stub_table:
 %endrep
 
 %assign i 32
-%rep 7
+%rep 8
    dq irq_stub_%+i
 %assign i i+1
 %endrep

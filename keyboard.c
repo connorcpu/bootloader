@@ -215,5 +215,6 @@ void keyboardHandler(registers_t r){
 void registerkdbint(){
 
    registerInterupt(1, &keyboardHandler);
+   kprintf("handler addr: %d\n", &keyboardHandler);
 
 }

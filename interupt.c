@@ -17,6 +17,7 @@ void createTable(){
 
    idtr.base = (uintptr_t)&idt[0];
    idtr.limit = (uint16_t)sizeof(idt_entry_t) * 40;
+   kprintf("stub table addr: %d\n", isr_stub_table);
 
    for (uint8_t vector = 0; vector < 32; vector++) {
 
@@ -26,7 +27,7 @@ void createTable(){
 
    PIC_remap(0x20, 0x28);
 
-   for (uint8_t vector = 32; vector < 39; vector++){
+   for (uint8_t vector = 32; vector < 40; vector++){
 
       idt_set_descriptor(vector, (void*)isr_stub_table[vector], 0x8E);
 
@@ -46,7 +47,7 @@ void registerInterupt(uint8_t vector, isr_t handler){
 
 void exception_handler(registers_t r){
 
-   print("we recieved an interupt\0");
+   kprintf("we recieved an interupt number %i\0", r.int_no);
 
    uint64_t int_ch = r.int_no + '0';
    putch(int_ch, 2, 0);           //set 3e character to the error code (single digit only)
