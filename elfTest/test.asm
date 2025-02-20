@@ -17,8 +17,11 @@ mov es, ax
 mov fs, ax 
 mov gs, ax
 
-mov byte [0xB8000], 'C'
-mov byte [0xB8002], 'O'
+[extern _start]
+
+ ;  mov byte [0xB8000], 'C'
+;   mov byte [0xB8002], 'O'
+   call _start
 
 ;restore saved ax
 pop rax 

@@ -17,7 +17,7 @@ void createTable(){
 
    idtr.base = (uintptr_t)&idt[0];
    idtr.limit = (uint16_t)sizeof(idt_entry_t) * 40;
-   kprintf("stub table addr: %d\n", isr_stub_table);
+//   kprintf("stub table addr: %d\n", isr_stub_table);
 
    for (uint8_t vector = 0; vector < 32; vector++) {
 
@@ -51,6 +51,7 @@ void exception_handler(registers_t r){
 
    uint64_t int_ch = r.int_no + '0';
    putch(int_ch, 2, 0);           //set 3e character to the error code (single digit only)
+   __asm__ volatile ("pop %rax");
    __asm__ volatile ("cli; hlt"); //halt when exception comes in
 
 }

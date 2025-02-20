@@ -35,8 +35,10 @@ typedef int(*execer)();
 
 void executeRaw(fileHeader_t* file){
 
-   int (*executablePtr)() = (execer)file;
-   (*executablePtr)();
+//   int (*executablePtr)() = (execer)file;
+  // (*executablePtr)();
+   void (*program)(void) = (void (*)())file;
+   program();
 
    return;
 

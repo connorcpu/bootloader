@@ -45,14 +45,16 @@ extern int _start() {
  //  kprintf("hi\n");
 
    //test the filesystem
-   fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
-   openFile("game.exe", testFile);
-   kprintf("opened executable\n");
-//   executeRaw(testFile);
+   //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
+   //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
+   fileHeader_t* testFile = (fileHeader_t*) 0x0;
+   openFile("test3.exe", testFile);
+//   kprintf("opened executable\n");
+   executeRaw(testFile);
 //   openFile("test5.txt", testFile);
    //executeElf(testFile);
 
-/*   for(int i = 0; 1 == 1; i++){
+   for(int i = 0; 1 == 1; i++){
 
       putch(i + 'A', 0, 1);
 
@@ -60,7 +62,7 @@ extern int _start() {
          i = 0;
       }
 
-   }*/
+   }
 
    return 0;
 }

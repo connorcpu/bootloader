@@ -1,0 +1,43 @@
+
+Discarded input sections
+
+ .comment       0x0000000000000000       0x13 bin/testC.bin
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+RAM              0x0000000000000000 0x0000000000001000 xrw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0x0000000000000000                . = 0x0
+
+.text           0x0000000000000000      0x13e
+ *(.text)
+ .text          0x0000000000000000      0x13e bin/testC.bin
+                0x0000000000000000                _start
+                0x0000000000000031                putpixel
+                0x000000000000009c                drawRect
+ *(.text*)
+
+.data           0x000000000000013e        0x1
+ *(.data)
+ .data          0x000000000000013e        0x1 bin/testC.bin
+                0x000000000000013e                _colour
+ *(.data*)
+
+.bss            0x000000000000013f        0x0
+ *(.bss)
+ .bss           0x000000000000013f        0x0 bin/testC.bin
+
+.rodata
+ *(.rodata)
+
+.eh_frame       0x0000000000000140       0x78
+ .eh_frame      0x0000000000000140       0x78 bin/testC.bin
+
+/DISCARD/
+ *(.comment)
+LOAD bin/testC.bin
+OUTPUT(bin/linkedTest.o binary)

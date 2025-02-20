@@ -23,6 +23,23 @@ do_shit:
    ;set vga mode to 160x50 text
    call setVga
 
+   ;get vesa info
+   call getVesa
+
+   ;push ecx 
+   ;push ebx
+   ;mov ebx, 2400
+  ; mov ecx, 0xe0000000 
+;jumpLabel:
+   ;mov byte [ecx], 55
+   ;add ecx, 1
+   ;sub ebx, 1
+   ;cmp ebx, 0x0
+   ;jne jumpLabel
+
+   ;pop ebx 
+   ;pop ecx
+
    mov ebx, 0x0
    mov di, memMap
 E820Marker:
@@ -42,6 +59,7 @@ stage2Msg: db "stage 2 now operational", 0x0d, 0x0a, 0x0
 a20Msg: db "enabled A20 gate", 0x0d, 0x0a, 0x0
 gdtMsg: db "loaded gdt tabel", 0x0d, 0x0a, 0x0
 ;global memMap
+[extern memMap]
 memMap: ;this does not work at 256
    times (3 * 10) dq 0
 
@@ -63,15 +81,61 @@ loadGDT:
   ; sti
    ret
 
+getVesa:
+   
+   mov di, VbeInfoStructure
+   ;clc
+   mov ax, 0x4f00
+   int 10h
+   cmp ax, 0x004f
+   jne .failed
+   
+
+   ;push word [VbeInfoStructure + 16]
+   ;pop es
+   mov di, VbeModeInfoStructure
+   mov bx, [VbeInfoStructure + 14]
+   mov cx, [bx + 46]
+   cmp cx, 0xffff ;if list is empty
+   je .NoModes
+    
+   clc
+   mov ax, 0x4f01 
+   int 0x10 
+   cmp ax, 0x00f4
+   jne .failed 
+   ret 
+
+   .failed:
+   stc 
+   ret
+
+   .NoModes:
+      jmp $
+    
+[extern VbeInfoStructure]
+VbeInfoStructure:
+;   .signature     db "VBE2"
+ ;  .table_data:   resb 508  
+   times 512 db 0
+
+[extern VbeModeInfoStructure]
+VbeModeInfoStructure:
+   times 256 db 0
+
+
 setVga:
    
    ;mov al, 12h ;640x480@16
-   ;mov ah, 00h
-   mov ax, 4f02h
+   mov al, 13h ;320x200@256
+   mov ah, 00h ;use with mov al for vga
+
+   ;mov ax, 4f02h ;use with mov bx for vesa
    ;mov bx, 107h ;1280x1024@256
    ;mov bx, 106h ;1280x1024@16
-   ;mov bx, 101h ;6400x480@256
-   mov bx, 011Ch ;1600x1200@256
+   ;mov bx, 101h ;640x480@256
+   ;mov bx, 411Ch ;1600x1200@256
+   ;mov bx, 0102h ;800x600@16
    int 10h
 
    ret
@@ -213,11 +277,16 @@ setupPaging:
    mov dword [edi], 0x3003
    add edi, 0x1000 
    mov dword [edi], 0x4003
+   add edi, 8
+   mov dword [edi], 0x5003
    add edi, 0x1000
+   sub edi, 8
 
    ;the loop instruction decrements ecx and jumps if not zero at the end, so 512 iterations
+   ;512 iterations to fill one table with entries (maps about 2mb), 1024 for 2 tables (dont forget the dir entry (also called table) needs to be setup
    mov ebx, 0x00000003
-   mov ecx, 512
+   ;mov ecx, 512
+   mov ecx, 1024
 
    ;add 0xn000 every 8 bytes starting at 0x4000, incrementing n every loop
    ;this does something and is important

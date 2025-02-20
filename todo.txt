@@ -1,22 +1,26 @@
-interrups DONE
-keyboard  DONE
 restructure
-fix io.c (printf & itoa) DONE
 makefile upgrade (learn make)
-cross compiler (low priority) DONE (it started acting up so priority got upgraded)
-filesystem REOPEND
+setup/generate standard library for cross-compliler
+complete filesystem 
    - actually read FAT
    - write loadClusterChain() function with FAT info
    - rewrite openFile() to search subdirectories until file is found, then load the cluster chain
-
-
-
-
-memory map (did a primative one)
+propper memory managment
 terminal
-graphics 
-   kill yourself it aint happening (probs)
-   dunno what mode it is
-   dunno what mode i want
-   dunno how to set mode (int 13h seems to not be working)
-elf execution (needs FAT reading first)
+VESA (map that high address to something waaaaay lower
+elf execution 
+propperly link the kernel so we can link against it for program execution
+
+
+
+dependency tree:
+
+generate stdlib
+restructure files 
+makefile upgrade
+propper kernel linking
+memory (sorta DONE!!)
+   - filesystem (could be treated independently)
+   - elf execution
+   - VESA 
+terminal

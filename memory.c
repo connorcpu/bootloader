@@ -2,15 +2,15 @@
 #include "io.h"
 #include <stdint.h>
 
-uint32_t* PML4;
-uint32_t* pdpt;
-uint32_t* pageDir;
-uint32_t* pageTable;
+uint64_t* PML4;
+uint64_t* pdpt;
+uint64_t* pageDir;
+uint64_t* pageTable;
 
-uint32_t currentTable;
-uint32_t freeMemAddr;
-//extern E820MemBlock memMap[256];
-E820MemBlock memMap[10];
+uint64_t currentTable;
+uint64_t freeMemAddr;
+extern E820MemBlock memMap[256];
+//E820MemBlock memMap[10];
 
 void pagingInit(){
 
@@ -18,25 +18,29 @@ void pagingInit(){
    while (memMap[i].length != 0) {
    
       kprintf("e820: found a region of type %d\n", memMap[i].type);
-      //kprintf("base: %d\n", memMap[i].base);
-      //kprintf("length: %d\n", memMap[i].length);
+      kprintf("base: %d\n", memMap[i].base);
+      kprintf("length: %d\n", memMap[i].length);
 
       i++;
    }
 
 
-   PML4 = (uint32_t*) PML4ADDR; 
-   pdpt = (uint32_t*) PML4ADDR + 0x1000;
-   pageDir = (uint32_t*) pdpt + 0x1000;
-   pageTable = (uint32_t*) pageDir + 0x1000;
+   PML4 = (uint64_t*) PML4ADDR; 
+   pdpt = (uint64_t*) 0x2000;
+   pageDir = (uint64_t*) 0x3000;
+   pageTable = (uint64_t*) 0x4000;
 
    currentTable = pageTable[0];
 
-//   kprintf("PML4: %d\n", PML4);
-//   kprintf("pdpt: %d\n", pdpt);
-//   kprintf("PD: %d\n", pageDir);
-//   kprintf("PT: %d\n", pageTable);
-//   kprintf("current table: %d\n", &currentTable);
+   //experimental
+   //pageTable[1] = 
+
+/*   kprintf("PML4: %d\n", PML4);
+   kprintf("pdpt: %d\n", pdpt);
+   kprintf("PD: %d\n", pageDir);
+   kprintf("PT: %d\n", pageTable);
+   kprintf("current table: %d\n", currentTable);
+   kprintf("next table: %d\n", pageTable[1]);*/
 
    freeMemAddr = 0x10000;
 
@@ -50,5 +54,14 @@ uint32_t kmalloc(uint32_t size, uint32_t *physAddr){
    freeMemAddr += size; //move pointer to new free space
    kprintf("mem: %d\n", ret);
    return ret;
+
+}
+
+uint8_t mapPage(void* physAddr, void* virtAddr, uint16_t flags){
+
+   uint32_t pdinx = (uint32_t)virtAddr >> 22;
+   uint32_t ptinx = (uint32_t)virtAddr >> 12 & 0x03FF;
+
+   
 
 }

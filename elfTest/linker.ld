@@ -1,16 +1,14 @@
-ENTRY(main)
-OUTPUT_FORMAT("binary")
+ENTRY(_start)
+OUTPUT_FORMAT(binary)
 
 MEMORY{
-   ROM (rx) : ORIGIN = 0x10400, LENGTH = 4k
-   RAM (wx) : org = 0x11400, len = 4k
+   RAM (rwx) : org = 0x0, len = 4k
 }
 
 SECTIONS 
 {
-   . = 0x10400;
-   .text : AT(0x10400){ 
-      . = ALIGN(4);
+   . = 0x0;
+   .text : AT(0x00){ 
       *(.text) 
       *(.text*) 
    }
@@ -22,5 +20,9 @@ SECTIONS
 
    .bss : { *(.bss) }
    .rodata : { *(.rodata) }
+
+   /DISCARD/ : {
+      *(.comment)
+   }
 
 }

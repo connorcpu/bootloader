@@ -24,7 +24,7 @@ void fatInit(){
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
 
-   kprintf("bytes per sector: %d\n", bootsect.bytesPerSect);
+//   kprintf("bytes per sector: %d\n", bootsect.bytesPerSect);
 
    fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect, 0);
    rootdir = *rootaddr;
