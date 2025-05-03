@@ -10,6 +10,7 @@ terminal
 VESA (map that high address to something waaaaay lower
 elf execution 
 propperly link the kernel so we can link against it for program execution
+implement mmap
 
 
 
@@ -22,5 +23,6 @@ propper kernel linking
 memory (sorta DONE!!)
    - filesystem (could be treated independently)
    - elf execution
-   - VESA 
+   - implement mmap
+      - VESA 
 terminal

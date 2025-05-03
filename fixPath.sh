@@ -1,1 +1,1 @@
-export PATH=/home/connor/code/magic/crossComp/bin:/home/connor/code/magic/crossComp/bin:/home/connor/.local/share/nvim/mason/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+export PATH="/home/connor/bulkFiles/BIGFiles/crossComp/bin:$PATH"

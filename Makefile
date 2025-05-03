@@ -8,7 +8,6 @@ default: run
 
 image: compile
 	dd if=bin/comb.o of=bin/qemu.img
-	#truncate -s 720K bin/qemu.img
 	truncate -s 100M bin/qemu.img
 	sudo kpartx -a bin/qemu.img 
 	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4' -n 'AUTISM FS  '

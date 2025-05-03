@@ -48,8 +48,9 @@ extern int _start() {
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
    fileHeader_t* testFile = (fileHeader_t*) 0x0;
+   //openFile("syscall.exe", testFile);
    openFile("test3.exe", testFile);
-//   kprintf("opened executable\n");
+   kprintf("opened executable\n");
    executeRaw(testFile);
 //   openFile("test5.txt", testFile);
    //executeElf(testFile);

@@ -4,14 +4,14 @@
 
 //#define VGA_WIDTH (uint16_t) 1280
 //#define VGA_HEIGHT (uint16_t) 1024
-#define VGA_WIDTH (uint32_t) 640
-#define VGA_HEIGHT (uint32_t) 480
+//#define VGA_WIDTH (uint32_t) 640
+//#define VGA_HEIGHT (uint32_t) 480
 //#define VGA_WIDTH (uint32_t) 1600 
 //#define VGA_HEIGHT (uint32_t) 1200
 //#define VGA_WIDTH (uint32_t) 800 
 //#define VGA_HEIGHT (uint32_t) 600
-//#define VGA_WIDTH (uint32_t) 320 
-//#define VGA_HEIGHT (uint32_t) 200
+#define VGA_WIDTH (uint32_t) 320 
+#define VGA_HEIGHT (uint32_t) 200
 #define VGA_MEM (uint8_t*) 0xa0000
 
 const int playerSize = 20;
@@ -24,10 +24,10 @@ uint8_t* vga_mem;
 
 void drawRect(int x, int y, int width, int height, int colour){
 
-   for(uint32_t i = x; i < width + x; i++){
-      for (uint32_t j = y; j < height + y; j++) {
+   for(uint16_t i = x; i < width + x; i++){
+      for (uint16_t j = y; j < height + y; j++) {
 
-         *(vga_mem + j * VGA_WIDTH + i) = colour;
+         *(VGA_MEM + j * VGA_WIDTH + i) = colour;
       
       }
 
@@ -65,18 +65,18 @@ int initFrame(){
 
    uint16_t* modes = (uint16_t* )(VbeInfoStructure.video_modes[0] * 0x10 + VbeInfoStructure.video_modes[1]);
 
-   kprintf("modeArray: %d\n", modes);
-   kprintf("modebuffer: %i\n", vga_mem);
+//   kprintf("modeArray: %d\n", modes);
+//   kprintf("modebuffer: %i\n", vga_mem);
 
-   playerY = VGA_HEIGHT / 2 - playerSize / 2;
 
-   //drawRect(playerX, playerY, playerSize, playerSize, 12);
-
+   //drawRect(0, 0, 100, 100, 55);
+/*
    for (uint16_t i = 0; i < VGA_WIDTH; i++) {
       for (uint16_t j = 0; j < VGA_HEIGHT; j++) {
 
-     //    uint8_t* pixel = VGA_MEM + j * VGA_WIDTH + i;
-    //     *pixel = 55;
+         //this one works
+         uint8_t* pixel = VGA_MEM + j * VGA_WIDTH + i;
+         *pixel = 55;
          //*(vga_mem + j * VGA_WIDTH + i) = 15;
          //*((uint8_t *)0xa0000 + j * VGA_WIDTH + i) = 15;
          //putpixel(VGA_MEM, i, j, 15);

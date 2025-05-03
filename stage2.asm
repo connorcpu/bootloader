@@ -21,7 +21,7 @@ do_shit:
    call print
    
    ;set vga mode to 160x50 text
-   call setVga
+;   call setVga
 
    ;get vesa info
    call getVesa
