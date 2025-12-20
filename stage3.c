@@ -51,7 +51,7 @@ extern int _start() {
    //openFile("syscall.exe", testFile);
    openFile("test3.exe", testFile);
    kprintf("opened executable\n");
-   executeRaw(testFile);
+  // executeRaw(testFile);
 //   openFile("test5.txt", testFile);
    //executeElf(testFile);
 

@@ -51,7 +51,7 @@ uint8_t executeElf(fileHeader_t* file){
       kprintf("program header type: %d\n", programHeaderTable[i].p_memsz);*/
 
       //load program headers that want to be loaded
-      mapPage((void*)programHeaderTable[i].p_paddr, (void*)programHeaderTable[i].p_vaddr, 0x0);
+      //mapPage((void*)programHeaderTable[i].p_paddr, (void*)programHeaderTable[i].p_vaddr, 0x0);
 
    }
 

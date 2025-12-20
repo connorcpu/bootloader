@@ -20,11 +20,11 @@ do_shit:
    mov bx, gdtMsg
    call print
    
-   ;set vga mode to 160x50 text
-;   call setVga
-
    ;get vesa info
    call getVesa
+
+   ;set vga mode to 160x50 text
+   ;call setVga
 
    ;push ecx 
    ;push ebx
@@ -58,6 +58,8 @@ E820Marker:
 stage2Msg: db "stage 2 now operational", 0x0d, 0x0a, 0x0
 a20Msg: db "enabled A20 gate", 0x0d, 0x0a, 0x0
 gdtMsg: db "loaded gdt tabel", 0x0d, 0x0a, 0x0
+errorMsg: db "error, fuck", 0x0d, 0x0a, 0x0
+VESAMsg: db "found vesa mode", 0x0d, 0x0a, 0x0
 ;global memMap
 [extern memMap]
 memMap: ;this does not work at 256
@@ -93,17 +95,17 @@ getVesa:
 
    ;push word [VbeInfoStructure + 16]
    ;pop es
-   mov di, VbeModeInfoStructure
-   mov bx, [VbeInfoStructure + 14]
-   mov cx, [bx + 46]
-   cmp cx, 0xffff ;if list is empty
-   je .NoModes
+   ;mov di, VbeModeInfoStructure
+   ;mov bx, [VbeInfoStructure + 14]
+   ;mov cx, [bx + 46]
+   ;cmp cx, 0xffff ;if list is empty
+   ;je .NoModes
     
-   clc
-   mov ax, 0x4f01 
-   int 0x10 
-   cmp ax, 0x00f4
-   jne .failed 
+   ;clc
+   ;mov ax, 0x4f01 
+   ;int 0x10 
+   ;cmp ax, 0x004f
+   ;jne .failed 
    ret 
 
    .failed:
@@ -125,20 +127,103 @@ VbeModeInfoStructure:
 
 
 setVga:
+
+   mov [.width], word 1280
+   mov [.height], word 1024
+   mov [.bpp], word 8
+
+   sti 
+
+   mov ax, word[VbeInfoStructure + 14]
+   mov [.offset], ax
+   mov ax, word[VbeInfoStructure + 16]
+   mov [.segment], ax
+
+   mov ax, [.segment]
+   mov fs, ax
+   mov si, [.offset]
+
+.find_mode:
+   mov dx, [fs:si]
+   add si, 2
+   mov [.offset], si
+   mov [.mode], dx
+   mov ax, 0
+   mov fs, ax
+
+   cmp [.mode], word 0xFFFF 
+   je .error
+
+   push es
+   mov ax, 0x4F01				; get VBE mode info
+	mov cx, [.mode]
+	mov di, VbeModeInfoStructure
+	int 0x10
+	pop es
+
+	cmp ax, 0x4F
+	jne .error
+
+	mov ax, [.width]
+	cmp ax, [VbeModeInfoStructure + 18]
+	jne .next_mode
+
+	mov ax, [.height]
+	cmp ax, [VbeModeInfoStructure + 20]
+	jne .next_mode
+
+	mov al, [.bpp]
+	cmp al, [VbeModeInfoStructure + 23]
+	jne .next_mode
+
+   ;YAY, found it
+   push es
+   mov ax, 0x4F02
+   mov bx, [.mode]
+   or bx, 0x4000 ;enabble linear framebuffer
+   mov di, 0   ;some bioses might need
+   int 0x10
+   pop es
+   cmp ax, 0x4F 
+   jne .error
+
+   clc
+   ret
+
+.next_mode:
+   mov ax, [.segment]
+   mov fs, ax
+   mov si, [.offset]
+   jmp .find_mode
+
+.error 
+   mov bx, errorMsg
+   call print
+
+   cli
+   hlt
+
+.width dw 0
+.height dw 0
+.bpp db 0
+.segment dw 0
+.offset dw 0
+.mode dw 0
+
    
    ;mov al, 12h ;640x480@16
-   mov al, 13h ;320x200@256
-   mov ah, 00h ;use with mov al for vga
+   ;mov al, 13h ;320x200@256
+   ;mov ah, 00h ;use with mov al for vga
 
-   ;mov ax, 4f02h ;use with mov bx for vesa
+  ; mov ax, 4f02h ;use with mov bx for vesa
    ;mov bx, 107h ;1280x1024@256
    ;mov bx, 106h ;1280x1024@16
    ;mov bx, 101h ;640x480@256
    ;mov bx, 411Ch ;1600x1200@256
    ;mov bx, 0102h ;800x600@16
-   int 10h
+   ;int 10h
 
-   ret
+   ;ret
 
 doE820: 
    mov ax, 0xe820

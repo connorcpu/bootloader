@@ -1,5 +1,17 @@
 #include "utils.h"
 
+void invlpg(void* addr){
+
+   asm volatile("invlpg (%0)" :: "r"(addr) : "memory");
+
+}
+
+void load_cr3(void * cr3_value){
+
+   asm volatile("mov %0, %%cr3" :: "r"((uint64_t)cr3_value): "memory");
+
+}
+
 void outb(uint16_t port, uint8_t val){
 
    //both of these work i dont know which is better

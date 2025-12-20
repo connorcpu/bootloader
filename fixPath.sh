@@ -1,1 +1,1 @@
-export PATH="/home/connor/bulkFiles/BIGFiles/crossComp/bin:$PATH"
+export PATH=/home/connor/bulkFiles/BIGFiles/crossComp/bin:$PATH

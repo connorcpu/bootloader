@@ -25,4 +25,15 @@ memory (sorta DONE!!)
    - elf execution
    - implement mmap
       - VESA 
+
+   the way memory works is the upper part of the address is translated into a page using the hyrarchical page tables. then once the page is found, the physical address is read from the page table entry
+
+   (32 bit)
+   so to map virtual 0xc0000000(8 digits) to physical 0x100000(6 digits), the upper 10 bits, 0xC0, 00b(2 digits hex, 2 bin) refer to index of the page dir entry, in bin its, 1100000000(10 digits), the next 10 specify the page table entry, so thats 00b, 0x00 or the first one.
+   then that page table entry is read and the alocated bits are read to find the implicated physical address.
+
+   having multiple page table entries with 0x0 in their adress creates the effect that multiple programs can use 0x0 as their adress base.
+   (where do they get the bloody page table bits from) (not out of the woods yet)
+   (on osdev paging article, read process context identifier, might be the awnser)
+
 terminal

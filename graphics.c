@@ -1,6 +1,7 @@
 #include "graphics.h"
 #include <stdint.h>
 #include "io.h"
+#include "memory.h"
 
 //#define VGA_WIDTH (uint16_t) 1280
 //#define VGA_HEIGHT (uint16_t) 1024
@@ -13,6 +14,7 @@
 #define VGA_WIDTH (uint32_t) 320 
 #define VGA_HEIGHT (uint32_t) 200
 #define VGA_MEM (uint8_t*) 0xa0000
+#define tempMem (uint32_t*) 0x6000
 
 const int playerSize = 20;
 const int playerX = 20;
@@ -20,7 +22,7 @@ int playerY;
 
 extern VbeInfoStructure_t VbeInfoStructure;
 extern VbeModeInfoStructure_t VbeModeInfoStructure;
-uint8_t* vga_mem;
+uint32_t* vga_mem;
 
 void drawRect(int x, int y, int width, int height, int colour){
 
@@ -48,23 +50,41 @@ void putpixel(uint8_t* screen, uint16_t x, uint16_t y, uint8_t colour){
 
 int initFrame(){
 
-   vga_mem = (uint8_t *)VbeModeInfoStructure.framebuffer;
+   vga_mem = (uint32_t *)VbeModeInfoStructure.framebuffer;
 
-  /* kprintf("width: %i\n", &VbeModeInfoStructure.width);
-   kprintf("height: %i\n", &VbeModeInfoStructure.height);
-   kprintf("framebuffer: %i\n", &VbeModeInfoStructure.framebuffer);
-   kprintf("bpp: %i\n", &VbeModeInfoStructure.bpp); 
+   kprintf("framebuffer: %i\n", (uint32_t)VbeModeInfoStructure.framebuffer);
+   //kprintf("width: %i\n", &VbeModeInfoStructure.width);
+   //kprintf("height: %i\n", &VbeModeInfoStructure.height);
+   //kprintf("framebuffer: %i\n", &VbeModeInfoStructure.framebuffer);
+   //kprintf("bpp: %i\n", &VbeModeInfoStructure.bpp); 
    kprintf("width: %i\n", VbeModeInfoStructure.width);
    kprintf("height: %i\n", VbeModeInfoStructure.height);
-   kprintf("framebuffer: %i\n", VbeModeInfoStructure.framebuffer);
    kprintf("bpp: %i\n", VbeModeInfoStructure.bpp); 
-   kprintf("vbe addr: %d\n", &VbeInfoStructure);
-   kprintf("vbe addr: %d\n", &VbeModeInfoStructure);*/
-   //kprintf("vbe: %i\n", VbeInfoStructure.video_modes[0]);
-   //kprintf("vbe2: %i\n", VbeInfoStructure.video_modes[1]);
+   //kprintf("vbe addr: %d\n", &VbeInfoStructure);
+   //kprintf("vbe addr: %d\n", &VbeModeInfoStructure);
+   kprintf("vbe: %i\n", VbeInfoStructure.video_modes[0]);
+   kprintf("vbe2: %i\n", VbeInfoStructure.video_modes[1]);
+   // *(tempMem) = VbeModeInfoStructure.framebuffer;
+  // mapPage(0x0, (uint32_t*)VbeModeInfoStructure.framebuffer, 0x0);
 
-   uint16_t* modes = (uint16_t* )(VbeInfoStructure.video_modes[0] * 0x10 + VbeInfoStructure.video_modes[1]);
-
+   //uint16_t* modes = (uint16_t* )(VbeInfoStructure.video_modes[0] * 0x10 + VbeInfoStructure.video_modes[1]);
+   /*uint16_t* modes = (uint16_t *)VbeInfoStructure.video_modes[0];
+   uint8_t keepGoing = 1;
+   uint8_t i = 0;
+   while(keepGoing){
+      kprintf("mode: %i\n", modes[i]);
+      if (modes[i] = 980) {
+         keepGoing = 0;
+         kprintf("Found! %i\n", i);
+         break;
+      }
+      if (modes[i] = 65535) {
+         kprintf("not found\n");
+         break;
+         keepGoing = 0;
+      }
+      i++;
+   }*/
 //   kprintf("modeArray: %d\n", modes);
 //   kprintf("modebuffer: %i\n", vga_mem);
 
@@ -77,15 +97,15 @@ int initFrame(){
          //this one works
          uint8_t* pixel = VGA_MEM + j * VGA_WIDTH + i;
          *pixel = 55;
-         //*(vga_mem + j * VGA_WIDTH + i) = 15;
-         //*((uint8_t *)0xa0000 + j * VGA_WIDTH + i) = 15;
+         // *(vga_mem + j * VGA_WIDTH + i) = 15;
+         // *((uint8_t *)0xa0000 + j * VGA_WIDTH + i) = 15;
          //putpixel(VGA_MEM, i, j, 15);
 
       }
    
    }
 
-   /*for(uint32_t k = 0x0FC000; k > 0xa0000; k--){
+   for(uint32_t k = 0x0FC000; k > 0xa0000; k--){
 
       //kprintf("pixel: %d\n", k);
 
