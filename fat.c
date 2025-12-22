@@ -10,11 +10,13 @@ fatEbr32_t ebrsect;
 uint32_t clusterBeginLba;
 fileHeader_t rootdir;
 fileHeader_t* rootFiles;
-uint32_t pointer;
+uint8_t* pointer;
 
 void fatInit(){
 
-   kmalloc(512, (uint32_t*) &pointer);
+//   kmalloc(512, (uint32_t*) &pointer);
+
+   pointer = kmalloc(512);
 
    fatBootsector_t* bootaddr = (fatBootsector_t*) pointer;
    fatEbr32_t* ebraddr = (fatEbr32_t*) (pointer + sizeof(fatBootsector_t));
@@ -26,7 +28,7 @@ void fatInit(){
 
 //   kprintf("bytes per sector: %d\n", bootsect.bytesPerSect);
 
-   fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect, 0);
+   fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect);
    rootdir = *rootaddr;
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);

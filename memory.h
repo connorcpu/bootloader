@@ -23,5 +23,6 @@ enum E820MemBlockType {
 };
 
 void pagingInit();
-uint32_t kmalloc(uint32_t size, uint32_t* physAddr);
-uint8_t mapPage(uint64_t physAddr, uint64_t virtAddr, uint16_t flags);
+//uint32_t kmalloc(uint32_t size, uint32_t* physAddr);
+uint8_t* kmalloc(uint32_t size);
+uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags);

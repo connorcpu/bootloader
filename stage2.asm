@@ -234,8 +234,8 @@ setVga:
    mov di, 0   ;some bioses might need
    int 0x10
    pop es
-   cmp ax, 0x4F 
-   jne .error2
+   ;cmp ax, 0x4F 
+   ;jne .error2
 
    clc
    ret

@@ -1,7 +1,7 @@
 #include <stdint.h>
 int initFrame();
 void drawRect(int x, int y, int width, int height, int colour);
-void putpixel(uint32_t* screen, uint16_t x, unsigned short y, unsigned char colour);
+void putpixel(uint16_t* screen, uint16_t x, unsigned short y, unsigned char colour);
 
 typedef struct VbeInfoStructure{
 

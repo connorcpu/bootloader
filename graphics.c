@@ -32,7 +32,7 @@ void drawRect(int x, int y, int width, int height, int colour){
    for (uint16_t j = y; j < height + y; j += 1) {
       for(uint16_t i = x; i < width + x; i += 1){
          //*(VGA_MEM + (j * VGA_WIDTH * 2) + (i * 2)) = colour;
-         putpixel((uint32_t*)VbeModeInfoStructure.framebuffer, i, j, colour);
+         putpixel((uint16_t*)vga_mem, i, j, colour);
 
       }
 
@@ -42,85 +42,40 @@ void drawRect(int x, int y, int width, int height, int colour){
 
 }
 
-void putpixel(uint32_t* screen, uint16_t x, uint16_t y, uint8_t colour){
+void putpixel(uint16_t* screen, uint16_t x, uint16_t y, uint8_t colour){
 
-   //uint8_t* loc = (uint8_t*)screen + (y * VbeModeInfoStructure.width * VbeModeInfoStructure.bpp) + (x * VbeModeInfoStructure.bpp);
-   uint8_t* loc = (uint8_t*)0xa0000 + (y * 1920 * 2) + (x * 2); //TODO: VbeModeInfoStructure.framebuffer is not populated correctly
+   uint16_t* loc = (uint16_t*)vga_mem + (y * VbeModeInfoStructure.width) + x;
+   //kprintf("about to segfault?\n");
+   //uint8_t* loc = (uint8_t*)0xa0000 + (y * 1920 * 2) + (x * 2); //TODO: VbeModeInfoStructure.framebuffer is not populated correctly
+   //kprintf("x: %d, y: %d\n", x, y);
    *loc = colour;
+   //kprintf("segfaulted?\n");
 
 }
 
 int initFrame(){
 
-   vga_mem = (uint16_t *)VbeModeInfoStructure.framebuffer;
+   kprintf("mapping framebuffer\n");
+   for(int i = 0; i < 1013; i++){
+      mapPage((uint8_t*)VbeModeInfoStructure.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0); //map "physical" video mem to 4GiB
+   }
+   kprintf("mapped framebuffer\n");
+
+   vga_mem = (uint16_t *)0x2000000;
 
    kprintf("framebuffer: %i\n", (uint32_t)VbeModeInfoStructure.framebuffer);
-   //kprintf("width: %i\n", &VbeModeInfoStructure.width);
-   //kprintf("height: %i\n", &VbeModeInfoStructure.height);
-   //kprintf("framebuffer: %i\n", &VbeModeInfoStructure.framebuffer);
-   //kprintf("bpp: %i\n", &VbeModeInfoStructure.bpp); 
    kprintf("width: %i\n", VbeModeInfoStructure.width);
    kprintf("height: %i\n", VbeModeInfoStructure.height);
    kprintf("bpp: %i\n", VbeModeInfoStructure.bpp); 
-   //kprintf("vbe addr: %d\n", &VbeInfoStructure);
-   //kprintf("vbe addr: %d\n", &VbeModeInfoStructure);
-   //kprintf("vbe: %i\n", VbeInfoStructure.video_modes[0]);
-   //kprintf("vbe2: %i\n", VbeInfoStructure.video_modes[1]);
-   // *(tempMem) = VbeModeInfoStructure.framebuffer;
-  // mapPage(0x0, (uint32_t*)VbeModeInfoStructure.framebuffer, 0x0);
-
-   //uint16_t* modes = (uint16_t* )(VbeInfoStructure.video_modes[0] * 0x10 + VbeInfoStructure.video_modes[1]);
-   /*uint16_t* modes = (uint16_t *)VbeInfoStructure.video_modes[0];
-   uint8_t keepGoing = 1;
-   uint8_t i = 0;
-   while(keepGoing){
-      kprintf("mode: %i\n", modes[i]);
-      if (modes[i] = 980) {
-         keepGoing = 0;
-         kprintf("Found! %i\n", i);
-         break;
-      }
-      if (modes[i] = 65535) {
-         kprintf("not found\n");
-         break;
-         keepGoing = 0;
-      }
-      i++;
-   }*/
-//   kprintf("modeArray: %d\n", modes);
-//   kprintf("modebuffer: %i\n", vga_mem);
 
 
-   drawRect(0, 0, 1920, 100, 55);
-/*
-   for (uint16_t i = 0; i < VGA_WIDTH; i++) {
-      for (uint16_t j = 0; j < VGA_HEIGHT; j++) {
+   drawRect(0, 0, 1920, 1080, 55);
 
-         //this one works
-         uint8_t* pixel = VGA_MEM + j * VGA_WIDTH + i;
-         *pixel = 55;
-         // *(vga_mem + j * VGA_WIDTH + i) = 15;
-         // *((uint8_t *)0xa0000 + j * VGA_WIDTH + i) = 15;
-         //putpixel(VGA_MEM, i, j, 15);
-
-      }
-   
-   }
-
-   for(uint32_t k = 0x0FC000; k > 0xa0000; k--){
-
-      //kprintf("pixel: %d\n", k);
-
-      uint8_t* pixel = vga_mem + k;
-      *pixel = 5;
-
-   }*/
-
-   *((uint8_t*)0xb0000) = 24;
+/*   *((uint8_t*)0xb0000) = 24;
    uint32_t addr = 0xb0000;
    *(uint8_t *)addr = 24;
    *(uint8_t *)(addr + 1) = 24;
-
+*/
 
    return 0;
 

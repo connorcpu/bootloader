@@ -1,4 +1,5 @@
 #include "io.h"
+#include "debug.h"
 #include <stdint.h>
 
 uint8_t lineNum;
@@ -35,6 +36,7 @@ int ioInit(){
 int putch(char character, uint8_t x, uint8_t y){
 
    vidmem[(y * 160) + (x * 2)] = character;
+   writeSerial(character);
 
 }
 
@@ -152,6 +154,8 @@ void printch(char ch){
 
    if(ch == '\n'){
       enter();
+      writeSerial('\n');
+      writeSerial('\r');
       return;
    }
    if(shift) ch -= ' ';

@@ -1,4 +1,5 @@
 #include "io.h"
+#include "debug.h"
 #include "keyboard.h"
 #include "ide.h"
 #include "pic.h"
@@ -32,6 +33,7 @@ extern int _start() {
 
    //read MBR
    //uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
+   initSerial();
 
    //init memory
    pagingInit();
@@ -49,7 +51,7 @@ extern int _start() {
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
    fileHeader_t* testFile = (fileHeader_t*) 0x0;
    //openFile("syscall.exe", testFile);
-   openFile("test3.exe", testFile);
+//   openFile("test3.exe", testFile);
    kprintf("opened executable\n");
   // executeRaw(testFile);
 //   openFile("test5.txt", testFile);
