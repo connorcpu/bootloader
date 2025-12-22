@@ -11,6 +11,7 @@ uint64_t* PML4;
 uint64_t freeMemAddr;
 uint64_t kmallocFreeMem;
 extern E820MemBlock memMap[256];
+uint64_t allocEnd; //stores the highest address we can alloced without having paging problems
 //E820MemBlock memMap[10];
 
 void pagingInit(){
@@ -42,16 +43,21 @@ void pagingInit(){
    freeMemAddr = 0x100000; //after 2MB we got free space,use this for allocing pages
    mapPage((uint64_t)0x100000, (uint64_t)0x100000, 0x0);
    kmallocFreeMem = 0x100000; //set it to the start of the now allocated page, it gets 1 page (4kb), if we need more we should allocate more
+   allocEnd = 0x100FFF;
 
 }
 
 uint32_t kmalloc(uint32_t size, uint32_t *physAddr){
    //since physaddr is an empty pointer to where the allocated memory is located we just set it to where we have space
-   if ((kmallocFreeMem + size) >= 101000) { //we have surpassed our first page so we need a second (cant do more than 2)
-      mapPage(0x101000, 0x101000, 0x0);
+   
+   if(physAddr) *physAddr = kmallocFreeMem;
+
+   if (kmallocFreeMem + size >= allocEnd) { //>= because allocEnd points to the last alloc-able byte, which means it points to kmallocFreeMem + size + 1 if you try to allocate exactly how much space you have left
+
+      mapPage(allocEnd + 1, allocEnd + 1, 0x0);
+      allocEnd += 0x1000;
    
    }
-   if(physAddr) *physAddr = kmallocFreeMem;
 
    uint32_t ret = kmallocFreeMem; //dunno why we return the address twice but okay
    kmallocFreeMem += size; //move pointer to new free space

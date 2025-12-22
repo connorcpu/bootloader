@@ -24,7 +24,7 @@ do_shit:
    call getVesa
 
    ;set vga mode to 160x50 text
-   ;call setVga
+   call setVga
 
    ;push ecx 
    ;push ebx
@@ -58,7 +58,8 @@ E820Marker:
 stage2Msg: db "stage 2 now operational", 0x0d, 0x0a, 0x0
 a20Msg: db "enabled A20 gate", 0x0d, 0x0a, 0x0
 gdtMsg: db "loaded gdt tabel", 0x0d, 0x0a, 0x0
-errorMsg: db "error, fuck", 0x0d, 0x0a, 0x0
+errorMsg: db "ran out of video modes", 0x0d, 0x0a, 0x0
+errorMsg2: db "error 2, fuck", 0x0d, 0x0a, 0x0
 VESAMsg: db "found vesa mode", 0x0d, 0x0a, 0x0
 ;global memMap
 [extern memMap]
@@ -117,26 +118,74 @@ getVesa:
     
 [extern VbeInfoStructure]
 VbeInfoStructure:
+   .signature resb 4
+   .version resw 1
+   .oemnameptr resd 1
+   .capabilities resd 1
+   .videomodesOffset resw 1
+   .videomodessegment resw 1
+   .countOfBlocks resw 1
+   .oemRevision resw 1
+   .oemVendorNamePtr resd 1
+   .oemProductNamePtr resd 1
+   .oemProductRevisionPtr resd 1
+   .reseved resb 222 
+   .oemData resb 256
 ;   .signature     db "VBE2"
  ;  .table_data:   resb 508  
-   times 512 db 0
+   ;times 512 db 0
 
 [extern VbeModeInfoStructure]
 VbeModeInfoStructure:
-   times 256 db 0
+   .attributes resw 1
+   .firstWinAttributes resb 1
+   .secondWinAttributes resb 1
+   .winGranularity resw 1
+   .winSize resw 1
+   .firstWinSegment resw 1
+   .secondWinSegment resw 1
+   .winFunctionPtr resd 1
+   .bytesPerScanLine resw 1
+
+   .width resw 1
+   .height resw 1
+   .charWith resb 1
+   .charHeight resb 1
+   .planesCount resb 1
+   .bpp resb 1
+   .banksCount resb 1
+   .memModel resb 1
+   .bankSize resb 1
+   .imagePagesCount resb 1
+   .reserved1 resb 1
+
+   .redMaskSize resb 1
+   .redFieldPos resb 1
+   .greenMaskSize resb 1
+   .greenFieldPos resb 1
+   .blueMaskSize resb 1
+   .blueFieldPos resb 1
+   .reservedMaskSize resb 1
+   .reservedMaskPos resb 1
+
+   .LFBAddr resd 1
+   .offScreenMemOffset resd 1
+   .offScreenMomSize resw 1
+   .reserved2 resb 206
+   ;times 256 db 0
 
 
 setVga:
 
-   mov [.width], word 1280
-   mov [.height], word 1024
-   mov [.bpp], word 8
+   mov [.width], word 1920
+   mov [.height], word 1080
+   mov [.bpp], word 16
 
    sti 
 
-   mov ax, word[VbeInfoStructure + 14]
+   mov ax, word[VbeInfoStructure.videomodesOffset]
    mov [.offset], ax
-   mov ax, word[VbeInfoStructure + 16]
+   mov ax, word[VbeInfoStructure.videomodessegment]
    mov [.segment], ax
 
    mov ax, [.segment]
@@ -144,6 +193,7 @@ setVga:
    mov si, [.offset]
 
 .find_mode:
+
    mov dx, [fs:si]
    add si, 2
    mov [.offset], si
@@ -152,7 +202,7 @@ setVga:
    mov fs, ax
 
    cmp [.mode], word 0xFFFF 
-   je .error
+   je .error1 ; this is the thing throwing the errror
 
    push es
    mov ax, 0x4F01				; get VBE mode info
@@ -162,18 +212,18 @@ setVga:
 	pop es
 
 	cmp ax, 0x4F
-	jne .error
+	jne .error2
 
-	mov ax, [.width]
-	cmp ax, [VbeModeInfoStructure + 18]
+	mov ax, [.width]  ;one of these had the wrong offset hardcoded
+	cmp ax, [VbeModeInfoStructure.width]
 	jne .next_mode
 
 	mov ax, [.height]
-	cmp ax, [VbeModeInfoStructure + 20]
+	cmp ax, [VbeModeInfoStructure.height]
 	jne .next_mode
 
 	mov al, [.bpp]
-	cmp al, [VbeModeInfoStructure + 23]
+	cmp al, [VbeModeInfoStructure.bpp]
 	jne .next_mode
 
    ;YAY, found it
@@ -185,7 +235,7 @@ setVga:
    int 0x10
    pop es
    cmp ax, 0x4F 
-   jne .error
+   jne .error2
 
    clc
    ret
@@ -196,7 +246,13 @@ setVga:
    mov si, [.offset]
    jmp .find_mode
 
-.error 
+.error2
+   mov bx, errorMsg2
+   call print
+   cli 
+   hlt
+
+.error1
    mov bx, errorMsg
    call print
 

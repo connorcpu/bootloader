@@ -22,8 +22,8 @@ run: clean image
 	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw > /dev/null 2>&1
 
 compile: ${OBJ} 
-	nasm boot.asm -f bin -o bin/boot.o
-	nasm stage2.asm -f elf64 -o bin/stage2.o
+	nasm boot.asm -f bin -o bin/boot.o -w+zeroing
+	nasm stage2.asm -f elf64 -o bin/stage2.o -w+zeroing
 	ld -Ttext 0x8000 bin/stage2.o $^ -o bin/kernel.o
 	objcopy -O binary bin/kernel.o bin/kernel.bin
 	cat bin/boot.o bin/kernel.bin > bin/comb.o
