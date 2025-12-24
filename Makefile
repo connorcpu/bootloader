@@ -24,7 +24,7 @@ run: clean image
 compile: ${OBJ} 
 	nasm boot.asm -f bin -o bin/boot.o -w+zeroing
 	nasm stage2.asm -f elf64 -o bin/stage2.o -w+zeroing
-	ld -Ttext 0x8000 bin/stage2.o $^ -o bin/kernel.o
+	ld -Ttext 0x8000 -fpie -pie bin/stage2.o $^ -o bin/kernel.o
 	objcopy -O binary bin/kernel.o bin/kernel.bin
 	cat bin/boot.o bin/kernel.bin > bin/comb.o
 	elfTest/compileC.sh

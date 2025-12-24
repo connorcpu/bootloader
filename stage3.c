@@ -47,21 +47,24 @@ extern int _start() {
  //  kprintf("hi\n");
 
    //test the filesystem
-   //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
+   fileHeader_t* testFile = (fileHeader_t*) kmalloc(512);
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
-   fileHeader_t* testFile = (fileHeader_t*) 0x0;
+   //fileHeader_t* testFile = (fileHeader_t*) 0x0;
    //openFile("syscall.exe", testFile);
-//   openFile("test3.exe", testFile);
+   openFile("test3.exe", testFile);
    kprintf("opened executable\n");
   // executeRaw(testFile);
 //   openFile("test5.txt", testFile);
-   //executeElf(testFile);
+   executeElf(testFile);
 
-   for(int i = 0; 1 == 1; i++){
+   for(uint32_t i = 0; 1 == 1; i++){
 
-      putch(i + 'A', 0, 1);
+      //putch(i + 'A', 0, 1);
+      //putPixel(0, 0, i);
+      drawRect(0, 0, 40, 40, i);
 
-      if(i > 26){
+      //if(i > 26){
+      if(i>16777216){
          i = 0;
       }
 

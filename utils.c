@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <stdint.h>
 
 void invlpg(void* addr){
 
@@ -72,5 +73,18 @@ int strcmp (const char* str1, const char* str2){
     }
 
     return *(const unsigned char*)str1 - *(const unsigned char*)str2;
+
+}
+
+void memcpy(void *src, void *dest, uint32_t size){
+
+   uint8_t* csrc = (uint8_t*)src;
+   uint8_t* cdest = (uint8_t*)dest;
+
+   for (int i = 0; i < size; i++) {
+
+      cdest[i] = csrc[i];
+   
+   }
 
 }

@@ -1,7 +1,27 @@
 #include <stdint.h>
 int initFrame();
-void drawRect(int x, int y, int width, int height, int colour);
-void putpixel(uint16_t* screen, uint16_t x, unsigned short y, unsigned char colour);
+void drawRect(int x, int y, int width, int height, uint32_t colour);
+void putpixel(uint8_t* screen, uint16_t x, unsigned short y, uint32_t colour);
+void putPixel(uint16_t x, unsigned short y, uint32_t colour);
+
+#define WHITE 0xFFFFFF
+#define RED   0xFF0000
+#define CYAN  0x00FFFF
+#define BLUE  0x0000FF
+#define DBLUE 0x0000A0
+#define LBLUE 0xADD8E6
+#define purpl 0x800080
+#define yelow 0xFFFF00
+#define LIME  0x00FF00
+#define MAGEN 0xFF00FF
+#define SILVE 0xC0C0C0
+#define GRAY  0x808080
+#define ORANG 0xFFA500
+#define BROWN 0xA52A2A
+#define MARON 0x800000
+#define GREEN 0x008000
+#define OLIVE 0x808000
+#define BLACK 0x000000
 
 typedef struct VbeInfoStructure{
 

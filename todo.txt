@@ -5,12 +5,12 @@ complete filesystem
    - actually read FAT
    - write loadClusterChain() function with FAT info
    - rewrite openFile() to search subdirectories until file is found, then load the cluster chain
-propper memory managment
+propper memory managment DONE
 terminal
-VESA (map that high address to something waaaaay lower
+VESA (map that high address to something waaaaay lower) DONE
 elf execution 
-propperly link the kernel so we can link against it for program execution
-implement mmap
+propperly link the kernel so we can link against it for program execution (not how that works you bozo)
+implement mmap DONE
 
 
 
@@ -21,9 +21,12 @@ restructure files
 makefile upgrade
 propper kernel linking
 memory DONE
-   - filesystem (could be treated independently)
+   - VESA DONE
    - elf execution
-   - VESA 
+      - split stage 2 and kernel 
+      - relocate kernel to higher half (just load and link it at a different address)
+      - we might be able to get away with programs under 32KiB but we really really shouldn't
+   - filesystem (could be treated independently)
 
    the way memory works is the upper part of the address is translated into a page using the hyrarchical page tables. then once the page is found, the physical address is read from the page table entry
 

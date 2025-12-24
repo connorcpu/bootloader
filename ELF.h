@@ -39,3 +39,12 @@ typedef struct programHeaderTableEntry{
    uint64_t alignment; //usually a power of 2
    
 }__attribute__((packed)) programHeaderEntry_t; 
+
+
+typedef struct program{
+
+   uint8_t id;
+   uint8_t name[10];
+   uint64_t PML4Ptr;
+
+}__attribute__((packed)) program_t;

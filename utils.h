@@ -9,3 +9,4 @@ void io_wait(void);
 int tolower(int character); 
 int toupper(int character); 
 int strcmp (const char* str1, const char* str2);
+void memcpy(void *src, void *dest, uint32_t size);

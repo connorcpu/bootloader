@@ -81,12 +81,13 @@ uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
    }
 */
    //one file takes 2x8bits, first file should be ignored cause that's the root dir, so i < 8 is 3 files max
-   for (uint8_t i = 2; i < 8; i += 2) {
+   for (uint8_t i = 2; i < 10; i += 2) {
 
       uint8_t name[12] = {0};
       uint8_t lengthF = getFileName(&rootFiles[i], name);
 
       if (strcmp(name, fileName) == 0) {
+         kprintf("loading %s, to %d\n", fileName, loadAddr);
 
          return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
       
