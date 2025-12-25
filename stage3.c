@@ -49,11 +49,12 @@ extern int _start() {
    //test the filesystem
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
-   fileHeader_t* testFile = (fileHeader_t*) 0x0;
+   mapPage((uint8_t*)0xC0000000, (uint8_t*)0xC0000000, 0x0);
+   fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
    //openFile("syscall.exe", testFile);
-//   openFile("test3.exe", testFile);
+   openFile("kernel.bin", testFile);
    kprintf("opened executable\n");
-  // executeRaw(testFile);
+   executeRaw(testFile);
 //   openFile("test5.txt", testFile);
    //executeElf(testFile);
 
