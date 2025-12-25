@@ -20,7 +20,7 @@ extern int _start() {
    print("connOS rules\n\0");
    putch('C', 79, 24);
 
-   //clear interupts, setup interupts, enable interupts
+   /*//clear interupts, setup interupts, enable interupts
    __asm__ volatile ("cli");
    createTable();
    __asm__ volatile ("sti");
@@ -69,7 +69,7 @@ extern int _start() {
       }
 
    }
-
+*/
    return 0;
 }
 

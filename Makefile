@@ -16,6 +16,23 @@ image: compile
 	sudo umount /media/osfat
 	sudo kpartx -d bin/qemu.img
 
+imageSep: compileSep
+	#dd if=bin/comp.o of=bin/qemu.img 
+	dd if=bin/stage2.bin of=bin/truct1.bin
+	truncate -s 20K bin/truct1.bin 
+	cat bin/truct1.bin bin/kernel.bin > bin/comb.bin
+	dd if=bin/comb.bin of=bin/qemu.img
+	truncate -s 100M bin/qemu.img 
+	sudo kpartx -a bin/qemu.img 
+	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4' -n "AUTISM FS  '
+	sudo mount /dev/mapper/loop0p4 /media/osfat 
+	sudo cp osfs/* /media/osfat 
+	sudo umount /media/osfat 
+	sudo kpartx -d bin/qemu.img
+
+runSep: clean imageSep
+	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw -serial file:serial.log > /dev/null 2>&1
+
 run: clean image
 #	qemu-system-x86_64 -hda bin/qemu.img  > /dev/null 2>&1
 	#-hdd does funcy shit
@@ -24,10 +41,18 @@ run: clean image
 compile: ${OBJ} 
 	nasm boot.asm -f bin -o bin/boot.o -w+zeroing
 	nasm stage2.asm -f elf64 -o bin/stage2.o -w+zeroing
-	ld -Ttext 0x8000 -fpie -pie bin/stage2.o $^ -o bin/kernel.o
+	ld -Ttext 0x8000 bin/stage2.o $^ -o bin/kernel.o
 	objcopy -O binary bin/kernel.o bin/kernel.bin
 	cat bin/boot.o bin/kernel.bin > bin/comb.o
 	elfTest/compileC.sh
+
+compileSep: ${OBJ}
+	nasm boot.asm -f bin -o bin/boot.o -w+zeroing 
+	nasm stage2.asm -f elf64 -o bin/stage2.o -w+zering 
+	ld -Ttext 0x8000 bin/stage2.o -o stage2ld.o
+	ld -Ttext 0xC0000000 $^ -o bin/kernel.o
+	objcopy -O binary bin/stage2ld.o stage2.bin
+	objcopy -O binary bin/kernel.o bin/kernel.bin 
 
 bin/%.o: %.c ${HEADERS}
 #	gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@

@@ -39,3 +39,15 @@ memory DONE
    (on osdev paging article, read process context identifier, might be the awnser)
 
 terminal
+
+
+what does higher-half need from stage 2?:
+- framebuffer structure (width, height, bpp, address);
+- E820 map (yes it's important, map it to something random, make sure to NEVER, overwrite reserved sections; recomendation is to only relocate reserved secions for lower overhead)
+
+- recomendation is to recreate kernel IDT from scratch?
+
+bassically, create 1 struct with the physical memory addresses of the structures i need, map virtual addresses to the physical ones and boom you have your structures, you don't even need to re-create them or copy them, just remapping the addresses is enough)
+
+stage to will be loaded at 0x8000 and it should be exactly 20K large (16 of those are actually occupied) that means that at kernel is at 0xD000 (physically)
+
