@@ -19,7 +19,7 @@ image: compile
 run: clean image
 #	qemu-system-x86_64 -hda bin/qemu.img  > /dev/null 2>&1
 	#-hdd does funcy shit
-	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw -serial file:serial.log > /dev/null 2>&1 
+	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw -serial file:serial.log -m 128M > /dev/null 2>&1 
 
 compile: ${OBJ} 
 	nasm boot.asm -f bin -o bin/boot.o -w+zeroing
@@ -43,3 +43,4 @@ bin/os.iso: compile
 
 clean:
 	rm bin/* -f
+	rm serial.log -f

@@ -49,8 +49,14 @@ extern int _start() {
    //test the filesystem
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
-   mapPage((uint8_t*)0xC0000000, (uint8_t*)0xC0000000, 0x0);
+   kprintf("hextest: %h\n", 0x1000);
+
+   for(int i = 0; i < 2; i++){
+      mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
+      kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
+   }
    fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
+   //fileHeader_t* testFile = (fileHeader_t*) 0xC0000942;
    //openFile("syscall.exe", testFile);
    openFile("kernel.bin", testFile);
    kprintf("opened executable\n");

@@ -1,2 +1,4 @@
 ata0-master: type=disk, path="bin/qemu.img", mode=flat, cylinders=792, heads=8, spt=32
 boot: disk
+memory: guest=128, host=128
+magic_break: enabled=1

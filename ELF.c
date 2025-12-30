@@ -68,9 +68,13 @@ typedef int(*execer)();
 
 void executeRaw(fileHeader_t* file){
 
+   kprintf("executing raw\n");
+
 //   int (*executablePtr)() = (execer)file;
   // (*executablePtr)();
    void (*program)(void) = (void (*)())file;
+
+   kprintf("jumping to: %h\n", program);
    program();
 
    return;

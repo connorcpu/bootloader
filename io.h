@@ -17,4 +17,5 @@ void setmod(uint8_t modkeyindx, bool enable);
 void movCursor(uint8_t x, uint8_t y);
 void kprintf(char *string, ...);
 void format(char *string, va_list args);
+void i2h(uint64_t num, char* buffer);
 void i2a(uint64_t num, char* buffer);

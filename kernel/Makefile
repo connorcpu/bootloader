@@ -1,8 +1,13 @@
 .PHONY: default compile iso run image clean
 
+default: run
+
 C_SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h *.c)
 OBJ = $(C_SOURCES:%.c=bin/%.o)
+
+run: clean compile
+	cp bin/kernel.bin ../osfs/kernel.bin
 
 compile: ${OBJ}
 	ld -Ttext 0xC0000000 $^ -o bin/main.bin
@@ -10,3 +15,6 @@ compile: ${OBJ}
 
 bin/%.o: %.c ${HEADERS}
 	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -c $< -o $@
+
+clean:
+	rm bin/* -f

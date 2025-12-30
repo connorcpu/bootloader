@@ -447,6 +447,7 @@ setupPaging:
 
    ;lidt [IDT]
 
+   ; set PAE bit
    ;we skip disabing paging because we were in gdt mode 
    ;asm garbage for switch bit num 5 in cr0
    mov edx, cr4 

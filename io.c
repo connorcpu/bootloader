@@ -108,6 +108,9 @@ void format(char *string, va_list args){
             i2a(va_arg(args, int), buf);
             print(buf);
             break;
+         case 'h':
+            i2h(va_arg(args, uint64_t), buf);
+            break;
          case '%':
             printch(ch);
             break;
@@ -124,6 +127,36 @@ void format(char *string, va_list args){
    }
 
    return;
+
+}
+
+void i2h(uint64_t decn, char* buffer){
+
+   uint64_t q;
+   uint64_t m;
+
+   uint32_t indx = 0;
+   uint64_t tmp;
+
+   while(decn > 0){
+
+      tmp = decn % 16;
+
+      if(tmp < 10){
+         buffer[indx] = tmp + '0';
+      }else{
+         buffer[indx] = tmp + 'A' - 10;
+      }
+      indx++;
+      decn /= 16;
+
+   }
+   kprintf("0x");
+
+   for(int i = indx - 1; i >= 0; i--){
+      //printch(buffer[i]);
+      kprintf("%c", buffer[i]);
+   }
 
 }
 

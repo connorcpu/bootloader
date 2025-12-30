@@ -36,3 +36,9 @@ memory DONE
    (on osdev paging article, read process context identifier, might be the awnser)
 
 terminal
+
+
+
+
+what is wrong: when executing terminal execution seems to skip over 0xc0000000, this causes the program thow some kind of page fault but it's hard to track without breakpoints
+(calling functions in the kernel probably makes it work less)
