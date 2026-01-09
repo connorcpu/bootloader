@@ -69,7 +69,7 @@ int initFrame(){
    kprintf("bpp: %i\n", VbeModeInfoStructure.bpp); 
 
 
-   drawRect(0, 0, 1920, 1080, 55);
+//   drawRect(0, 0, 1920, 1080, 55);
 
 /*   *((uint8_t*)0xb0000) = 24;
    uint32_t addr = 0xb0000;

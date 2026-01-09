@@ -1,4 +1,4 @@
 uint8_t initSerial();
-void bochsBreak(){
+void bochsBreak();
 int isTransmitEmpty();
 void writeSerial(char a);

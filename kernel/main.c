@@ -1,5 +1,5 @@
 #include <stdint.h>
-//#include "io.h"
+#include "io.h"
 
 typedef struct bootArgs {
    
@@ -13,7 +13,9 @@ int _start(){
 
    //kprintf("kernel loaded");
 
-   /*uint16_t* vga_mem = (uint16_t *)0x2000000;
+   __asm__ volatile ("xchg %bx, %bx");
+
+   uint16_t* volatile vga_mem = (uint16_t *)0x2000000;
 
    for(uint32_t i = 0; i < 16777216; i++){
 
@@ -29,9 +31,8 @@ int _start(){
 
       }
 
-   }*/
+   }
 
-   __asm__ volatile ("xchg %bx, %bx");
 
    return 0;
 
