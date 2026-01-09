@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "utils.h"
+
 #define PORT 0x3f8
 
 void bochsBreak(){
