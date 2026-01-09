@@ -179,7 +179,7 @@ setVga:
 
    mov [.width], word 1920
    mov [.height], word 1080
-   mov [.bpp], word 16
+   mov [.bpp], word 24
 
    sti 
 

@@ -36,6 +36,8 @@ void fatInit(){
    //load root dir
    uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);
    rootFiles = rootaddr;
+
+   kprintf("bytes per sect: %d; sects per cluster: %d", bootsect.bytesPerSect, bootsect.sectsPerCluster);
    
 }
 

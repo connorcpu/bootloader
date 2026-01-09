@@ -27,7 +27,8 @@ compile: ${OBJ}
 	ld -Ttext 0x8000 bin/stage2.o $^ -o bin/kernel.o
 	objcopy -O binary bin/kernel.o bin/kernel.bin
 	cat bin/boot.o bin/kernel.bin > bin/comb.o
-	elfTest/compileC.sh
+#	elfTest/compileC.sh
+	$(MAKE) -C kernel 
 
 bin/%.o: %.c ${HEADERS}
 #	gcc -ffreestanding -mno-red-zone -m64 -c $< -o $@

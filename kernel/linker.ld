@@ -3,7 +3,6 @@
 ENTRY(_start)
 
 STARTUP(bin/main.o)
-INPUT(bin/debug.o bin/io.o bin/utils.o)
 OUTPUT(bin/main.bin)
 
 /*OUTPUT_FORMAT(binary)*/
