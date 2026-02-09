@@ -42,3 +42,4 @@ terminal
 
 what is wrong: when executing terminal execution seems to skip over 0xc0000000, this causes the program thow some kind of page fault but it's hard to track without breakpoints
 (calling functions in the kernel probably makes it work less)
+   cause: fat only reads one 512 byte cluster and kernel is bigger than that, when calling functions that come after 0xc0000200 there is nothing loaded in memory so it keeps running until it overruns the mapped page

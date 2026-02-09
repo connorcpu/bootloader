@@ -1,5 +1,5 @@
 #include <stdint.h>
-//#include "io.h"
+#include "io.h"
 //#include "debug.h"
 
 typedef struct bootArgs {
@@ -16,7 +16,7 @@ int _start(){
 
    __asm__ volatile ("xchg %bx, %bx");
 
-   //kprintf("kernel loaded");
+   kprintf("kernel loaded");
 
    //print("kernel loaded");
    
