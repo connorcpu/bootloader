@@ -44,31 +44,30 @@ extern int _start() {
    //initalize graphics
    initFrame();
 
- //  kprintf("hi\n");
-
-   //test the filesystem
-   //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
-   //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
-   kprintf("hextest: %h\n", 0x1000);
-
+   //mapping pages for kernel
    for(int i = 0; i < 2; i++){
       mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
       kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
    }
-   fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
-   //fileHeader_t* testFile = (fileHeader_t*) 0xC0000942;
-   //openFile("syscall.exe", testFile);
-   kprintf("opening file\n");
-   int8_t p = openFile("kernel.bin", testFile);
-   kprintf("code: %i\n", p);
-   if(p == -1){
-      kprintf("failed to locate kernel.bin in rootdir, terminating unsafely...\n");
-      return -1;}
-   kprintf("opened executable\n");
-   executeRaw(testFile);
-//   openFile("test5.txt", testFile);
-   //executeElf(testFile);
 
+   //picking kernel load location
+   fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
+
+   kprintf("opening file\n");
+
+   if(openFile("kernel.bin", testFile) == -1){
+      kprintf("could not load kernel from disk, terminating...\n");
+      return -1;   
+   }
+
+   //debug
+   kprintf("opened executable\n");
+
+   //run kernel
+   executeRaw(testFile);
+
+
+   //catch loop
    for(int i = 0; 1 == 1; i++){
 
       putch(i + 'A', 0, 1);

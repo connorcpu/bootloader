@@ -31,9 +31,6 @@ void fatInit(){
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
 
-//   kprintf("bytes per sector: %d\n", bootsect.bytesPerSect);
-   //kprintf("LBA start: %h\n", bootsect.);
-
    fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect);
    rootdir = *rootaddr;
    
@@ -41,21 +38,7 @@ void fatInit(){
 
    fat = kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
    //read the fat 
-   //mapPage((uint8_t*)0x1001200, (uint8_t*)0x1001200, 0x0);
-   //mapPage((uint8_t*)0x1002200, (uint8_t*)0x1002200, 0x0);
-
-/*   for(uint8_t i = 0; i < 2; i++){
-      uint8_t* mapAddr = (uint8_t*)0x1001200 + (i * 0x1000);
-      mapPage((uint8_t*)mapAddr, (uint8_t*)mapAddr, 0x0);
-
-   }*/
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);
-   /*for(uint8_t i = 0; i < 2; i++){
-      uint8_t* mapAddr = (uint8_t*)0x1ff1000 + (i * 0x1000);
-      mapPage((uint8_t*)mapAddr, (uint8_t*)mapAddr, 0x0);
-
-   }*/
-   //ide_read_sectors(0, ebrsect.fatSize * bootsect.bytesPerSect, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
 
 
@@ -110,25 +93,23 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
    }
 */
    //one file takes 4x8bits, first file should be ignored cause that's the root dir, so i < 8 is 3 files max
-   for (uint8_t i = 0; i < 16; i++) {
+   for (uint8_t i = 1; i < 16; i++) {
 
+      //THIS IS THE CORRECT WAY OF ACCESSING
+      //ONLY USE &rootFiles[i] IF YOU WANT THE ADDRESS OF FILE AT THAT INDEX
       if(rootFiles[i].attributes == 0xE5) {kprintf("deleted entry\n"); continue;}
-      if(rootFiles[i].attributes == 0x0F) {kprintf("long name entry\n"); continue;}
+      if(rootFiles[i].attributes == 0x0F) {continue;}
       if(rootFiles[i].attributes == 0x00) {kprintf("end of dir\n"); /*break;*/}
 
-      kprintf("reading from %h\n", &rootFiles[i]);
       uint8_t name[13] = {0};
       fileHeader_t* f;
-      //kprintf("f addr: %h\n", &f);
-     // memcpy(f, rootFiles + (i * sizeof(fileHeader_t)), sizeof(fileHeader_t));
       uint8_t lengthF = getFileName(&rootFiles[i], name);
-      //uint8_t lengthF = getFileName(f, name);
 
       kprintf("name: %s\n", name);
 
       if (strcmp(name, fileName) == 0) {
 
-         kprintf("found file");
+         kprintf("found file\n");
          return loadClusterChain(&rootFiles[i].startingCluster, (void *)loadAddr);
         // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
       
@@ -144,7 +125,7 @@ uint8_t loadClusterChain(uint16_t* firstCluster, fileHeader_t* loadAddr){
    
    fileHeader_t* addr = loadAddr;
    uint32_t currentCluster = (uint32_t)firstCluster;
-   kprintf("fat test %i\n", fat[currentCluster]);
+   kprintf("fat test %x\n", fat[currentCluster]);
    //1. load cluster
    //2. increment loadAddr 
    //3. load next cluster
@@ -211,18 +192,6 @@ uint8_t getFileName(fileHeader_t* file, uint8_t* name){
 
    uint8_t length = 8;
    uint8_t* f = (uint8_t*) file;
-
-   kprintf("file addr: %h\n", file);
-   kprintf("addr: %h\n", f);
-   
-   for(uint8_t j = 0; j < 8; j++){
-
-      //kprintf("j: %d\n", j);
-      //kprintf("value: %c, at %h\n", *(f+j), &(f[j]));
-      kprintf("value: %c, at %h\n", *f, f);
-      f++;
-      
-   }
 
    for (int8_t i = 7; i >= 0; i--) {
 
