@@ -191,7 +191,7 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
 
             if (cl == 0x14 && ch == 0xEB) {
                type = IDE_ATAPI;
-            }else if (cl = 0x69 && ch == 0x96) {
+            }else if (cl == 0x69 && ch == 0x96) {
                type = IDE_ATAPI;
             }else {
                continue;
@@ -283,17 +283,17 @@ uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t n
 
                                                 
       lba_mode = 1; //lba28
-      lba_io[0] = (lba & 0x00000FF) >> 0;
-      lba_io[1] = (lba & 0x000FF00) >> 8;
-      lba_io[2] = (lba & 0x0FF0000) >> 16;
+      lba_io[0] = (lba & 0x000000FF) >> 0;
+      lba_io[1] = (lba & 0x0000FF00) >> 8;
+      lba_io[2] = (lba & 0x00FF0000) >> 16;
       lba_io[3] = 0;
       lba_io[4] = 0; //not needed in lba48
       lba_io[5] = 0;
-      head      = (lba & 0xF000000) >> 24;
+      head      = (lba & 0x0F000000) >> 24;
    
    }else { //CHS
 
-      lba_mode = 0; //chs
+/*      lba_mode = 0; //chs
       sect = (lba % 63) + 1;
       cyl = (lba + 1 -sect) /(16 * 63);
       lba_io[0] = (lba & 0x00000FF) >> 0;
@@ -303,20 +303,36 @@ uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t n
       lba_io[4] = 0; //not needed in lba48
       lba_io[5] = 0;
       head      = (lba + 1 - sect) % (16* 63) / (63);
-   
+ */ 
+      lba_mode = 0;
+      sect = (lba % 63) + 1;
+      cyl = (lba + 1 - sect) / (16*63);
+      lba_io[0] = sect;
+      lba_io[1] = (cyl >> 0) & 0xFF;
+      lba_io[2] = (cyl >> 8) & 0xFF;
+      lba_io[3] = 0;
+      lba_io[4] = 0;
+      lba_io[5] = 0;
+      head = (lba + 1 - sect) % (16*63) / (63);
    }
 
    dma = 0;
 
-   while (ide_read(channel, ATA_REG_STATUS) & ATA_SR_BSY) {
+   while (ide_read(channel, ATA_REG_STATUS) & ATA_SR_BSY);
    
-   } //we ist busy, shush tf up
+    //we ist busy, shush tf up
 
    //select drive
    if(lba_mode == 0)
       ide_write(channel, ATA_REG_HDDEVSEL, 0xA0 | (slavebit << 4) | head); //drive & chs 
    else
-    ide_write(channel, ATA_REG_HDDEVSEL, 0xE0 | (slavebit << 4) | head); //drive & LBA
+      ide_write(channel, ATA_REG_HDDEVSEL, 0xE0 | (slavebit << 4) | head); //drive & LBA
+                                                                           //
+   //delay
+   for(int i = 0; i < 4; i++){
+      ide_read(channel, ATA_REG_ALTSTATUS);
+
+   }
 
    //write params
    if(lba_mode == 2){
@@ -349,24 +365,39 @@ uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t n
 
    ide_write(channel, ATA_REG_COMMAND, cmd);               // Send the Command.
 
-   if (dma)
-      if (direction == 0);
+   if (dma){
+      if (direction == 0){
          //dma read code (fuck it)
-      else;
+      }else{
          //dma write code (kill yourself)
-   else
+      }
+   }else
       if(direction == 0)
          //pio read 
       for(i = 0; i < numSects; i++){
 
          if(err = ide_polling(channel, 1))
             return err;
+         uint16_t old_es;
          __asm__ volatile("pushw %bx");
          __asm__ volatile("mov %es, %bx");
          __asm__ volatile("mov %%ax, %%es" : : "a"(selector));
          __asm__ volatile("rep insw" : : "c"(words), "d"(bus), "D"(edi)); //recieve data
          __asm__ volatile("mov %bx, %es");
          __asm__ volatile("popw %bx");
+/*         __asm__ volatile(
+            "mov %%es, %[old_es]\n"
+            "mov %[sel], %%ax\n"
+            "mov %%ax, %%es\n"
+            "rep insw\n"
+            "mov %[old_es], %%ax\n"
+            "mov %%ax, %%es\n"
+            : [old_es] "=r"(old_es), "+D"(edi)
+            : [sel] "r"(selector),
+               "d"(bus),
+               "c"(words)
+            : "ax", "memory"
+         );*/
          edi += (words*2);
       }else{
          //pio write

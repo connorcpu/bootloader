@@ -26,3 +26,4 @@ void pagingInit();
 //uint32_t kmalloc(uint32_t size, uint32_t* physAddr);
 uint8_t* kmalloc(uint32_t size);
 uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags);
+void* memcpy(void* dest, void* src, uint32_t size);

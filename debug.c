@@ -2,6 +2,10 @@
 #include "utils.h"
 #define PORT 0x3f8
 
+void bochsBreak(){
+   __asm__ volatile ("xchg %bx, %bx");
+}
+
 uint8_t initSerial(){
 
    outb(PORT +1, 0x00); //disable interupts

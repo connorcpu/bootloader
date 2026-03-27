@@ -2,3 +2,4 @@ ata0-master: type=disk, path="bin/qemu.img", mode=flat, cylinders=792, heads=8, 
 boot: disk
 memory: guest=128, host=128
 magic_break: enabled=1
+com1: enable=1, mode=file, dev=bochsSerial.txt

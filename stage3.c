@@ -50,7 +50,6 @@ extern int _start() {
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(512, 0);
    //fileHeader_t* testFile = (fileHeader_t*) kmalloc(1280, 0);
    kprintf("hextest: %h\n", 0x1000);
-   kprintf("thing: %h\n", 512);
 
    for(int i = 0; i < 2; i++){
       mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
@@ -59,7 +58,12 @@ extern int _start() {
    fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
    //fileHeader_t* testFile = (fileHeader_t*) 0xC0000942;
    //openFile("syscall.exe", testFile);
-   openFile("kernel.bin", testFile);
+   kprintf("opening file\n");
+   int8_t p = openFile("kernel.bin", testFile);
+   kprintf("code: %i\n", p);
+   if(p == -1){
+      kprintf("failed to locate kernel.bin in rootdir, terminating unsafely...\n");
+      return -1;}
    kprintf("opened executable\n");
    executeRaw(testFile);
 //   openFile("test5.txt", testFile);

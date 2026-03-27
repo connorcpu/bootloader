@@ -47,7 +47,7 @@ void registerInterupt(uint8_t vector, isr_t handler){
 
 void exception_handler(registers_t r){
 
-   kprintf("we recieved an interupt number %i\n", r.int_no);
+   kprintf("we recieved an interupt number %i (%h)\n", r.int_no, r.int_no);
 
    if (r.int_no == 14) {
    

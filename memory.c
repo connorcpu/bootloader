@@ -46,6 +46,12 @@ void pagingInit(){
    kmallocFreeMem = (uint8_t*)0x1000000; //set it to the start of the now allocated page, it gets 1 page (4kb), if we need more we should allocate more
    allocEnd = (uint8_t*)0x100FFF;
 
+
+   //just map some shit in advance, way simpler :(
+   for(uint8_t i = 0; i < 3; i++){
+      mapPage((uint8_t*)0x1001000 + (i*0x1000),(uint8_t*)0x1001000 + (i*0x1000), 0x0);
+   }
+
 }
 
 /*uint32_t kmalloc(uint32_t size, uint32_t *physAddr){
@@ -78,7 +84,7 @@ uint8_t* kmalloc(uint32_t size){
 
    uint8_t* ret = kmallocFreeMem;
    kmallocFreeMem += size;
-   kprintf("mem: %d\n", ret);
+   kprintf("mem: %h\n", ret);
    return ret;
 
 }
@@ -171,5 +177,19 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    uint32_t* pt = ((uint32_t *)0xFFC00000) + (0x400 * pdinx); */
 
    //pt[ptinx] = ((uint32_t)physAddr) | (flags & 0xFFF) | 0x01; //present
+
+}
+
+void* memcpy(void* dest, void* src, uint32_t size){
+
+   uint8_t* d = (uint8_t*) dest;
+   uint8_t* s = (uint8_t*) src;
+
+   for(uint32_t i = 0; i < size; i++){
+
+      d[i] = s[i];
+
+   }
+   return dest;
 
 }
