@@ -13,7 +13,7 @@ fileHeader_t rootdir;
 fileHeader_t* rootFiles;
 uint8_t* pointer;
 
-uint8_t* fat;
+uint32_t* fat;
 
 void fatInit(){
 
@@ -36,7 +36,7 @@ void fatInit(){
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
-   fat = kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
+   fat = (uint32_t*) kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
    //read the fat 
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
@@ -105,12 +105,10 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
       fileHeader_t* f;
       uint8_t lengthF = getFileName(&rootFiles[i], name);
 
-      kprintf("name: %s\n", name);
-
       if (strcmp(name, fileName) == 0) {
 
-         kprintf("found file\n");
-         return loadClusterChain(&rootFiles[i].startingCluster, (void *)loadAddr);
+         kprintf("found file %s, loading at %h\n", name, loadAddr);
+         return loadClusterChain(rootFiles[i].startingCluster, (void *)loadAddr);
         // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
       
       }
@@ -121,20 +119,29 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
 }
 
 //function takes in index of first cluster, then loads that cluster to loadAddr, increment with clustersize and load next cluster in chain
-uint8_t loadClusterChain(uint16_t* firstCluster, fileHeader_t* loadAddr){
-   
-   fileHeader_t* addr = loadAddr;
-   uint32_t currentCluster = (uint32_t)firstCluster;
-   kprintf("fat test %x\n", fat[currentCluster]);
-   //1. load cluster
-   //2. increment loadAddr 
-   //3. load next cluster
+uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
+   uint32_t addr = (uint32_t)loadAddr;
+   uint32_t currentCluster = (uint32_t)firstCluster;
+
+   uint8_t done = 0;
    do {
    
+      //1. load cluster
       ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(currentCluster), 0x10, (uint32_t)addr);
 
-   }while (0);
+      //2. increment loadAddr
+      //addr += 0x200;
+      addr = addr + ( bootsect.sectsPerCluster * bootsect.bytesPerSect);
+
+      //3. find whatever the next currentcluster should be
+      uint32_t nextFat = fat[currentCluster] & 0x0FFFFFF; //this should mask it so we ignore the top 4 reserved bits
+      if(nextFat == 0x0FFFFFF){ done = 1; kprintf("hit end of file\n"); break;} //special case: end of cluster chain
+      currentCluster = nextFat;
+
+
+   }while (!done);
+   kprintf("loaded file\n");
 
 }
 

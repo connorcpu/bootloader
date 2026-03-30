@@ -454,13 +454,14 @@ setupPaging:
    or edx, (1 << 5)
    mov cr4, edx
 
-   ;asm garbage for switch bit num 8 in the model spcific register 
-   ;no clue what ecx does: consult wikipedia
-   mov ecx, 0xC0000080
+   ;asm garbage for switch bit num 8 in the model spcific register; enables long mode
+   ;we are gonna set the 8th bit for enabling long mode and the first bit for enabling syscalls
+   mov ecx, 0xC0000080 ;this contains which modelspecific register you want, they are 64-bit wide, this is the EFER register, the most important one
    rdmsr ;read model specific register into eax
    ;both of these work
    ;or eax, 1 << 8
-   or eax, 0x00000100
+   ;or eax, 1
+   or eax, 0x00000101
    wrmsr
 
    ;set paging bit in cr0

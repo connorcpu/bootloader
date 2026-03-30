@@ -3,12 +3,12 @@ gdt_nulldesc:
 
 ;both segments are very similair, only 1 bit is diffrent
 gdt_codedesc:
-    dw 0xFFFF
-    dw 0x0000
-    db 0x00
-    db 10011010b ;this line contains under more that we want 32 bit
-    db 11001111b
-    db 0x00
+    dw 0xFFFF ;limit
+    dw 0x0000 ;base
+    db 0x00  ;more base
+    db 10011010b ;this line contains under more that we want 32 bit; access byte
+    db 11001111b ;limit + flags..... first 4 bits are flags?
+    db 0x00 ;more base
 
 gdt_datadesc:
     dw 0xFFFF

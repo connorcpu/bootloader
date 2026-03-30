@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "io.h"
-//#include "debug.h"
+#include "GDT.h"
 
 typedef struct bootArgs {
    
@@ -16,11 +16,11 @@ int _start(){
 
    __asm__ volatile ("xchg %bx, %bx");
 
-   kprintf("kernel loaded");
+   kprintf("kernel loaded\n");
 
-   //print("kernel loaded");
-   
-   //writeSerial('Z');
+   kprintf("loading GDT");
+
+   loadGDT();
 
    uint8_t rgb[3];
    rgb[0] = 255;
@@ -82,15 +82,9 @@ void drawRect(uint8_t _rgb[]){
 
       for (uint8_t k = 0; k < 100; k++) {
 
-         /*uint8_t* loc = (uint8_t *)vga_mem + (j * 3 * 1920) + (k * 3);
-         *loc = _rgb[0];
-         *(loc+1) = _rgb[1];
-         *(loc+2) = _rgb[2];*/
-
          where[k*3] = _rgb[0];
          where[k*3 + 1] = _rgb[1];
          where[k*3 + 2] = _rgb[2];
-
       
       }
          where += (1920*3);

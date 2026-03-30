@@ -53,7 +53,7 @@ typedef struct fileEntry{
 //#define BOOTADDR 0x70000
 //*#define ROOTADDR 0x74000
 void fatInit();
-uint8_t loadClusterChain(uint16_t* firstCluster, fileHeader_t* loadAddr);
+uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr);
 uint32_t clusterToLba(uint32_t clusterIndx);
 uint8_t getFileName(fileHeader_t* file, uint8_t* name);
 void recodeFileName(char* name, char* loadAddr);

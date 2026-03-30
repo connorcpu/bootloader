@@ -38,15 +38,11 @@ memory DONE
 terminal
 
 
-
-
-what is wrong: when executing terminal execution seems to skip over 0xc0000000, this causes the program thow some kind of page fault but it's hard to track without breakpoints
-(calling functions in the kernel probably makes it work less)
-   cause: fat only reads one 512 byte cluster and kernel is bigger than that, when calling functions that come after 0xc0000200 there is nothing loaded in memory so it keeps running until it overruns the mapped page
-
-chatGPT recons that because of some compiler misaligned reading it fucks up the file names. 
-to fix this we need a memcpy function. we do not have such a thing.
-
+kernel is now chainloaded and can call to other files/included libs. onto processes
+processes:
+   - figure out TSS -> used to load kernel on syscall
+   - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
+   - articals: getting to ring 3; TSS (maybe also GDT)
 
 - objdump
    - -d / -D to disassembly
@@ -60,3 +56,12 @@ to fix this we need a memcpy function. we do not have such a thing.
    - xp for physical memory
       - /16w for 16 words
       - /16wc to get 16 words in ascii
+
+- inline asm
+   - volatile __asm__(instructions : output operands : input operands : clobbered registers);
+   - use %% for registers and %0/%1 for C variables
+   - when outputting, a for eax, b for ebx etc
+   - when outputting, use '"=a" (EAX)' to output to EAX, the = means don't care about EAX initial value
+   - gcc can figure out that if an register is used for output it gets clobbered
+   - use "r" as constraint when you want the var to go throuh some register, lets compiler choose
+   - use "g" if you really don't give a shit
