@@ -13,10 +13,10 @@ void load_cr3(void * cr3_value){
 }
 
 void outb(uint16_t port, uint8_t val){
-
+   uint16_t p = port;
    //both of these work i dont know which is better
    //__asm__ volatile("outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
-   __asm__("out %%al, %%dx" : : "a" (val), "d" (port));
+   __asm__("out %%al, %%dx" : : "a" (val), "d" (p));
 
    return;
 
@@ -25,13 +25,14 @@ void outb(uint16_t port, uint8_t val){
 uint8_t inb(uint16_t port){
 
    uint8_t ret;
-   
+   uint16_t p = port;
+
    //both of these work i dont know which is better
 /*   __asm__ volatile ( "inb %w1, %b0"
                      : "=a"(ret)
                      : "Nd"(port)
                      : "memory");*/
-   __asm__("in %%dx, %%al" : "=a" (ret) : "d" (port));
+   __asm__("in %%dx, %%al" : "=a" (ret) : "d" (p));
    return ret;
 
 }

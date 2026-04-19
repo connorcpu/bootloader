@@ -20,7 +20,7 @@ void setupSyscall(){
    //Set LSTAR to the RIP value for the syscall entry point (since higherhalf kernel always the same)
    //set STAR 47:32 to KERNEL CS 
    //set SFMASK if relavent (think just leave it at 0x00000)
-   //
+   //chatGPT recommends setting SFMASK to 0x200 to clear the Interupt flag
 
 }
 
@@ -30,6 +30,7 @@ void handleSyscall(){
    //
    //what this method should do:
    //switch to kernel stack
+   //store ECX for returning later
    //handle syscall according to yet undetermined syscall table
    //setup and execute iretq, later try sysret
 

@@ -6,7 +6,8 @@ STARTUP(bin/main.o)
 OUTPUT(bin/main.bin)
 
 /*OUTPUT_FORMAT(binary)*/
-OUTPUT_FORMAT(binary)
+/*OUTPUT_FORMAT(binary)*/
+OUTPUT_FORMAT(elf64-x86-64)
 
 SECTIONS {
 
