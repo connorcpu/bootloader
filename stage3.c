@@ -8,6 +8,14 @@
 #include "ELF.h"
 #include "graphics.h"
 
+typedef struct bootArgs {
+
+   uint64_t VBEInfoBlockAddr;
+   uint64_t E820Addr;
+   uint64_t kernelPML4Addr;
+
+}__attribute__((packed)) bootArgs_t;
+
 extern int _start() {
 
    //make sure pic is godamn clear
@@ -45,10 +53,13 @@ extern int _start() {
    initFrame();
 
    //mapping pages for kernel
-   for(int i = 0; i < 2; i++){
+   for(int i = 0; i < 5; i++){
       mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
       kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
    }
+
+   //cheating to make it easier
+   mapPage((uint8_t*)0xC000000, (uint8_t*)0xD0000000, 0x0);
 
    //picking kernel load location
    fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;
@@ -63,9 +74,14 @@ extern int _start() {
    //debug
    kprintf("opened executable\n");
 
-   //run kernel
-   executeRaw(testFile);
+   //setup kernel args
+   bootArgs_t argsB;
+   argsB.kernelPML4Addr = (uint64_t) PML4ADDR;
 
+   //run kernel
+   //executeRaw(testFile);
+   void (*kernel)(bootArgs_t) = (void (*)(bootArgs_t args))testFile;
+   kernel(argsB);
 
    //catch loop
    for(int i = 0; 1 == 1; i++){

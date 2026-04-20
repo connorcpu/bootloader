@@ -1,4 +1,6 @@
 #include "syscall.h"
+#include "io.h"
+#include "debug.h"
 
 void setupSyscall(){
 
@@ -17,10 +19,41 @@ void setupSyscall(){
    //
    //
    //what this method should do:
-   //Set LSTAR to the RIP value for the syscall entry point (since higherhalf kernel always the same)
-   //set STAR 47:32 to KERNEL CS 
-   //set SFMASK if relavent (think just leave it at 0x00000)
+   //1. Set LSTAR to the RIP value for the syscall entry point (since higherhalf kernel always the same)
+   //2. set STAR 47:32 to KERNEL CS 
+   //3. set SFMASK if relavent (think just leave it at 0x00000)
    //chatGPT recommends setting SFMASK to 0x200 to clear the Interupt flag
+   
+   //1. set LSTAR to entry point address
+/*   __asm__ volatile ("mov $0xC0000082, %%ecx" : : : "ecx"); //ECX contains which MSR we'll be writing to
+   __asm__ volatile ("movq %0, %%rax" : : "r" (&handleSyscall) : "rax"); //eax contains what we'll be writing to the MSR
+   __asm__ volatile ("wrmsr");*/
+
+   uint64_t addr = (uint64_t)&handleSyscall;
+
+   __asm__ volatile (
+       "mov $0xC0000082, %%ecx\n\t"
+       "mov %0, %%rax\n\t"
+       "shr $32, %%rax\n\t"
+       "mov %%eax, %%edx\n\t"   // high 32 bits
+       "mov %0, %%rax\n\t"      // reload full value
+       "wrmsr"
+       :
+       : "r"(addr)
+       : "rax", "rdx", "rcx"
+   );
+
+   //2. set Star 47:32 to 0x08
+   __asm__ volatile ("mov $0xc0000081, %%ecx" : : : "ecx");
+   __asm__ volatile ("rdmsr" : : : "rax");
+   unsigned long val = 0x08UL << 32;
+   __asm__ volatile ("or %0, %%rax" : : "r"(val) : "rax"); //intermedate values cannot be 64 bits wide so we need to go through a register
+   __asm__ volatile ("wrmsr");
+
+   //3. set SFMask 
+   __asm__ volatile ("mov $0xc0000084, %%ecx" : : : "ecx");
+   __asm__ volatile ("mov $0x200, %%eax" : : : "eax");
+   __asm__ volatile ("wrmsr");
 
 }
 
@@ -28,6 +61,8 @@ void handleSyscall(){
 
    //entrypoint for syscall 
    //
+   kprintf("registered syscall\n");
+   bochsBreak();
    //what this method should do:
    //switch to kernel stack
    //store ECX for returning later

@@ -23,14 +23,23 @@ void fatInit(){
 
    pointer = kmalloc(512);
 
+   kprintf("allocated\n");
+
    fatBootsector_t* bootaddr = (fatBootsector_t*) pointer;
    fatEbr32_t* ebraddr = (fatEbr32_t*) (pointer + sizeof(fatBootsector_t));
 
+   kprintf("going to read VBR\n");
+
    ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
+   kprintf("read VBR\n");
+
+   kprintf("hi\n");
+   bochsBreak();
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
 
+   kprintf("sects per cluster: %i\n", bootsect.sectsPerCluster);
    fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect);
    rootdir = *rootaddr;
    
@@ -40,6 +49,8 @@ void fatInit(){
    //read the fat 
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
+
+   kprintf("read fat\n");
 
 
    //load root dir
@@ -93,13 +104,13 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
    }
 */
    //one file takes 4x8bits, first file should be ignored cause that's the root dir, so i < 8 is 3 files max
-   for (uint8_t i = 1; i < 16; i++) {
+   for (uint8_t i = 1; i < 24; i++) {
 
       //THIS IS THE CORRECT WAY OF ACCESSING
       //ONLY USE &rootFiles[i] IF YOU WANT THE ADDRESS OF FILE AT THAT INDEX
       if(rootFiles[i].attributes == 0xE5) {kprintf("deleted entry\n"); continue;}
       if(rootFiles[i].attributes == 0x0F) {continue;}
-      if(rootFiles[i].attributes == 0x00) {kprintf("end of dir\n"); /*break;*/}
+      if(rootFiles[i].attributes == 0x00) {kprintf("end of dir\n"); break;}
 
       uint8_t name[13] = {0};
       fileHeader_t* f;

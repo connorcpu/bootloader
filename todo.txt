@@ -44,6 +44,11 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
+problems: 
+   - kmalloc gives 0xe000-0000, this throws an exception
+   - GDT has a minor fuck-up
+   - IDT is misbehaving and not being called, despite it being loaded up until the exception happens
+
 - objdump
    - -d / -D to disassembly
    - -S to show source code

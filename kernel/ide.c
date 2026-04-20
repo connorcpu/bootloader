@@ -124,7 +124,8 @@ uint8_t ide_print_error(uint32_t drive, uint8_t err){
    kprintf("ERROR NUMBER: %d\n", err);
    if(err == 2){
       uint8_t st = ide_read(ide_devices[drive].channel, ATA_REG_ERROR);
-      putch(st + '0', 4, 0);
+      //putch(st + '0', 4, 0);
+      kprintf("st: %d\n", st);
    }
 
    return err;

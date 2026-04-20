@@ -1,6 +1,10 @@
 #include <stdint.h>
+#include "debug.h"
 #include "io.h"
 #include "GDT.h"
+#include "ELF.h"
+#include "syscall.h"
+#include "memory.h"
 
 typedef struct bootArgs {
    
@@ -12,16 +16,38 @@ typedef struct bootArgs {
 
 void drawRect(uint8_t rgb[]);
 
-int _start(){
+int _start(bootArgs_t args){
 
    __asm__ volatile ("xchg %bx, %bx");
 
    kprintf("kernel loaded\n");
 
-   kprintf("loading GDT");
+   kprintf("pml4: %h\n", args.kernelPML4Addr);
+
+   kprintf("loading GDT\n");
 
    loadGDT();
 
+   pagingInit();
+
+   fatInit();
+
+   setupSyscall();
+
+   fileHeader_t* exef = (fileHeader_t*) 0x0;
+   if(openFile("syscall.tst", exef) == -1){
+      kprintf("did not find syscall test file\n");
+   }else{
+
+      kprintf("testing syscalls\n");
+
+      bochsBreak();
+
+     // executeRaw(exef);
+
+      kprintf("success");
+   }
+   
    uint8_t rgb[3];
    rgb[0] = 255;
    rgb[1] = 0;

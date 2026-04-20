@@ -1,10 +1,13 @@
 #include "GDT.h"
+#include "debug.h"
+#include "io.h"
 
 //gdtEntry_t GDT[] = kmalloc(sizeof(gdtEntry_t)));
 gdtEntry_t GDT[6];
 
 void loadGDT(){
 
+   bochsBreak();
    //no strict order is imposed in 64-bit as opposed to 32-bit however:
    //KDS = KCS+8
    //UDS = UCS+8
@@ -49,11 +52,13 @@ void loadGDT(){
 
    runLGDTR(gdtrptr);
 
+   kprintf("tada: %h\n", &gdtrptr);
+
 }
 
 void runLGDTR(gdtrPointer_t ptr){
 
-   __asm__ volatile("lGDT %[gdtr]" : [gdtr] "=g" (ptr)); 
+   __asm__ volatile("lGDT %[gdtr]" : [gdtr] "=g" (ptr.gdtAddr)); 
 
 }
 

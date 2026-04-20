@@ -3,16 +3,10 @@
 #include <stdint.h>
 
 uint64_t* PML4;
-//uint64_t* pdpt;
-//uint64_t* pageDir;
-//uint64_t* pageTable;
-
-//uint64_t currentTable;
 uint8_t* freeMemAddr;
 uint8_t* kmallocFreeMem;
 extern E820MemBlock memMap[256];
 uint8_t* allocEnd; //stores the highest address we can alloced without having paging problems
-//E820MemBlock memMap[10];
 
 void pagingInit(){
 /*
@@ -28,17 +22,6 @@ void pagingInit(){
 
 
    PML4 = (uint64_t*) PML4ADDR; 
-   //pdpt = (uint64_t*) 0x2000;
-   //pageDir = (uint64_t*) 0x3000;
-   //pageTable = (uint64_t*) 0x4000;
-
-   //experimental
-   //pageTable[1] = 
-
-   //kprintf("PML4: %d\n", PML4[0]);
-   //kprintf("pdpt: %d\n", pdpt[0]);
-   //kprintf("PD: %d\n", pageDir[1]);
-   //kprintf("PT: %d\n", pageTable[0]);
 
    freeMemAddr = (uint8_t*)memMap[3].base; //after 2MB we got free space,use this for allocing pages
    //mapPage((uint8_t*)0x100000, memMap[3].base, 0x0); //we have to map the page tables otherwise operating on the page table throws page fault :smh:

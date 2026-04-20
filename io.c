@@ -132,6 +132,11 @@ void format(char *string, va_list args){
 
 void i2h(uint64_t decn, char* buffer){
 
+   if(decn == 0){
+      kprintf("0x0");
+      return ;
+   }
+
    uint64_t q;
    uint64_t m;
 

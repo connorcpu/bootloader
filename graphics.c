@@ -63,7 +63,7 @@ int initFrame(){
 
    vga_mem = (uint16_t *)0x2000000;
 
-   kprintf("framebuffer: %i\n", (uint32_t)VbeModeInfoStructure.framebuffer);
+   kprintf("framebuffer: %h\n", (uint32_t)VbeModeInfoStructure.framebuffer);
    kprintf("width: %i\n", VbeModeInfoStructure.width);
    kprintf("height: %i\n", VbeModeInfoStructure.height);
    kprintf("bpp: %i\n", VbeModeInfoStructure.bpp); 
