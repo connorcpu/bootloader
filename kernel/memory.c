@@ -25,7 +25,7 @@ void pagingInit(){
 
    PML4 = (uint64_t*) PML4ADDR; 
 
-   freeMemAddr = (uint8_t*)0xD0000000;
+   freeMemAddr = (uint8_t*)0x5000000;
    //just put empty memory at double the physical space of the kernel, and just C->D for virtual memory space; more than plenty
    //
    //skip this line because bootloader already did it for us
@@ -35,7 +35,8 @@ void pagingInit(){
 //   mapPage((uint8_t*)0x1000000, (uint8_t*)0x1000000, 0x0);
    
    //this for kmalloc space
-   mapPage((uint8_t*)0xE000000, (uint8_t*)0xE0000000, 0x0);
+   mapPage((uint8_t*)0x4000000, (uint8_t*)0xE0000000, 0x0);
+   kprintf("mapped the bloody page\n");
    kmallocFreeMem = (uint8_t*)0xe0000000; //set it to the start of the now allocated page, it gets 1 page (4kb), if we need more we should allocate more
    allocEnd = (uint8_t*)0xe0000FFF;
 
@@ -48,19 +49,20 @@ void pagingInit(){
 }
 
 uint8_t* kmalloc(uint32_t size){
+   kprintf("loc'ing %d bytes at %h\n", size, kmallocFreeMem);
 
    if(kmallocFreeMem + size >= allocEnd){
 
+      //this identity maps, that is wrong
       kprintf("shiii\n");
       mapPage((uint8_t*)(allocEnd + 1), (uint8_t*)(allocEnd + 1), 0x0);
       allocEnd += 0x1000;
 
    }
-   kprintf("allocating\n");
 
    uint8_t* ret = kmallocFreeMem;
    kmallocFreeMem += size;
-   kprintf("mem: %h\n", ret);
+   kprintf("allocated\n");
    return ret;
 
 }
@@ -68,6 +70,7 @@ uint8_t* kmalloc(uint32_t size){
 #define tempMem (uint64_t*)0x6000
 
 //just find the next available page in free memory so we can use it to map stuff
+//so turns out that the addresses stored in the page structure are interpreted as physical addresses. therefore we are kinda forced to identity map the space where we allocate fresh pages
 void* alloc_page(void){
 
    void* page = (void*)freeMemAddr;
@@ -125,7 +128,7 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    kprintf("2\n");
 
    uint64_t* pd = (uint64_t*)(pdpt[pdptidx] & ~0xFFF);
-   //kprintf("pd: %d\n", pd);
+   kprintf("pd: %h\n", pd);
 
    if (!(pd[pdidx] & 0x01)) {
       kprintf("pd was the issue\n");
@@ -138,11 +141,13 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    kprintf("3\n");
 
    uint64_t* pt = (uint64_t*)(pd[pdidx] & ~0xFFF);
-   //kprintf("pt: %d\n", (uint64_t)pt);
+   kprintf("pt: %h\n", (uint64_t)pt);
    //kprintf("page contents: %d\n", pt[ptidx]);
 
    pt[ptidx] = (uint64_t)physAddr | (uint64_t)flags | (uint64_t)0x01 | (0x01 << 1);
    kprintf("4\n");
+   kprintf("should say \"0xe000003\": %h\n", pt[ptidx]);
+   kprintf("physAddr: %h\n", physAddr);
 
    invlpg((void*)virtAddr);
 

@@ -59,7 +59,7 @@ extern int _start() {
    }
 
    //cheating to make it easier
-   mapPage((uint8_t*)0xC000000, (uint8_t*)0xD0000000, 0x0);
+   mapPage((uint8_t*)0x5000000, (uint8_t*)0x5000000, 0x0);
 
    //picking kernel load location
    fileHeader_t* testFile = (fileHeader_t*) 0xC0000000;

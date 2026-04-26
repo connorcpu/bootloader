@@ -22,8 +22,8 @@ typedef struct gdtCEntry{
 
 typedef struct gdtrPointer{
 
-   uint16_t size;
    uint64_t gdtAddr;
+   uint16_t size;
 
 }__attribute__((packed)) gdtrPointer_t;
 

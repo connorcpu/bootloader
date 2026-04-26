@@ -193,7 +193,7 @@ void printch(char ch){
    if(ch == '\n'){
       enter();
       writeSerial('\n');
-      writeSerial('\r');
+      //writeSerial('\r');
       return;
    }
    if(shift) ch -= ' ';

@@ -46,6 +46,7 @@ void format(char *string, va_list args){
 
          ch = *(string++);
          
+         //it seems that d produces cononical addresses while i produceses linear
          switch (ch) {
          case 0: return;
          case 'c':
@@ -146,7 +147,7 @@ void printch(char ch){
 
    if(ch == '\n'){
       writeSerial('\n');
-      writeSerial('\r');
+      //writeSerial('\r');
       return;
    }
    //putch(ch, x, lineNum);

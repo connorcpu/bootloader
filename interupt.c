@@ -49,7 +49,7 @@ void exception_handler(registers_t r){
 
    kprintf("we recieved an interupt number %i (%h)\n", r.int_no, r.int_no);
 
-   if (r.int_no == 14) {
+   if (r.int_no == 14 || r.int_no == 13) {
    
       uint64_t cr2_val;
       __asm__ volatile ("mov %%cr2, %0" : "=r"(cr2_val));

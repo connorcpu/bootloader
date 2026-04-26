@@ -24,11 +24,11 @@ int _start(bootArgs_t args){
 
    kprintf("pml4: %h\n", args.kernelPML4Addr);
 
+   pagingInit();
+
    kprintf("loading GDT\n");
 
    loadGDT();
-
-   pagingInit();
 
    fatInit();
 
