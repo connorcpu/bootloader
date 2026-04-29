@@ -37,7 +37,7 @@ uint8_t ide_read(uint8_t channel, uint8_t reg){
 
    if(reg > 0x07 && reg < 0x0c)
       ide_write(channel, ATA_REG_CONTROL, 0x80 | channels[channel].nIEN);
-   kprintf("port: %h\n", channels[channel].base + reg - 0x00);
+   //kprintf("port: %h\n", channels[channel].base + reg - 0x00);
    if(reg < 0x08)
       result = inb(channels[channel].base + reg - 0x00);
    else if(reg < 0x0c)
@@ -244,9 +244,9 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
 
       if(ide_devices[i].reserved == 1){
 
-         //kprintf("found drive of type: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type]);
-         //kprintf("size: %d\n", (ide_devices[i].size));
-         //kprintf("model: %s\n", ide_devices[i].model);
+         kprintf("found drive of type: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type]);
+         kprintf("size: %d\n", (ide_devices[i].size));
+         kprintf("model: %s\n", ide_devices[i].model);
          drives++;
          
 

@@ -55,7 +55,7 @@ void loadGDT(){
 
    runLGDTR(gdtrptr);
 
-   kprintf("tada: %h\n", &gdtrptr);
+   kprintf("tada: %h\n", gdtrptr);
 
 }
 
@@ -70,8 +70,8 @@ void runLGDTR(gdtrPointer_t ptr){
 gdtEntry_t encodeGdtEntry(gdtCEntry_t source){
 
   //limit and base are ignored in 64-bits so don't bother
-  //gdtEntry_t target = kmalloc(sizeof(gdtEntry_t));
-  gdtEntry_t target;
+  gdtEntry_t target = *((gdtEntry_t *)kmalloc(sizeof(gdtEntry_t)));
+  //gdtEntry_t target;
   target.access = source.accessByte; 
   target.limitFlagsBase |= (source.flags << 4);
 

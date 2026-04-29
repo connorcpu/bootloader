@@ -11,6 +11,27 @@ typedef struct gdtEntry{
 
 }__attribute__((packed)) gdtEntry_t;
 
+/*typedef struct gdtEntry{
+
+   unsigned int limitLow      : 16;
+   unsigned int baseLow       : 24;
+   unsigned int accessed      : 1;
+   unsigned int read_write    : 1;
+   unsigned int conforming    : 1; //no clue
+   unsigned int code          : 1; //1 for code, otherwise data
+   unsigned int codeOrData    : 1; //1 unless TSS or LDT
+   unsigned int ring          : 2; //privilege level
+   unsigned int present       : 1; //exists or not
+   unsigned int limitHigh     : 4;
+   unsigned int available     : 1; //software only
+   unsigned int long          : 1; //1 means yes
+   unsigned int big           : 1; //32 bit opcodes?? whaaaat?
+   unsigned int granularity   : 1; //1 for 4k page addressing, 0 for byte
+   unsigned int baseHigh      : 8;
+
+
+}__attribute__((packed)) gdtEntry_t;*/
+
 typedef struct gdtCEntry{
 
    uint32_t limit;

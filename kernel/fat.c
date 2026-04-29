@@ -32,7 +32,7 @@ void fatInit(){
 
    ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
-   kprintf("read VBR\n");
+   kprintf("read VBR into %h\n", bootaddr); 
 
    kprintf("hi\n");
    bochsBreak();
@@ -46,7 +46,9 @@ void fatInit(){
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
    fat = (uint32_t*) kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
+
    //read the fat 
+   //we should not be mapping pages for this
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
 
@@ -110,11 +112,13 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
       //ONLY USE &rootFiles[i] IF YOU WANT THE ADDRESS OF FILE AT THAT INDEX
       if(rootFiles[i].attributes == 0xE5) {kprintf("deleted entry\n"); continue;}
       if(rootFiles[i].attributes == 0x0F) {continue;}
-      if(rootFiles[i].attributes == 0x00) {kprintf("end of dir\n"); break;}
+      if(rootFiles[i].attributes == 0x00) {kprintf("end of dir at indx: %d\n", i); break;}
 
       uint8_t name[13] = {0};
       fileHeader_t* f;
       uint8_t lengthF = getFileName(&rootFiles[i], name);
+
+      kprintf("name: %s\n", name);
 
       if (strcmp(name, fileName) == 0) {
 

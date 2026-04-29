@@ -45,8 +45,11 @@ processes:
    - articals: getting to ring 3; TSS (maybe also GDT)
 
 problems: 
-   - kmalloc gives 0xe000-0000, this throws an exception
-   - GDT has a minor fuck-up
+   - GDT might have a minor fuck-up
+      - i think the encode function is broken
+   - GDT needs to have cannonical addressing for bochs to work, qemu is good though
+      - this should have been solved by moving the GDT to a different address but its not working
+      - we might be loading the wrong pointer
    - IDT is misbehaving and not being called, despite it being loaded up until the exception happens
 
 - objdump

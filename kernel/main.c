@@ -5,6 +5,7 @@
 #include "ELF.h"
 #include "syscall.h"
 #include "memory.h"
+#include "ide.h"
 
 typedef struct bootArgs {
    
@@ -29,6 +30,8 @@ int _start(bootArgs_t args){
    kprintf("loading GDT\n");
 
    loadGDT();
+
+   ideInit(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
 
    fatInit();
 
