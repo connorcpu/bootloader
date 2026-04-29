@@ -17,34 +17,27 @@ void loadGDT(){
    
 
    //null pointer
-   gdtCEntry_t nul;
-   nul.accessByte = 0x00;
-   nul.flags = 0x0;
-   GDT[0] = encodeGdtEntry(nul); 
+   //GDT[0] = (gdtEntry_t)0x00000000000000000000000000000000; //just zero 16 bytes 
+   for(uint8_t i = 0; i < 16; i++){
+      uint8_t* tmp = (uint8_t *)GDT+i;
+      *tmp = 0x00;
+   }
 
    //kernel code
-   gdtCEntry_t kcs;
-   kcs.accessByte = 0x9a; //10011010b: present; ring 0; code/date segment; executable; cannot be executed from other rings; read write allowed; not accessed
-   kcs.flags = 0xA; //1010b, granular to pages instead of bytes; db should be clear in 64-bits; long mode flag enabled
-   GDT[1] = encodeGdtEntry(kcs);
+   //code ring 0
+   GDT[1] = encodeGdtEntry(1, 0);
 
    //kernel data
-   gdtCEntry_t kds;
-   kds.accessByte = 0x92; //10010010b: present; ring 0; code/data segment; not executable; segment grows up; read/write enabled; not accessed
-   kds.flags = 0xC; //1100b granular to bytes; 0=16-bit, 1=32-bit, set to 1 :shrug:; not long mode _code_ segment 
-   GDT[2] = encodeGdtEntry(kds);
+   //data ring 0
+   GDT[2] = encodeGdtEntry(0, 0);
 
    //user code
-   gdtCEntry_t ucs;
-   ucs.accessByte = 0xF2;
-   ucs.flags = 0xc;
-   GDT[3] = encodeGdtEntry(ucs);
+   //code ring 3
+   GDT[3] = encodeGdtEntry(1, 3);
 
    //user data
-   gdtCEntry_t uds;
-   uds.accessByte = 0xFA;
-   uds.flags = 0xA;
-   GDT[4] = encodeGdtEntry(uds);
+   //data ring 3
+   GDT[4] = encodeGdtEntry(0, 3);
 
    //TSS
    //GDT[5] = ...;
@@ -53,26 +46,52 @@ void loadGDT(){
    gdtrptr.gdtAddr = (uint64_t) GDT;
    gdtrptr.size = ((sizeof(gdtEntry_t) * 6) - 1); //subtract 1 because that's the spec
 
-   runLGDTR(gdtrptr);
+   runLGDTR();
 
-   kprintf("tada: %h\n", gdtrptr);
 
 }
 
-void runLGDTR(gdtrPointer_t ptr){
+void runLGDTR(){
 
+
+   gdtrPointer_t ptr;
+   kprintf("tada: %h\n", GDT);
+   ptr.size = (sizeof(gdtEntry_t) * 6) - 1;
+   ptr.gdtAddr = (uint64_t)GDT;
    bochsBreak();
 
-   __asm__ volatile("lGDT %[gdtr]" : [gdtr] "=g" (ptr)); 
-
+   __asm__ volatile("cli");
+   __asm__ volatile("lgdt %0" : : "m" (ptr)); 
+   __asm__ volatile("sti");
+   
 }
 
-gdtEntry_t encodeGdtEntry(gdtCEntry_t source){
+//type 1 for code, type 0 for data
+gdtEntry_t encodeGdtEntry(uint8_t type, uint8_t ring){
+   
+   //limit and base are ignored in 64-bits so don't bother
+   gdtEntry_t target = *((gdtEntry_t *)kmalloc(sizeof(gdtEntry_t)));
+   //gdtEntry_t target;
+   /*target.access = source.accessByte; 
+   target.limitFlagsBase |= (source.flags << 4);
+   target.base = 0x00*/
 
-  //limit and base are ignored in 64-bits so don't bother
-  gdtEntry_t target = *((gdtEntry_t *)kmalloc(sizeof(gdtEntry_t)));
-  //gdtEntry_t target;
-  target.access = source.accessByte; 
-  target.limitFlagsBase |= (source.flags << 4);
+   target.limitLow = 0xFFFF;
+   target.limitHigh = 0xF;
+   target.baseLow = 0x000000;
+   target.baseHigh = 0x00;
+   target.present = 1; //must be set to 1 for valid segment
+   target.ring = ring;
+   target.codeOrData = 1; //yes target is code or data
+   target.code = type;
+   target.conforming = 0; // not quite sure yet
+   target.read_write = 1; // for code this means you can read, for data it means you can write
+   target.accessed = 0; //we haven't touched it yet and we are not doing read-only gdt memory (can cause page fault by CPU trying to set it to 1)
+   target.granularity = 1; //1 means page, 0 means byte, the recomendation is page
+   target.longT = type;
+   target.big = ~type; //also know as the db size flag, should be set to 0 if the "long mode code segment" bit is set, so for data segments it should be set
+
+   return target;
+
 
 }

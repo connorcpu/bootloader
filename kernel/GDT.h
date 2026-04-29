@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-typedef struct gdtEntry{
+/*typedef struct gdtEntry{
 
    uint16_t limit;
    uint16_t base;
@@ -9,9 +9,9 @@ typedef struct gdtEntry{
    uint16_t limitFlagsBase;
 
 
-}__attribute__((packed)) gdtEntry_t;
+}__attribute__((packed)) gdtEntry_t;*/
 
-/*typedef struct gdtEntry{
+typedef struct gdtEntry{
 
    unsigned int limitLow      : 16;
    unsigned int baseLow       : 24;
@@ -24,30 +24,21 @@ typedef struct gdtEntry{
    unsigned int present       : 1; //exists or not
    unsigned int limitHigh     : 4;
    unsigned int available     : 1; //software only
-   unsigned int long          : 1; //1 means yes
+   unsigned int longT         : 1; //1 means yes
    unsigned int big           : 1; //32 bit opcodes?? whaaaat?
    unsigned int granularity   : 1; //1 for 4k page addressing, 0 for byte
    unsigned int baseHigh      : 8;
 
 
-}__attribute__((packed)) gdtEntry_t;*/
-
-typedef struct gdtCEntry{
-
-   uint32_t limit;
-   uint32_t base;
-   uint8_t accessByte;
-   uint8_t flags;
-
-} gdtCEntry_t;
+}__attribute__((packed)) gdtEntry_t;
 
 typedef struct gdtrPointer{
 
-   uint64_t gdtAddr;
    uint16_t size;
+   uint64_t gdtAddr;
 
 }__attribute__((packed)) gdtrPointer_t;
 
 void loadGDT();
-void runLGDTR(gdtrPointer_t ptr);
-gdtEntry_t encodeGdtEntry(gdtCEntry_t source);
+void runLGDTR();
+gdtEntry_t encodeGdtEntry(uint8_t type, uint8_t ring);

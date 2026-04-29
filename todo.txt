@@ -48,9 +48,10 @@ problems:
    - GDT might have a minor fuck-up
       - i think the encode function is broken
    - GDT needs to have cannonical addressing for bochs to work, qemu is good though
-      - this should have been solved by moving the GDT to a different address but its not working
+      - this should have been solved by moving the GDT to a different address but its not working (solved by flipping size and offset :|)
       - we might be loading the wrong pointer
    - IDT is misbehaving and not being called, despite it being loaded up until the exception happens
+      - since it complains about "not code segment" this is likely caused by the GDT being misconfigured, but it does now load
 
 - objdump
    - -d / -D to disassembly
