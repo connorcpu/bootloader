@@ -42,13 +42,13 @@ void pagingInit(){
    //lets fucking put at something that is also cannonical for 32-bit addressing so as to not trip up bochs :|
    mapPage((uint8_t*)0x4000000, (uint8_t*)0x60000000, 0x0);
    kmallocFreeMem = (uint8_t*)0x60000000; //set it to the start of the now allocated page, it gets 1 page (4kb), if we need more we should allocate more
-   allocEnd = (uint8_t*)0xe0000FFF;
+   allocEnd = (uint8_t*)0x60000FFF;
 
 
    //just map some shit in advance, way simpler :(
-/*   for(uint8_t i = 0; i < 3; i++){
-      mapPage((uint8_t*)0xe0001000 + (i*0x1000),(uint8_t*)0xe0001000 + (i*0x1000), 0x0);
-   }*/
+   for(uint8_t i = 0; i < 3; i++){
+      mapPage((uint8_t*)0x60001000 + (i*0x1000),(uint8_t*)0x60001000 + (i*0x1000), 0x0);
+   }
 
 }
 

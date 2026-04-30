@@ -55,7 +55,6 @@ void runLGDTR(){
 
 
    gdtrPointer_t ptr;
-   kprintf("tada: %h\n", GDT);
    ptr.size = (sizeof(gdtEntry_t) * 6) - 1;
    ptr.gdtAddr = (uint64_t)GDT;
    bochsBreak();

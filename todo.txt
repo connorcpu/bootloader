@@ -44,14 +44,7 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
-problems: 
-   - GDT might have a minor fuck-up
-      - i think the encode function is broken
-   - GDT needs to have cannonical addressing for bochs to work, qemu is good though
-      - this should have been solved by moving the GDT to a different address but its not working (solved by flipping size and offset :|)
-      - we might be loading the wrong pointer
-   - IDT is misbehaving and not being called, despite it being loaded up until the exception happens
-      - since it complains about "not code segment" this is likely caused by the GDT being misconfigured, but it does now load
+next up: fat is reading sectors, but it fails when it tries to allocated 798720 bytes....
 
 - objdump
    - -d / -D to disassembly

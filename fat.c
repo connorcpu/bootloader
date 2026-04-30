@@ -36,6 +36,7 @@ void fatInit(){
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
+   kprintf("stage 3 fat size: %i\nbytes per sect: %i\n", ebrsect.fatSize, bootsect.bytesPerSect);
    fat = (uint32_t*) kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
    //read the fat 
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);

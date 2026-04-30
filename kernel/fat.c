@@ -23,29 +23,25 @@ void fatInit(){
 
    pointer = kmalloc(512);
 
-   kprintf("allocated\n");
-
    fatBootsector_t* bootaddr = (fatBootsector_t*) pointer;
    fatEbr32_t* ebraddr = (fatEbr32_t*) (pointer + sizeof(fatBootsector_t));
 
-   kprintf("going to read VBR\n");
-
    ide_read_sectors(0, 1, 0x000000800, 0x10, (uint32_t)bootaddr); //read VBR
 
-   kprintf("read VBR into %h\n", bootaddr); 
-
-   kprintf("hi\n");
-   bochsBreak();
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
 
-   kprintf("sects per cluster: %i\n", bootsect.sectsPerCluster);
+   kprintf("fat name (boot sect validation): %s\n", bootsect.oem_name);
+   kprintf("fat name (ebr sect validation): %s\n", ebrsect.volumeLabel);
    fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect);
    rootdir = *rootaddr;
    
    clusterBeginLba = 0x000000800 + bootsect.numReservedSects + (bootsect.numFats * ebrsect.fatSize);
 
+   //THIS LINE IS THE ONE ALLOCATING WAAAYYY TO MUCH
+   //okay it might be allocating the correct amount
    fat = (uint32_t*) kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
+   kprintf("fat size: %i\nbytes per sect: %i\n", ebrsect.fatSize, bootsect.bytesPerSect);
 
    //read the fat 
    //we should not be mapping pages for this
@@ -53,7 +49,6 @@ void fatInit(){
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
 
    kprintf("read fat\n");
-
 
    //load root dir
    uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);

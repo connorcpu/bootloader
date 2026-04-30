@@ -27,7 +27,7 @@ void pagingInit(){
    //mapPage((uint8_t*)0x100000, memMap[3].base, 0x0); //we have to map the page tables otherwise operating on the page table throws page fault :smh:
    mapPage((uint8_t*)0x1000000, (uint8_t*)0x1000000, 0x0);
    kmallocFreeMem = (uint8_t*)0x1000000; //set it to the start of the now allocated page, it gets 1 page (4kb), if we need more we should allocate more
-   allocEnd = (uint8_t*)0x100FFF;
+   allocEnd = (uint8_t*)0x1000FFF;
 
 
    //just map some shit in advance, way simpler :(

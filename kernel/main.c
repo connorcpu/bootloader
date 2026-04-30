@@ -46,9 +46,9 @@ int _start(bootArgs_t args){
 
       bochsBreak();
 
-     // executeRaw(exef);
+      executeRaw(exef);
 
-      kprintf("success");
+      kprintf("success\n");
    }
    
    uint8_t rgb[3];
