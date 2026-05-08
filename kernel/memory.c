@@ -53,12 +53,11 @@ void pagingInit(){
 }
 
 uint8_t* kmalloc(uint32_t size){
-   kprintf("loc'ing %d bytes at %h\n", size, kmallocFreeMem);
 
    if(kmallocFreeMem + size >= allocEnd){
 
       //this identity maps, that is wrong
-      kprintf("shiii\n");
+//      kprintf("shiii\n");
       mapPage((uint8_t*)(allocEnd + 1), (uint8_t*)(allocEnd + 1), 0x0);
       allocEnd += 0x1000;
 
@@ -73,7 +72,7 @@ uint8_t* kmalloc(uint32_t size){
 
    uint8_t* ret = kmallocFreeMem;
    kmallocFreeMem += size;
-   kprintf("allocated\n");
+   kprintf("mem: allocated %h bytes at %h\n", size, ret);
    return ret;
 
 }
@@ -110,7 +109,7 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    kprintf("pd: %h\n", pdidx);
    kprintf("pt: %h\n", ptidx);*/
 
-   kprintf("mapping virt %h to phys %h\n", virtAddr, physAddr);
+   kprintf("mem: mapping virt %h to phys %h\n", virtAddr, physAddr);
 
    //gets triggered if there is no entry in the pml4
    if(!(PML4[p4idx]) & 0x01){
@@ -158,8 +157,6 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
 }
 
 void* memcpy(void* dest, void* src, uint32_t size){
-
-   kprintf("from %h, to %h, size %h\n", src, dest, size);
 
    uint8_t* d = (uint8_t*) dest;
    uint8_t* s = (uint8_t*) src;

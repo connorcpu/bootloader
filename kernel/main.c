@@ -21,13 +21,13 @@ int _start(bootArgs_t args){
 
    __asm__ volatile ("xchg %bx, %bx");
 
-   kprintf("kernel loaded\n");
+   kprintf("ker: kernel loaded\n");
 
-   kprintf("pml4: %h\n", args.kernelPML4Addr);
+   kprintf("ker: pml4: %h\n", args.kernelPML4Addr);
 
    pagingInit();
 
-   kprintf("loading GDT\n");
+   kprintf("ker: loading GDT\n");
 
    loadGDT();
 
@@ -43,15 +43,15 @@ int _start(bootArgs_t args){
    mapPage((uint8_t*)0x2002000, (uint8_t*)0xD002000, 0x0);
    fileHeader_t* exef = (fileHeader_t*) 0xD000000;
    if(openFile("syscall.elf", exef) == -1){
-      kprintf("did not find syscall test file\n");
+      kprintf("ker: did not find syscall test file\n");
    }else{
 
-      kprintf("testing syscalls\n");
+      kprintf("ker: testing syscalls\n");
 
       bochsBreak();
       executeElf(exef);
 
-      kprintf("returned to kernel code\n");
+      kprintf("ker: returned to kernel code\n");
    }
    
    uint8_t rgb[3];

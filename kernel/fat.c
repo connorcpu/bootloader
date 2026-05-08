@@ -19,7 +19,7 @@ void fatInit(){
 
 //   kmalloc(512, (uint32_t*) &pointer);
 //
-   kprintf("initing fat\n");
+   kprintf("fat: initing fat\n");
 
    pointer = kmalloc(512);
 
@@ -31,8 +31,8 @@ void fatInit(){
    bootsect = *bootaddr;
    ebrsect = *ebraddr;
 
-   kprintf("fat name (boot sect validation): %s\n", bootsect.oem_name);
-   kprintf("fat name (ebr sect validation): %s\n", ebrsect.volumeLabel);
+//   kprintf("fat name (boot sect validation): %s\n", bootsect.oem_name);
+   //kprintf("fat name (ebr sect validation): %s\n", ebrsect.volumeLabel);
    fileHeader_t* rootaddr = (fileHeader_t*)kmalloc(bootsect.sectsPerCluster * bootsect.bytesPerSect);
    rootdir = *rootaddr;
    
@@ -41,21 +41,21 @@ void fatInit(){
    //THIS LINE IS THE ONE ALLOCATING WAAAYYY TO MUCH
    //okay it might be allocating the correct amount
    fat = (uint32_t*) kmalloc(ebrsect.fatSize * bootsect.bytesPerSect);
-   kprintf("fat size: %i\nbytes per sect: %i\n", ebrsect.fatSize, bootsect.bytesPerSect);
+   //kprintf("fat size: %i\nbytes per sect: %i\n", ebrsect.fatSize, bootsect.bytesPerSect);
 
    //read the fat 
    //we should not be mapping pages for this
    mapPage((uint8_t*)0x1ff0000, (uint8_t*)0x1ff0000, 0x0);
    ide_read_sectors(0, ebrsect.fatSize, 0x800 + bootsect.numReservedSects, 0x10, (uint32_t)fat); 
 
-   kprintf("read fat\n");
+   //kprintf("read fat\n");
 
    //load root dir
    uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);
    rootFiles = rootaddr;
-   kprintf("loading root dir at %h\n", (uint64_t)rootFiles);
+   //kprintf("loading root dir at %h\n", (uint64_t)rootFiles);
    
-   kprintf("bytes per sect: %d; sects per cluster: %d\n", bootsect.bytesPerSect, bootsect.sectsPerCluster);
+   //kprintf("bytes per sect: %d; sects per cluster: %d\n", bootsect.bytesPerSect, bootsect.sectsPerCluster);
    
 }
 
@@ -105,25 +105,25 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
 
       //THIS IS THE CORRECT WAY OF ACCESSING
       //ONLY USE &rootFiles[i] IF YOU WANT THE ADDRESS OF FILE AT THAT INDEX
-      if(rootFiles[i].attributes == 0xE5) {kprintf("deleted entry\n"); continue;}
+      if(rootFiles[i].attributes == 0xE5) {kprintf("fat: deleted entry\n"); continue;}
       if(rootFiles[i].attributes == 0x0F) {continue;}
-      if(rootFiles[i].attributes == 0x00) {kprintf("end of dir at indx: %d\n", i); break;}
+      if(rootFiles[i].attributes == 0x00) {kprintf("fat: end of dir at indx: %d\n", i); break;}
 
       uint8_t name[13] = {0};
       fileHeader_t* f;
       uint8_t lengthF = getFileName(&rootFiles[i], name);
 
-      kprintf("name: %s\n", name);
+      //kprintf("name: %s\n", name);
 
       if (strcmp(name, fileName) == 0) {
 
-         kprintf("found file %s, loading at %h\n", name, loadAddr);
+         kprintf("fat: found file %s, loading at %h\n", name, loadAddr);
          return loadClusterChain(rootFiles[i].startingCluster, (void *)loadAddr);
         // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
       
       }
    }
-   kprintf("file not found\n", fileName);
+   kprintf("fat: file not found\n", fileName);
    return -1;
 
 }
@@ -146,12 +146,12 @@ uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
       //3. find whatever the next currentcluster should be
       uint32_t nextFat = fat[currentCluster] & 0x0FFFFFF; //this should mask it so we ignore the top 4 reserved bits
-      if(nextFat == 0x0FFFFFF){ done = 1; kprintf("hit end of file\n"); break;} //special case: end of cluster chain
+      if(nextFat == 0x0FFFFFF){ done = 1; kprintf("fat: hit end of file\n"); break;} //special case: end of cluster chain
       currentCluster = nextFat;
 
 
    }while (!done);
-   kprintf("loaded file\n");
+   kprintf("fat: loaded file\n");
 
 }
 

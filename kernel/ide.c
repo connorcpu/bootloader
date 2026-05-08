@@ -244,11 +244,8 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
 
       if(ide_devices[i].reserved == 1){
 
-         kprintf("found drive of type: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type]);
-         kprintf("size: %d\n", (ide_devices[i].size));
-         kprintf("model: %s\n", ide_devices[i].model);
+         kprintf("ide: found drive of type: %s, size: %d, model: %s\n", (char *[]){"ATA", "ATAPI"}[ide_devices[i].type], (ide_devices[i].size), (ide_devices[i].model));
          drives++;
-         
 
       }
 
