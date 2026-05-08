@@ -37,18 +37,21 @@ int _start(bootArgs_t args){
 
    setupSyscall();
 
-   fileHeader_t* exef = (fileHeader_t*) 0x0;
-   if(openFile("syscall.tst", exef) == -1){
+   bochsBreak();
+   mapPage((uint8_t*)0x2000000, (uint8_t*)0xD000000, 0x0);
+   mapPage((uint8_t*)0x2001000, (uint8_t*)0xD001000, 0x0);
+   mapPage((uint8_t*)0x2002000, (uint8_t*)0xD002000, 0x0);
+   fileHeader_t* exef = (fileHeader_t*) 0xD000000;
+   if(openFile("syscall.elf", exef) == -1){
       kprintf("did not find syscall test file\n");
    }else{
 
       kprintf("testing syscalls\n");
 
       bochsBreak();
+      executeElf(exef);
 
-      executeRaw(exef);
-
-      kprintf("success\n");
+      kprintf("returned to kernel code\n");
    }
    
    uint8_t rgb[3];

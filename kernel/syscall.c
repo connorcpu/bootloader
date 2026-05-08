@@ -61,8 +61,20 @@ void handleSyscall(){
 
    //entrypoint for syscall 
    //
-   kprintf("registered syscall\n");
+   uint64_t length;
+   uint8_t* ptr;
+
+   __asm__ volatile("mov %%rsi, %0" : "=r" (ptr));
+   __asm__ volatile("mov %%rdx, %0" : "=r"(length));
    bochsBreak();
+   kprintf("registered syscall\n");
+
+   kprintf("ptr: %i\n", ptr);
+   kprintf("len: %i\n", length);
+
+   ptr[length] = 0x00;
+   kprintf("%s", ptr);
+   
    //what this method should do:
    //switch to kernel stack
    //store ECX for returning later

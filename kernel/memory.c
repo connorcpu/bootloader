@@ -27,7 +27,7 @@ void pagingInit(){
 
    freeMemAddr = (uint8_t*)0x5000000;
    for(uint8_t i = 0; i < 3; i++){
-      mapPage((uint8_t*)0x50002000 + (i*0x1000),(uint8_t*)0x50002000 + (i*0x1000), 0x0);
+      mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
    }
 //      mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
    //just put empty memory at double the physical space of the kernel, and just C->D for virtual memory space; more than plenty
@@ -61,6 +61,13 @@ uint8_t* kmalloc(uint32_t size){
       kprintf("shiii\n");
       mapPage((uint8_t*)(allocEnd + 1), (uint8_t*)(allocEnd + 1), 0x0);
       allocEnd += 0x1000;
+
+      /*while(kmalocFreeMem + size > allocEnd){
+         mapPage((uint8_t*)(allocEnd + 1)
+
+      }*/
+
+      //((kmallocFreeMem + size) - allocEnd)
 
    }
 
@@ -103,7 +110,7 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    kprintf("pd: %h\n", pdidx);
    kprintf("pt: %h\n", ptidx);*/
 
-  
+   kprintf("mapping virt %h to phys %h\n", virtAddr, physAddr);
 
    //gets triggered if there is no entry in the pml4
    if(!(PML4[p4idx]) & 0x01){
@@ -132,7 +139,7 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    //kprintf("pd: %h\n", pd);
 
    if (!(pd[pdidx] & 0x01)) {
-      kprintf("pd was the issue\n");
+    //  kprintf("pd was the issue\n");
 
       uint64_t* pt = alloc_page();
       pd[pdidx] = (uint64_t)pt | 0x01 | (0x01 << 1);
@@ -151,6 +158,8 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
 }
 
 void* memcpy(void* dest, void* src, uint32_t size){
+
+   kprintf("from %h, to %h, size %h\n", src, dest, size);
 
    uint8_t* d = (uint8_t*) dest;
    uint8_t* s = (uint8_t*) src;

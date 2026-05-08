@@ -9,7 +9,6 @@ gdtEntry_t* GDT;
 void loadGDT(){
 
    GDT = (gdtEntry_t*)kmalloc(sizeof(gdtEntry_t) * 6);
-   bochsBreak();
    //no strict order is imposed in 64-bit as opposed to 32-bit however:
    //KDS = KCS+8
    //UDS = UCS+8
@@ -57,7 +56,6 @@ void runLGDTR(){
    gdtrPointer_t ptr;
    ptr.size = (sizeof(gdtEntry_t) * 6) - 1;
    ptr.gdtAddr = (uint64_t)GDT;
-   bochsBreak();
 
    __asm__ volatile("cli");
    __asm__ volatile("lgdt %0" : : "m" (ptr)); 

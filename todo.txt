@@ -44,7 +44,14 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
-next up: fat is reading sectors, but it fails when it tries to allocated 798720 bytes....
+next up: elf execution
+   - syscalls are working
+   - elf execution is kinda tricky
+   - we should move the kernel memory map out of the lower address space to free it up for program mapping
+   - i think just map all of the program headers from the provided virtual addr to the physical one, idk man
+   - we are told to zero any space between fileSiz and memSiz
+   - take care of setting flags
+
 
 - objdump
    - -d / -D to disassembly
