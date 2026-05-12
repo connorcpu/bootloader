@@ -1,1 +1,0 @@
-kprintf(char *string, ...);

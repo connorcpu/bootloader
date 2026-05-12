@@ -1,9 +1,10 @@
+#include "../stdlib/syscalls.h"
 
 
-int main(){
+void _start(){
 
-   __asm__ volatile("syscall");
+   char* helloString = "Hello from C code!\n";
 
-   return 0;
+   write(1, helloString, sizeof(helloString));
 
 }

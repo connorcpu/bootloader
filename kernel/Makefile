@@ -28,9 +28,9 @@ bin/%.o: %.c ${HEADERS}
 
 test:
 	nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
-	ld -o ../osfs/syscall.elf bin/syscall.elf
+	#ld -o ../osfs/syscall.elf bin/syscall.elf
 
 clean:
-	rm ../osfs/* -f
+	#rm ../osfs/* -f
 	rm bin/* -rf
 	mkdir bin/syscalls
