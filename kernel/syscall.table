@@ -1,0 +1,16 @@
+calling convention:
+- fuck 32-bit chuds
+- rax for syscall NR and return
+- RDI -> 0
+- RSI -> 1
+- RDX -> 2
+- R10 -> 3
+- R8  -> 4
+- R9  -> 5
+- more -> stack
+
+
+name | desc | RAX | RDI | RSI | RDX | R10 | R8  | R9  | more?
+-----|------|-----|-----|-----|-----|-----|-----|-----|-------
+read | buh  | 0   | file desc | buf* | size|
+write | buh | 0x01| file desc | buf* | size

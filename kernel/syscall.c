@@ -1,5 +1,7 @@
 #include "syscall.h"
 #include "io.h"
+#include "syscalls/read.h"
+#include "syscalls/write.h"
 #include "debug.h"
 
 void setupSyscall(){
@@ -61,20 +63,52 @@ void handleSyscall(){
 
    //entrypoint for syscall 
    //
-   uint64_t length;
+/*   uint64_t length;
    uint8_t* ptr;
 
    __asm__ volatile("mov %%rsi, %0" : "=r" (ptr));
    __asm__ volatile("mov %%rdx, %0" : "=r"(length));
-   bochsBreak();
-   kprintf("registered syscall\n");
+   bochsBreak();*/
 
-   kprintf("ptr: %i\n", ptr);
-   kprintf("len: %i\n", length);
+   //kprintf("ptr: %i\n", ptr);
+  // kprintf("len: %i\n", length);
 
-   ptr[length] = 0x00;
-   kprintf("%s", ptr);
+   //ptr[length] = 0x00;
+   //kprintf("%s", ptr);
    
+   uint64_t syscallNr = -1;
+   uint64_t rdi = -1;
+   uint64_t rsi = -1;
+   uint64_t rdx = -1;
+   uint64_t r10 = -1;
+   uint64_t r8 = -1;
+   uint64_t r9 = -1;
+   __asm__ volatile("mov %%rax, %0" : "=r" (syscallNr));
+   __asm__ volatile("mov %%rdi, %0" : "=r" (rdi));
+   __asm__ volatile("mov %%rsi, %0" : "=r" (rsi));
+   __asm__ volatile("mov %%rdx, %0" : "=r" (rdx));
+   __asm__ volatile("mov %%r10, %0" : "=r" (r10));
+   __asm__ volatile("mov %%r8, %0" : "=r" (r8));
+   __asm__ volatile("mov %%r9, %0" : "=r" (r9));
+
+   kprintf("registered syscall number: %d\n", syscallNr);
+   
+   switch(syscallNr){
+
+      case 0x00:
+         sysRead(rdi, rsi, rdx);
+         break;
+      case 0x01:
+         sysWrite(rdi, rsi, rdx);
+         break;
+
+      default: 
+         kprintf("syscall number %h not found \n", syscallNr);
+         break;
+
+   }
+
+
    //what this method should do:
    //switch to kernel stack
    //store ECX for returning later
@@ -82,3 +116,4 @@ void handleSyscall(){
    //setup and execute iretq, later try sysret
 
 }
+

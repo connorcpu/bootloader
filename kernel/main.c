@@ -6,6 +6,7 @@
 #include "syscall.h"
 #include "memory.h"
 #include "ide.h"
+#include "syscalls/fileDescriptor.h"
 
 typedef struct bootArgs {
    
@@ -35,6 +36,8 @@ int _start(bootArgs_t args){
 
    fatInit();
 
+   startfd();
+   
    setupSyscall();
 
    bochsBreak();

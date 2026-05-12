@@ -46,7 +46,8 @@ void pagingInit(){
 
 
    //just map some shit in advance, way simpler :(
-   for(uint8_t i = 0; i < 3; i++){
+   //needs to be rediculusly large because fat needs a rediculus amout of space (0.8 mb)
+   for(uint8_t i = 0; i < 196; i++){
       mapPage((uint8_t*)0x60001000 + (i*0x1000),(uint8_t*)0x60001000 + (i*0x1000), 0x0);
    }
 
@@ -109,7 +110,7 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
    kprintf("pd: %h\n", pdidx);
    kprintf("pt: %h\n", ptidx);*/
 
-   kprintf("mem: mapping virt %h to phys %h\n", virtAddr, physAddr);
+   //kprintf("mem: mapping virt %h to phys %h\n", virtAddr, physAddr);
 
    //gets triggered if there is no entry in the pml4
    if(!(PML4[p4idx]) & 0x01){
