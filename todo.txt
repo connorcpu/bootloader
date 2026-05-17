@@ -48,9 +48,9 @@ next up: elf execution
    - syscalls are working
    - elf execution is kinda tricky
    - we should move the kernel memory map out of the lower address space to free it up for program mapping
-   - i think just map all of the program headers from the provided virtual addr to the physical one, idk man
-   - we are told to zero any space between fileSiz and memSiz
-   - take care of setting flags
+   - so while syscalls are working, sysrets are not
+      - it seems not much easier to try the iretq method
+      - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks
 
 
 - objdump

@@ -72,7 +72,6 @@ uint8_t executeElf(fileHeader_t* file){
          //just identity map for now ig
          int64_t sizeLeft = programHeaderTable[i].p_memsz;
 
-         bochsBreak();
 
          do{
             mapPage((uint8_t*)(programHeaderTable[i].p_vaddr), (uint8_t*)(programHeaderTable[i].p_vaddr), 0x0);

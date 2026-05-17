@@ -7,7 +7,7 @@ calling convention:
 - R10 -> 3
 - R8  -> 4
 - R9  -> 5
-- more -> stack
+- more -> there is no more on linux, otherwise stack
 
 
 name | desc | RAX | RDI | RSI | RDX | R10 | R8  | R9  | more?

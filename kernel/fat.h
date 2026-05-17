@@ -57,5 +57,6 @@ uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr);
 uint32_t clusterToLba(uint32_t clusterIndx);
 uint8_t getFileName(fileHeader_t* file, uint8_t* name);
 void recodeFileName(char* name, char* loadAddr);
-int8_t openFile(char* fileName, fileHeader_t* loadAddr); //does not yet support subdirectories or files above 0.5KB
+uint8_t openFile(char* fileName, fileHeader_t* loadAddr); //does not yet support subdirectories or files above 0.5KB
+fileHeader_t findFile(char* fileName);
 

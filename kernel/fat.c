@@ -59,7 +59,38 @@ void fatInit(){
    
 }
 
-int8_t openFile(char* fileName, fileHeader_t* loadAddr){
+uint8_t loadFile(char* fileName){
+
+   fileHeader_t file = findFile(fileName);
+   
+   if(file.fileSize == -1) {
+      kprintf("fat: could not find file\n"); 
+      return -1;
+   }
+
+   uint8_t* loc = kmalloc(file.fileSize);
+
+   return loadClusterChain(file.startingCluster, (void*)loc);
+
+}
+
+uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
+
+   fileHeader_t file = findFile(fileName); 
+
+   kprintf("file size: %d\n", file.fileSize);
+
+   if(file.fileSize == -1) {
+      kprintf("fat: could not find file\n"); 
+      return -1;
+   }
+
+   return loadClusterChain(file.startingCluster, (void *)loadAddr);
+  // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+      
+}
+
+fileHeader_t findFile(char* fileName){
 
 /*   bool found = false;
    fileHeader_t* currentDir = rootFiles;
@@ -117,14 +148,15 @@ int8_t openFile(char* fileName, fileHeader_t* loadAddr){
 
       if (strcmp(name, fileName) == 0) {
 
-         kprintf("fat: found file %s, loading at %h\n", name, loadAddr);
-         return loadClusterChain(rootFiles[i].startingCluster, (void *)loadAddr);
-        // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
-      
+         kprintf("fat: found file %s\n", name);
+         return rootFiles[i];
+
       }
    }
-   kprintf("fat: file not found\n", fileName);
-   return -1;
+
+   fileHeader_t didNotFind;
+   didNotFind.fileSize = -1;
+   return didNotFind;
 
 }
 

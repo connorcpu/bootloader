@@ -2,9 +2,21 @@
 #include "io.h"
 #include "syscalls/read.h"
 #include "syscalls/write.h"
+#include "syscalls/open.h"
 #include "debug.h"
 
-void setupSyscall(){
+uint64_t VBEIBA;
+
+uint64_t getVBEIBA(){
+
+   return VBEIBA;
+
+}
+
+void setupSyscall(uint64_t VBEInfoBlockAddr){
+
+   //btw also handle the VBEInfo block for now
+   VBEIBA = VBEInfoBlockAddr;
 
    //STAR = 0xc0000081
    //LSTAR = 0xc0000082
@@ -23,6 +35,7 @@ void setupSyscall(){
    //what this method should do:
    //1. Set LSTAR to the RIP value for the syscall entry point (since higherhalf kernel always the same)
    //2. set STAR 47:32 to KERNEL CS 
+   //2.5 set STAR 64:48 to user CS
    //3. set SFMASK if relavent (think just leave it at 0x00000)
    //chatGPT recommends setting SFMASK to 0x200 to clear the Interupt flag
    
@@ -46,11 +59,21 @@ void setupSyscall(){
    );
 
    //2. set Star 47:32 to 0x08
-   __asm__ volatile ("mov $0xc0000081, %%ecx" : : : "ecx");
-   __asm__ volatile ("rdmsr" : : : "rax");
-   unsigned long val = 0x08UL << 32;
-   __asm__ volatile ("or %0, %%rax" : : "r"(val) : "rax"); //intermedate values cannot be 64 bits wide so we need to go through a register
-   __asm__ volatile ("wrmsr");
+   //so turns out the MSR is actually red from EAX and EDX.....
+
+   uint64_t star = (0x08UL << 32) | (0x08UL << 48);
+   uint32_t low = (uint32_t) star;
+   uint32_t high = (uint32_t) (star >> 32);
+
+   //2.5, set star 63:48 to 0x18;
+   __asm__ volatile("mov $0xc0000081, %%ecx\n\t"
+                     "mov %0, %%eax\n\t"
+                     "mov %1, %%edx\n\t"
+                     "wrmsr"
+                     :
+                     : "r" (low), "r"(high)
+                     : "rax", "rdx", "rcx"
+                     );
 
    //3. set SFMask 
    __asm__ volatile ("mov $0xc0000084, %%ecx" : : : "ecx");
@@ -62,20 +85,10 @@ void setupSyscall(){
 void handleSyscall(){
 
    //entrypoint for syscall 
-   //
-/*   uint64_t length;
-   uint8_t* ptr;
-
-   __asm__ volatile("mov %%rsi, %0" : "=r" (ptr));
-   __asm__ volatile("mov %%rdx, %0" : "=r"(length));
-   bochsBreak();*/
-
-   //kprintf("ptr: %i\n", ptr);
-  // kprintf("len: %i\n", length);
-
-   //ptr[length] = 0x00;
-   //kprintf("%s", ptr);
    
+   //save ECX
+   
+   uint64_t ecx = 0x00;
    uint64_t syscallNr = -1;
    uint64_t rdi = -1;
    uint64_t rsi = -1;
@@ -83,15 +96,26 @@ void handleSyscall(){
    uint64_t r10 = -1;
    uint64_t r8 = -1;
    uint64_t r9 = -1;
+  /* __asm__ volatile("mov %%ecx, %0" : "=r" (ecx));
    __asm__ volatile("mov %%rax, %0" : "=r" (syscallNr));
    __asm__ volatile("mov %%rdi, %0" : "=r" (rdi));
    __asm__ volatile("mov %%rsi, %0" : "=r" (rsi));
    __asm__ volatile("mov %%rdx, %0" : "=r" (rdx));
    __asm__ volatile("mov %%r10, %0" : "=r" (r10));
    __asm__ volatile("mov %%r8, %0" : "=r" (r8));
-   __asm__ volatile("mov %%r9, %0" : "=r" (r9));
+   __asm__ volatile("mov %%r9, %0" : "=r" (r9));*/
 
-   kprintf("registered syscall number: %d\n", syscallNr);
+   __asm__ volatile("mov %%rcx, %0\n\t"
+                  "mov %%rax, %1\n\t"
+                  "mov %%rdi, %2\n\t"
+                  "mov %%rsi, %3\n\t"
+                  "mov %%rdx, %4\n\t"
+                  "mov %%r10, %5\n\t"
+                  "mov %%r8,  %6\n\t"
+                  "mov %%r9,  %7\n\t"
+                  : "=g" (ecx), "=g"(syscallNr), "=g"(rdi), "=g"(rsi), "=g"(rdx), "=g"(r10), "=g"(r8), "=g"(r9));
+
+   kprintf("registered syscall number: %d, return addr: %h\n", syscallNr, ecx);
    
    switch(syscallNr){
 
@@ -101,6 +125,9 @@ void handleSyscall(){
       case 0x01:
          sysWrite(rdi, rsi, rdx);
          break;
+      case 0x02:
+         sysOpen((char*)rdi, rsi, rdx);
+         break;
 
       default: 
          kprintf("syscall number %h not found \n", syscallNr);
@@ -108,6 +135,32 @@ void handleSyscall(){
 
    }
 
+   bochsBreak();
+
+   //return uing sysret back to program
+   /*__asm__ volatile("mov %0, %%ecx\n\t"
+         "sysretq" 
+         : 
+         : "r"(ecx) : "ecx");*/
+
+   __asm__ volatile(
+         "mov $0x10, %%ax\n\t"
+         "mov %%ax, %%ds\n\t"
+         "mov %%ax, %%es\n\t"
+         "mov %%ax, %%gs\n\t"
+         "mov %%ax, %%fs\n\t"
+
+         "mov %%rsp, %%rax\n\t"
+         "pushq $0x10\n\t"
+         "pushq %%rax\n\t"
+         "pushfq\n\t"
+         "pushq $0x08\n\t"
+         "pushq %0\n\t"
+         "iretq\n\t"
+         :
+         : "r"(ecx)
+         : "rax", "memory"
+         );
 
    //what this method should do:
    //switch to kernel stack

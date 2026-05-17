@@ -12,7 +12,7 @@ COMPOBJ := $(wildcard bin/*.o)
 COMPOBJ := $(filter-out bin/main.o, $(COMPOBJ))
 OBJ := $(filter-out bin/main.o, $(OBJ))
 
-run: clean compile test
+run: clean compile lib test
 	cp bin/kernel.bin ../osfs/kernel.bin
 
 compile: ${OBJ}
@@ -26,11 +26,15 @@ compile: ${OBJ}
 bin/%.o: %.c ${HEADERS}
 	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -mcmodel=large -c $< -o $@
 
+lib:
+	$(MAKE) -C ../stdlib
+
 test:
-	nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
+	#nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
 	#ld -o ../osfs/syscall.elf bin/syscall.elf
+	x86_64-elf-gcc ../elfTest/elf.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -o ../osfs/syscall.elf
 
 clean:
-	#rm ../osfs/* -f
+	rm ../osfs/* -f
 	rm bin/* -rf
 	mkdir bin/syscalls

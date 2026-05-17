@@ -63,7 +63,7 @@ void exception_handler(registers_t r){
    putch(int_ch, 2, 0);           //set 3e character to the error code (single digit only)
    __asm__ volatile ("pop %rax");
    __asm__ volatile ("mov %%rax, %0" : "=r"(errorCode));
-   kprintf("error code: %d\n", errorCode);
+   kprintf("error code: %h\n", errorCode);
    __asm__ volatile ("cli; hlt"); //halt when exception comes in
 
 }

@@ -38,6 +38,8 @@ void loadGDT(){
    //data ring 3
    GDT[4] = encodeGdtEntry(0, 3);
 
+   //user code and date need to be swapped because of 64-bit sysret
+
    //TSS
    //GDT[5] = ...;
    

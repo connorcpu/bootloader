@@ -81,6 +81,7 @@ extern int _start() {
    //setup kernel args
    bootArgs_t argsB;
    argsB.kernelPML4Addr = (uint64_t) PML4ADDR;
+   //argsB.Vbe
 
    //run kernel
    //executeRaw(testFile);

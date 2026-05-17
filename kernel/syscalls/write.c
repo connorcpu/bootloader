@@ -3,6 +3,7 @@
 #include "../io.h"
 #include "../memory.h"
 #include <stdint.h>
+#include "../debug.h"
 
 void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
 
@@ -15,7 +16,7 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
    uint8_t fd = (uint8_t)rdi;
    uint64_t size = rdx;
 
-   kprintf("going for buf: %h, at size: %d to fd: %d\n", buf, size, fd);
+   kprintf("sys: going for buf: %h, at size: %d to fd: %d\n", buf, size, fd);
 
    //2.
    switch(fd){
@@ -24,10 +25,8 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
          kprintf("sys: input not implemented\n");
          break;
       case 1:
-
          //stdout
          for(uint64_t i = 0; i < size; i++){ putch(*(buf+i)); }
-
          break;
       case 2:
          //stderr

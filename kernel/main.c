@@ -38,9 +38,8 @@ int _start(bootArgs_t args){
 
    startfd();
    
-   setupSyscall();
+   setupSyscall(args.VBEInfoBlockAddr);
 
-   bochsBreak();
    mapPage((uint8_t*)0x2000000, (uint8_t*)0xD000000, 0x0);
    mapPage((uint8_t*)0x2001000, (uint8_t*)0xD001000, 0x0);
    mapPage((uint8_t*)0x2002000, (uint8_t*)0xD002000, 0x0);
@@ -51,7 +50,6 @@ int _start(bootArgs_t args){
 
       kprintf("ker: testing syscalls\n");
 
-      bochsBreak();
       executeElf(exef);
 
       kprintf("ker: returned to kernel code\n");
