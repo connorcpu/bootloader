@@ -82,20 +82,21 @@ void setupSyscall(uint64_t VBEInfoBlockAddr){
 
 }
 
-void handleSyscall(){
+uint64_t saved_rcx = 0x00;
+uint64_t saved_rax = -1;
+uint64_t saved_rdi = -1;
+uint64_t saved_rsi = -1;
+uint64_t saved_rdx = -1;
+uint64_t saved_r10 = -1;
+uint64_t saved_r8 = -1;
+uint64_t saved_r9 = -1;
+
+__attribute__((naked))void handleSyscall(){
 
    //entrypoint for syscall 
    
    //save ECX
    
-   uint64_t ecx = 0x00;
-   uint64_t syscallNr = -1;
-   uint64_t rdi = -1;
-   uint64_t rsi = -1;
-   uint64_t rdx = -1;
-   uint64_t r10 = -1;
-   uint64_t r8 = -1;
-   uint64_t r9 = -1;
   /* __asm__ volatile("mov %%ecx, %0" : "=r" (ecx));
    __asm__ volatile("mov %%rax, %0" : "=r" (syscallNr));
    __asm__ volatile("mov %%rdi, %0" : "=r" (rdi));
@@ -104,8 +105,18 @@ void handleSyscall(){
    __asm__ volatile("mov %%r10, %0" : "=r" (r10));
    __asm__ volatile("mov %%r8, %0" : "=r" (r8));
    __asm__ volatile("mov %%r9, %0" : "=r" (r9));*/
-
-   __asm__ volatile("mov %%rcx, %0\n\t"
+   __asm__ volatile(
+       "mov %%rcx, saved_rcx(%%rip)\n\t"
+       "mov %%rax, saved_rax(%%rip)\n\t"
+       "mov %%rdi, saved_rdi(%%rip)\n\t"
+       "mov %%rsi, saved_rsi(%%rip)\n\t"
+       "mov %%rdx, saved_rdx(%%rip)\n\t"
+       "mov %%r10, saved_r10(%%rip)\n\t"
+       "mov %%r8,  saved_r8(%%rip)\n\t"
+       "mov %%r9,  saved_r9(%%rip)\n\t"
+       :::
+   );
+/*   __asm__ volatile("mov %%rcx, %0\n\t"
                   "mov %%rax, %1\n\t"
                   "mov %%rdi, %2\n\t"
                   "mov %%rsi, %3\n\t"
@@ -113,24 +124,24 @@ void handleSyscall(){
                   "mov %%r10, %5\n\t"
                   "mov %%r8,  %6\n\t"
                   "mov %%r9,  %7\n\t"
-                  : "=g" (ecx), "=g"(syscallNr), "=g"(rdi), "=g"(rsi), "=g"(rdx), "=g"(r10), "=g"(r8), "=g"(r9));
-
-   kprintf("registered syscall number: %d, return addr: %h\n", syscallNr, ecx);
+                  : "=m" (ecx), "=m"(syscallNr), "=m"(rdi), "=m"(rsi), "=m"(rdx), "=m"(r10), "=m"(r8), "=m"(r9));
+*/
+   kprintf("registered syscall number: %d, return addr: %h\n", saved_rax, saved_rcx);
    
-   switch(syscallNr){
+   switch(saved_rax){
 
       case 0x00:
-         sysRead(rdi, rsi, rdx);
+         sysRead(saved_rdi, saved_rsi, saved_rdx);
          break;
       case 0x01:
-         sysWrite(rdi, rsi, rdx);
+         sysWrite(saved_rdi, saved_rsi, saved_rdx);
          break;
       case 0x02:
-         sysOpen((char*)rdi, rsi, rdx);
+         sysOpen((char*)saved_rdi, saved_rsi, saved_rdx);
          break;
 
       default: 
-         kprintf("syscall number %h not found \n", syscallNr);
+         kprintf("syscall number %h not found \n", saved_rax);
          break;
 
    }
@@ -158,7 +169,7 @@ void handleSyscall(){
          "pushq %0\n\t"
          "iretq\n\t"
          :
-         : "r"(ecx)
+         : "r"(saved_rcx)
          : "rax", "memory"
          );
 
