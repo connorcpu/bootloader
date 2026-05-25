@@ -66,15 +66,18 @@ uint8_t executeElf(fileHeader_t* file){
    //loading time bitch
    for(uint8_t i = 0; i < header->programHeaderEntryCount; i++){
       
+
       //it's a load type
       if(programHeaderTable[i].type == 1){
+         kprintf("mapping header #%i at addr: %h, with mem size %h\n", i, programHeaderTable[i].p_vaddr, programHeaderTable[i].p_memsz);
 
          //just identity map for now ig
          int64_t sizeLeft = programHeaderTable[i].p_memsz;
 
 
          do{
-            mapPage((uint8_t*)(programHeaderTable[i].p_vaddr), (uint8_t*)(programHeaderTable[i].p_vaddr), 0x0);
+            mapPage((uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, (uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, 0x0);
+            //kprintf("mapping page %h\n", programHeaderTable[i].p_vaddr + sizeLeft);
             sizeLeft -= 0x1000;
          }while(sizeLeft > 0x0000);
       }

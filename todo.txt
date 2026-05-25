@@ -44,13 +44,29 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
-next up: elf execution
-   - syscalls are working
-   - elf execution is kinda tricky
+next up: more syscalls -> setup to terminal and propper userspace programs
+   - baponkar.github.io/Osdev-Notes/
+   - setup TSS & switch to sysret at some point (also do ring 3 execution)
    - we should move the kernel memory map out of the lower address space to free it up for program mapping
-   - so while syscalls are working, sysrets are not
-      - it seems not much easier to try the iretq method
-      - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks
+   - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks
+   - USERSPACE STDIO DOES NOT DO VAR SUBSTITUTION
+   - syscalls to implement:
+      - read (to file/fd)
+      - write (to file/fd)
+      - open 
+      - close
+      - lseek (allows writing at offsets which we need for the framebuffer)
+      - mmap (probably usefull, also for doing framebuffer manipulation)
+      - poll (think i need it or select() for user input)
+      - {,f,l}stat (gets some stats on fd's)
+         - we want fstat since it used filedescriptors instead of paths
+      - ioctl (maybe, is used to manipulate fd's)
+      - far future: socket calls like bind connect accept etc
+   - we miiiiight wanna do multithreading:
+      - you need to sent "INIT IPI" & "SIPI" over the APIC to wake a thread
+      - then you need to trampoline the core out of 16-bit mode much like the first thread
+         - this need physical 0x8000 memory....
+      - DO NOT REUSE STACK
 
 
 - objdump

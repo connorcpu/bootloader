@@ -1,15 +1,23 @@
 #include "../stdlib/syscalls.h"
+#include "../stdlib/stdio.h"
 
 
 void drawRect(uint8_t _rgb[]);
 
+uint8_t fd;
+//uint8_t buffer[1080][1920*3];
+//uint8_t buffer[6220800];
+uint8_t buffer[576000];
+
 void _start(){
 
-   char* helloString = "Hello from C code!\n";
+   char c = 'C';
+   char* testStr = "substitution";
+   kprintf("hello from %c code, now with %s\n", c, testStr);
+   fd = open("/dev/fb", 0x0, 0x0);
 
-   write(1, helloString, 19);
-   open("/dev/fb", 0x0, 0x0);
-   
+   //var substition currently NOT working
+   kprintf("recieved fd: %d\n", fd);
    uint8_t rgb[3];
    rgb[0] = 255;
    rgb[1] = 0;
@@ -59,8 +67,8 @@ void _start(){
 
 void drawRect(uint8_t _rgb[]){
 
-   uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
-   uint8_t* where = vga_mem;
+   //uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
+   uint8_t* where = buffer;
 
    for(uint8_t j = 0; j < 100; j++){
 
@@ -74,5 +82,8 @@ void drawRect(uint8_t _rgb[]){
          where += (1920*3);
 
    }
+
+//   write(fd, buffer, (1920*3*100));
+
 }
 

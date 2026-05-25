@@ -4,6 +4,7 @@
 #include "syscalls/write.h"
 #include "syscalls/open.h"
 #include "debug.h"
+#include "interrupt.h"
 
 uint64_t VBEIBA;
 
@@ -13,10 +14,22 @@ uint64_t getVBEIBA(){
 
 }
 
+uint8_t keyboardReady = 0;
+
+uint8_t getKeyboard(){
+   uint8_t tmp = keyboardReady;
+   if(keyboardReady == 1) keyboardReady = 0; //if statement for the rare case the interupt occurs between checking and updating
+
+   return tmp;
+
+}
+
 void setupSyscall(uint64_t VBEInfoBlockAddr){
 
    //btw also handle the VBEInfo block for now
    VBEIBA = VBEInfoBlockAddr;
+
+   registerInterupt(0x1, &handleKeyboard);
 
    //STAR = 0xc0000081
    //LSTAR = 0xc0000082
@@ -90,6 +103,7 @@ uint64_t saved_rdx = -1;
 uint64_t saved_r10 = -1;
 uint64_t saved_r8 = -1;
 uint64_t saved_r9 = -1;
+uint64_t ret = -1;
 
 __attribute__((naked))void handleSyscall(){
 
@@ -126,7 +140,9 @@ __attribute__((naked))void handleSyscall(){
                   "mov %%r9,  %7\n\t"
                   : "=m" (ecx), "=m"(syscallNr), "=m"(rdi), "=m"(rsi), "=m"(rdx), "=m"(r10), "=m"(r8), "=m"(r9));
 */
-   kprintf("registered syscall number: %d, return addr: %h\n", saved_rax, saved_rcx);
+//   kprintf("registered syscall number: %d, return addr: %h\n", saved_rax, saved_rcx);
+   
+   ret = -1;
    
    switch(saved_rax){
 
@@ -137,7 +153,7 @@ __attribute__((naked))void handleSyscall(){
          sysWrite(saved_rdi, saved_rsi, saved_rdx);
          break;
       case 0x02:
-         sysOpen((char*)saved_rdi, saved_rsi, saved_rdx);
+         ret = sysOpen((char*)saved_rdi, saved_rsi, saved_rdx);
          break;
 
       default: 
@@ -145,8 +161,6 @@ __attribute__((naked))void handleSyscall(){
          break;
 
    }
-
-   bochsBreak();
 
    //return uing sysret back to program
    /*__asm__ volatile("mov %0, %%ecx\n\t"
@@ -164,9 +178,11 @@ __attribute__((naked))void handleSyscall(){
          "mov %%rsp, %%rax\n\t"
          "pushq $0x10\n\t"
          "pushq %%rax\n\t"
+         "sti\n\t"
          "pushfq\n\t"
          "pushq $0x08\n\t"
          "pushq %0\n\t"
+         "mov ret(%%rip), %%rax\n\t"
          "iretq\n\t"
          :
          : "r"(saved_rcx)
@@ -181,3 +197,11 @@ __attribute__((naked))void handleSyscall(){
 
 }
 
+void handleKeyboard(){
+   kprintf("registerd keyboard input\n");
+
+   keyboardReady = 1;
+   uint8_t scancode = inb(0x60);
+   kprintf("code: %h\n", scancode);
+
+}

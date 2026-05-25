@@ -16,7 +16,7 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
    uint8_t fd = (uint8_t)rdi;
    uint64_t size = rdx;
 
-   kprintf("sys: going for buf: %h, at size: %d to fd: %d\n", buf, size, fd);
+//   kprintf("sys: going for buf: %h, at size: %d to fd: %d\n", buf, size, fd);
 
    //2.
    switch(fd){
@@ -33,8 +33,13 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
          for(uint64_t i = 0; i < size; i++){ kprintf("err: "); putch(*(buf+i)); }
          break;
       default:
-         //3. (not implemented)
-         kprintf("sys: fd %d not found \n", fd);
+         //3. (file, not special)
+         uint8_t* ptr = retrievefd(fd);
+         //this line trips it
+         if(ptr != -1){
+            memcpy(ptr, (void*)rsi, rdx);
+         }
+
    }
    return;
 }

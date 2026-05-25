@@ -6,6 +6,8 @@
 #include "syscall.h"
 #include "memory.h"
 #include "ide.h"
+#include "interrupt.h"
+#include "PIC.h"
 #include "syscalls/fileDescriptor.h"
 
 typedef struct bootArgs {
@@ -26,6 +28,10 @@ int _start(bootArgs_t args){
 
    kprintf("ker: pml4: %h\n", args.kernelPML4Addr);
 
+   PIC_sendEOI(0x03);
+
+   createIDT();
+
    pagingInit();
 
    kprintf("ker: loading GDT\n");
@@ -37,6 +43,9 @@ int _start(bootArgs_t args){
    fatInit();
 
    startfd();
+
+//   bochsBreak();
+   __asm__ volatile("sti");
    
    setupSyscall(args.VBEInfoBlockAddr);
 

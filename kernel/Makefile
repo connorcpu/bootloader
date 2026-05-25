@@ -11,9 +11,14 @@ SYSOBJ := $(wildcard syscalls/bin/*.o)
 COMPOBJ := $(wildcard bin/*.o)
 COMPOBJ := $(filter-out bin/main.o, $(COMPOBJ))
 OBJ := $(filter-out bin/main.o, $(OBJ))
+OBJ += bin/interruptASM.o
 
 run: clean compile lib test
 	cp bin/kernel.bin ../osfs/kernel.bin
+
+bin/interruptASM.o:
+	nasm interrupt.asm -f elf64 -o bin/interruptASM.o -w+zeroing
+
 
 compile: ${OBJ}
 	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -mcmodel=large -c main.c -o bin/main.o

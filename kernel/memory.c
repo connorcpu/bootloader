@@ -29,6 +29,7 @@ void pagingInit(){
    for(uint8_t i = 0; i < 3; i++){
       mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
    }
+
 //      mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
    //just put empty memory at double the physical space of the kernel, and just C->D for virtual memory space; more than plenty
    //
