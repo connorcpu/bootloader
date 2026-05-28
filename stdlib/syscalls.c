@@ -29,3 +29,22 @@ uint8_t open(char* fileName, uint32_t flags, uint16_t mode){
    return fd;
 
 }
+
+uint8_t poll(pollfd_t* fds, uint8_t nfds, uint16_t timeout){
+
+   ret = -1;
+   uint64_t scancode = -1;
+
+   //syscall #7
+   __asm__ volatile ("mov %0, %%rdi" : : "r" (fds) : "rdi");
+   __asm__ volatile ("mov %0, %%sil" : : "r" (nfds) : "rsi");
+   __asm__ volatile ("mov %0, %%dx" : : "r" (timeout) : "rdx");
+   __asm__ volatile ("mov $7, %%rax" : : : "rax");
+   __asm__ volatile ("syscall");
+//   __asm__ volatile ("mov %%rax, ret(%%rip)" : : : );
+   __asm__ volatile("mov %%rax, %0" : "=r" (scancode) : :);
+   
+   return (uint8_t)scancode;
+
+
+}

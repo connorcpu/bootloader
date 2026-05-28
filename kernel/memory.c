@@ -26,7 +26,7 @@ void pagingInit(){
    PML4 = (uint64_t*) PML4ADDR; 
 
    freeMemAddr = (uint8_t*)0x5000000;
-   for(uint8_t i = 0; i < 3; i++){
+   for(uint8_t i = 0; i < 4; i++){
       mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
    }
 

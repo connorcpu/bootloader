@@ -19,7 +19,7 @@ typedef struct bootArgs {
 extern int _start() {
 
    //make sure pic is godamn clear
-   PIC_sendEOI(0x03);
+//   PIC_sendEOI(0x03);
    //init basic io vars for printing
    ioInit();
    cls();
@@ -30,11 +30,11 @@ extern int _start() {
 
    //clear interupts, setup interupts, enable interupts
    __asm__ volatile ("cli");
-   createTable();
+  // createTable();
    __asm__ volatile ("sti");
 
    //register keyboard interupt
-   registerkdbint();
+ //  registerkdbint();
 
    //setup ide
    ideInit(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
@@ -53,7 +53,7 @@ extern int _start() {
    initFrame();
 
    //mapping pages for kernel
-   for(int i = 0; i < 8; i++){
+   for(int i = 0; i < 9; i++){
       mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
       kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
    }
@@ -86,6 +86,7 @@ extern int _start() {
    //run kernel
    //executeRaw(testFile);
    void (*kernel)(bootArgs_t) = (void (*)(bootArgs_t args))testFile;
+   //__asm__ volatile ("mov $0xBFFFFF00, %rsp");
    kernel(argsB);
 
    //catch loop

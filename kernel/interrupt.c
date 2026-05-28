@@ -47,6 +47,7 @@ void registerInterupt(uint8_t vector, isr_t handler){
 
 void exceptionHandler(registers_t r){
    
+   __asm__ volatile ("xchg %bx, %bx");
    kprintf("int: we recieved an interupt number %i (%h)\n", r.int_no, r.int_no);
 
    if (r.int_no == 14 || r.int_no == 13) {
@@ -54,7 +55,7 @@ void exceptionHandler(registers_t r){
       uint64_t cr2_val;
       __asm__ volatile ("mov %%cr2, %0" : "=r"(cr2_val));
       kprintf("int: page fault address: %h\n", cr2_val);
-      if(r.int_no == 14) kprintf("page fault occured\n");
+      if(r.int_no == 14) kprintf("page fault occured, rip: %h\n", r.rip);
       if(r.int_no == 13) kprintf("GP fault\n");
 
    }
@@ -72,8 +73,9 @@ void exceptionHandler(registers_t r){
 
 }
 
+uint64_t* saved_rsp = 0;
 void irq_handler(registers_t r){
-   kprintf("irq %i got triggerd\n", r.int_no);
+   //kprintf("irq %i got triggerd from %h\n", r.int_no, r.rip);
 
    if(r.int_no > 0){
 
@@ -83,10 +85,29 @@ void irq_handler(registers_t r){
 
    } 
 
-   bochsBreak();
+   //bochsBreak();
 
+  // kprintf("sending EIO\n");
 
    PIC_sendEOI(1);
+   
+   /*kprintf("sent EIO\n");
+
+   __asm__ volatile ("mov %rsp, saved_rsp(%rip)");
+
+   for(uint8_t i = 32; i > 0; i--){
+      
+      kprintf("%h: %h\n", saved_rsp-(8*i), *(saved_rsp-(8*i)));
+
+   }
+   kprintf("rsp: %h\n", saved_rsp);
+   for(uint8_t i = 0; i < 32; i++){
+      
+      kprintf("%h: %h\n", saved_rsp+(8*i), *(saved_rsp+(8*i)));
+
+   }*/
+
+   //bochsBreak();
 
    return;
 

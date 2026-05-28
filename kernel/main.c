@@ -23,6 +23,7 @@ void drawRect(uint8_t rgb[]);
 int _start(bootArgs_t args){
 
    __asm__ volatile ("xchg %bx, %bx");
+   //__asm__ volatile ("mov $0xbFFFFFFF, %rsp");
 
    kprintf("ker: kernel loaded\n");
 
@@ -33,6 +34,17 @@ int _start(bootArgs_t args){
    createIDT();
 
    pagingInit();
+
+   kprintf("mapping stack\n");
+   for(uint8_t i = 5; i > 0; i--){
+   
+      mapPage((uint8_t*)(0x6000000 - (i*0x1000)), (uint8_t*)(0xc0000000-(i*0x1000)), 0x0);
+      kprintf("%i: mapping %h, to %h\n", i, (0xc0000000-(i*0x1000)), (0x6000000-(i*0x1000)));
+
+   }
+
+//   __asm__ volatile ("mov $0xBFFFFF00, %rsp");
+//   __asm__ volatile ("mov %rsp, %rbp");
 
    kprintf("ker: loading GDT\n");
 

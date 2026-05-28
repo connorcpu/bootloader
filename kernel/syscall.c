@@ -3,6 +3,7 @@
 #include "syscalls/read.h"
 #include "syscalls/write.h"
 #include "syscalls/open.h"
+#include "syscalls/poll.h"
 #include "debug.h"
 #include "interrupt.h"
 
@@ -15,12 +16,19 @@ uint64_t getVBEIBA(){
 }
 
 uint8_t keyboardReady = 0;
+uint8_t scancode = 0;
 
 uint8_t getKeyboard(){
    uint8_t tmp = keyboardReady;
    if(keyboardReady == 1) keyboardReady = 0; //if statement for the rare case the interupt occurs between checking and updating
 
    return tmp;
+
+}
+
+uint8_t getScancode(){
+
+   return scancode;
 
 }
 
@@ -155,6 +163,9 @@ __attribute__((naked))void handleSyscall(){
       case 0x02:
          ret = sysOpen((char*)saved_rdi, saved_rsi, saved_rdx);
          break;
+      case 0x07:
+         ret = sysPoll((pollfd_t*) saved_rdi, (uint8_t)saved_rsi, (uint16_t)saved_rdx);
+         break;
 
       default: 
          kprintf("syscall number %h not found \n", saved_rax);
@@ -198,10 +209,14 @@ __attribute__((naked))void handleSyscall(){
 }
 
 void handleKeyboard(){
-   kprintf("registerd keyboard input\n");
+   //kprintf("registerd keyboard input\n");
 
    keyboardReady = 1;
-   uint8_t scancode = inb(0x60);
+   uint8_t sc = inb(0x60);
+   if(sc <= 0x7f){
+      scancode = sc;
+   }
+
    kprintf("code: %h\n", scancode);
 
 }

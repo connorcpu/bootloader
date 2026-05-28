@@ -25,6 +25,11 @@ irq_stub_%+%1:
 %endmacro
 
 isr_common:
+
+    push r11
+    push r10
+    push r9
+    push r8
     push rdi
     push rsi
     push rbp
@@ -59,12 +64,21 @@ isr_common:
     pop rbp
     pop rsi
     pop rdi
+    pop r8
+    pop r9
+    pop r10
+    pop r11
 
     add rsp, 16
-    sti
+    ;sti
     iretq
 
 irq_common:
+
+   push r11
+   push r10
+   push r9
+   push r8
    push rdi 
    push rsi 
    push rbp 
@@ -101,9 +115,14 @@ irq_common:
    pop rbp 
    pop rsi 
    pop rdi
+   pop r8
+   pop r9
+   pop r10
+   pop r11
 
    add rsp, 16
-   sti 
+   ;sti 
+   xchg bx, bx
    iretq
 
 
