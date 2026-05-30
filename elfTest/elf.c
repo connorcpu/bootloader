@@ -7,8 +7,8 @@ void repos();
 
 uint8_t fd;
 //uint8_t buffer[1080][1920*3];
-//uint8_t buffer[6220800];
-uint8_t buffer[576000];
+uint8_t buffer[6220800]; //1920*1080*3
+//uint8_t buffer[576000]; //1920*100*3
 uint8_t* loc = buffer;
 
 void _start(){

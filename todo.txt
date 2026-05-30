@@ -49,7 +49,6 @@ next up: more syscalls -> setup to terminal and propper userspace programs
    - setup TSS & switch to sysret at some point (also do ring 3 execution)
    - we should move the kernel memory map out of the lower address space to free it up for program mapping
    - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks
-   - USERSPACE STDIO DOES NOT DO VAR SUBSTITUTION
    - syscalls to implement:
       - read (to file/fd)
       - write (to file/fd)
@@ -58,6 +57,7 @@ next up: more syscalls -> setup to terminal and propper userspace programs
       - lseek (allows writing at offsets which we need for the framebuffer)
       - mmap (probably usefull, also for doing framebuffer manipulation)
       - poll (think i need it or select() for user input)
+         - implemented a small thing to use with keyboard input
       - {,f,l}stat (gets some stats on fd's)
          - we want fstat since it used filedescriptors instead of paths
       - ioctl (maybe, is used to manipulate fd's)
