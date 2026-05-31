@@ -77,7 +77,7 @@ uint8_t executeElf(fileHeader_t* file){
 
          do{
             mapPage((uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, (uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, 0x0);
-            //kprintf("mapping page %h\n", programHeaderTable[i].p_vaddr + sizeLeft);
+      //      kprintf("mapping page %h\n", programHeaderTable[i].p_vaddr + sizeLeft);
             sizeLeft -= 0x1000;
          }while(sizeLeft > 0x0000);
       }

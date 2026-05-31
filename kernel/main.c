@@ -118,10 +118,6 @@ int _start(bootArgs_t args){
 
    }
 
-   
-   
-
-
    return 0;
 
 
@@ -132,9 +128,9 @@ void drawRect(uint8_t _rgb[]){
    uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
    uint8_t* where = vga_mem;
 
-   for(uint8_t j = 0; j < 100; j++){
+   for(uint16_t j = 0; j < 1920; j++){
 
-      for (uint8_t k = 0; k < 100; k++) {
+      for (uint16_t k = 0; k < 1080; k++) {
 
          where[k*3] = _rgb[0];
          where[k*3 + 1] = _rgb[1];

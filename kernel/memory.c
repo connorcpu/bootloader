@@ -26,7 +26,7 @@ void pagingInit(){
    PML4 = (uint64_t*) PML4ADDR; 
 
    freeMemAddr = (uint8_t*)0x5000000;
-   for(uint8_t i = 0; i < 4; i++){
+   for(uint16_t i = 0; i < 220; i++){
       mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
    }
 
@@ -86,7 +86,10 @@ uint8_t* kmalloc(uint32_t size){
 void* alloc_page(void){
 
    void* page = (void*)freeMemAddr;
+   //freeMemAddr += 0x1000;
+   //freeMemAddr += 0x20;
    freeMemAddr += 0x1000;
+   kprintf("feeMemAddr: %h\n", freeMemAddr);
    return page;
 
 }

@@ -217,6 +217,6 @@ void handleKeyboard(){
       scancode = sc;
    }
 
-   kprintf("code: %h\n", scancode);
+//   kprintf("code: %h\n", scancode);
 
 }

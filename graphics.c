@@ -56,7 +56,7 @@ void putpixel(uint16_t* screen, uint16_t x, uint16_t y, uint8_t colour){
 int initFrame(){
 
    kprintf("mapping framebuffer\n");
-   for(int i = 0; i < 1013; i++){
+   for(int i = 0; i < 1519; i++){
       mapPage((uint8_t*)VbeModeInfoStructure.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0); //map "physical" video mem to 4GiB
    }
    kprintf("mapped framebuffer\n");

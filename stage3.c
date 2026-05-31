@@ -61,7 +61,7 @@ extern int _start() {
    //cheating to make it easier
    //this is where we put new pages in the kernel, has to be identity mapped or go with the complicated route (future)
    mapPage((uint8_t*)0x5000000, (uint8_t*)0x5000000, 0x0);
-   mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
+   //mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
 
    kmalloc(8);
 

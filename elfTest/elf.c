@@ -91,7 +91,7 @@ void drawRect(uint8_t _rgb[], uint8_t* where){
 
    }
 
-   write(fd, buffer, (1920*3*100));
+   write(fd, buffer, (1920*3*1080));
 
 }
 
