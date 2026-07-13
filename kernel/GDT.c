@@ -82,7 +82,6 @@ void loadGDT(){
    kprintf("gdt: %h, %h\n", GDT, (5*8));
 
    //filling the TSS
-   mapPage((uint8_t*)0x10000, (uint8_t*)0x10000, 0x4); //should create a user page
    tss->RSP2_l = 0x10000;
    tss->RSP2_h = 0x00000000;
    

@@ -44,15 +44,15 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
-current problem: while the stack seems to switch correctly, for some reason trying to execute elf shits the bed due to a rbp-56 to resolve file :shrug:
+no current problems
 
-next up: more syscalls -> setup to terminal and propper userspace programs
+next up: more syscalls -> setup to terminal, or PCI or better memory management
 
    - BRUH, syscalls never save any form of register (or atleast restore) and we are wondering WHY IT CLOBERS STUFF???? AM I STUPID
    - baponkar.github.io/Osdev-Notes/
-   - setup TSS & switch to sysret at some point (also do ring 3 execution)
+   - switch to sysret at some point
    - we should move the kernel memory map out of the lower address space to free it up for program mapping
-   - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks
+   - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks, only when moving up tho so idk lol
    - syscalls to implement:
       - read (to file/fd)
       - write (to file/fd)
@@ -71,6 +71,8 @@ next up: more syscalls -> setup to terminal and propper userspace programs
       - then you need to trampoline the core out of 16-bit mode much like the first thread
          - this need physical 0x8000 memory....
       - DO NOT REUSE STACK
+   - we mighhhttt wanna do some PCI stuff, seems doable
+   - look at SYSV ABI
 
 
 - objdump
