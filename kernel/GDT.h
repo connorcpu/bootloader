@@ -32,6 +32,13 @@ typedef struct gdtEntry{
 
 }__attribute__((packed)) gdtEntry_t;
 
+typedef struct gdtSysExtension{
+
+   uint32_t baseMegaHigh: 32;
+   uint32_t reserved: 32;
+
+}__attribute__((packed)) gdtSysExtension_t;
+
 typedef struct gdtrPointer{
 
    uint16_t size;

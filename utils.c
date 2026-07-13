@@ -16,7 +16,9 @@ void outb(uint16_t port, uint8_t val){
 
    //both of these work i dont know which is better
    //__asm__ volatile("outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
-   __asm__("out %%al, %%dx" : : "a" (val), "d" (port));
+   __asm__("push %rax");
+   __asm__("out %%al, %%dx" : : "a" (val), "d" (port) : );
+   __asm__("pop %rax");
 
    return;
 
@@ -31,7 +33,9 @@ uint8_t inb(uint16_t port){
                      : "=a"(ret)
                      : "Nd"(port)
                      : "memory");*/
+   __asm__("push %rax");
    __asm__("in %%dx, %%al" : "=a" (ret) : "d" (port));
+   __asm__("pop %rax");
    return ret;
 
 }

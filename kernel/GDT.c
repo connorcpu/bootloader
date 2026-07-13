@@ -2,13 +2,15 @@
 #include "debug.h"
 #include "io.h"
 #include "memory.h"
+#include "tss.h"
 
 gdtEntry_t* GDT; 
 //gdtEntry_t GDT[6];
+tss_t* tss;
 
 void loadGDT(){
 
-   GDT = (gdtEntry_t*)kmalloc(sizeof(gdtEntry_t) * 6);
+   GDT = (gdtEntry_t*)kmalloc(sizeof(gdtEntry_t) * 7);
    //no strict order is imposed in 64-bit as opposed to 32-bit however:
    //KDS = KCS+8
    //UDS = UCS+8
@@ -41,11 +43,53 @@ void loadGDT(){
    //user code and date need to be swapped because of 64-bit sysret
 
    //TSS
-   //GDT[5] = ...;
+   //flag byte == 0x0
+   gdtEntry_t* tssEntry = (gdtEntry_t*)kmalloc(sizeof(gdtEntry_t) * 2);
+   tssEntry->granularity = 0;
+   tssEntry->big = 0;
+   tssEntry->longT = 0;
+   
+   //access byte: 0x89: 0b10001001
+   //0b1000 means present; ring zero (2 bits); data segment
+   //1001 means type 0x9, 64-bits tss segment
+   tssEntry->present = 1;
+   tssEntry->ring = 0;
+   tssEntry->codeOrData = 0; //only 0 for TSS or LDT
+   tssEntry->code = 1;  //code, conforming, read_write and accessed should be a 4-bit type field, 0x9 = 64-bit tss (available)
+   tssEntry->conforming = 0; //always zero on TSS
+   tssEntry->read_write = 0; //can be seen as 1=busy, 0=avaibable
+   tssEntry->accessed = 1; //should be 1=tss, 0=LDT as long as codeOrDate = 0 because that means system segment
+   
+   tss = (tss_t*)kmalloc(sizeof(tss_t));
+   kprintf("tss: %h\n", tss);
+   uint64_t limit = sizeof(tss_t) - 1;
+   tssEntry->baseLow = (uint32_t)tss & 0xFFFFFF;
+   tssEntry->baseHigh = ((uint64_t)tss >> 24) & 0xFF; //shouldn't even need the & 0xFF;
+   tssEntry->limitLow = limit;
+   tssEntry->limitHigh = (limit >> 16) & 0xF;
+
+   kprintf("size: %i\n", sizeof(tss_t));
+   
+   gdtSysExtension_t* tssExtension = (gdtSysExtension_t*)(tssEntry + 1); //whaaaaat, +8 does +8 gdtEntry sizes???
+   tssExtension->baseMegaHigh = ((uint64_t)tss >> 32) & 0xFFFFFFFF;
+   tssExtension->reserved = 0x0;
+
+   GDT[6] = *((gdtEntry_t*)(tssExtension));
+   GDT[5] = *tssEntry;
+   
+   //memcpy(&GDT[5], tssEntry, 16);
+   kprintf("tss access byte, should be 0x89: %h, at addr: %h\n", *(((uint8_t*)(GDT + 5)) + 5), ((uint8_t*)(GDT + 5)) + 5);
+   kprintf("gdt: %h, %h\n", GDT, (5*8));
+
+   //filling the TSS
+   mapPage((uint8_t*)0x10000, (uint8_t*)0x10000, 0x4); //should create a user page
+   tss->RSP2_l = 0x10000;
+   tss->RSP2_h = 0x00000000;
+   
    
    gdtrPointer_t gdtrptr;
    gdtrptr.gdtAddr = (uint64_t) GDT;
-   gdtrptr.size = ((sizeof(gdtEntry_t) * 6) - 1); //subtract 1 because that's the spec
+   gdtrptr.size = ((sizeof(gdtEntry_t) * 7) - 1); //subtract 1 because that's the spec
 
    runLGDTR();
 
@@ -56,11 +100,14 @@ void runLGDTR(){
 
 
    gdtrPointer_t ptr;
-   ptr.size = (sizeof(gdtEntry_t) * 6) - 1;
+   ptr.size = (sizeof(gdtEntry_t) * 7) - 1;
    ptr.gdtAddr = (uint64_t)GDT;
 
    __asm__ volatile("cli");
    __asm__ volatile("lgdt %0" : : "m" (ptr)); 
+   __asm__ volatile("mov $0x28, %ax");
+   //__asm__ volatile("xchg %bx, %bx");
+   __asm__ volatile("ltr %ax");
    __asm__ volatile("sti");
    
 }

@@ -2,6 +2,7 @@
 #include "PIC.h"
 #include "io.h"
 #include "debug.h"
+#include "utils.h"
 
 __attribute__((aligned(0x10))) //this might be important :shrug:
 idt_entry_t idt[256];
@@ -9,6 +10,8 @@ idt_entry_t idt[256];
 idtr_t idtr;
 
 extern uint64_t isr_stub_table[];
+uint64_t rsp_u;
+uint64_t rbp_u;
 
 isr_t routineHandlers[256];
 
@@ -41,6 +44,7 @@ void createIDT(){
 
 void registerInterupt(uint8_t vector, isr_t handler){
 
+   kprintf("setting IRQ %i to handler addr %h\n", vector, handler);
    routineHandlers[vector] = handler;
 
 }
@@ -50,37 +54,47 @@ void exceptionHandler(registers_t r){
    __asm__ volatile ("xchg %bx, %bx");
    kprintf("int: we recieved an interupt number %i (%h)\n", r.int_no, r.int_no);
 
+
    if (r.int_no == 14 || r.int_no == 13) {
    
       uint64_t cr2_val;
       __asm__ volatile ("mov %%cr2, %0" : "=r"(cr2_val));
       kprintf("int: page fault address: %h\n", cr2_val);
-      if(r.int_no == 14) kprintf("page fault occured, rip: %h\n", r.rip);
+      kprintf("error code: %h\n", r.err_code);
+      kprintf("rip: %h\n", r.rip);
+      if(r.int_no == 14){
+         pageFaultError_t thing = *((pageFaultError_t*)&r.err_code);
+         kprintf("page fault occured, rip: %h, RSP: %h\n", r.rip, r.rsp);
+         kprintf("present: %h\n", thing.p);
+         kprintf("write: %h\n", thing.w);
+         kprintf("user: %h\n", thing.u);
+         kprintf("reserved write: %h\n", thing.resw);
+         kprintf("instruction fetch: %h\n", thing.infet);
+         kprintf("protection key: %h\n", thing.pk);
+         kprintf("shadow stack: %h\n", thing.ss);
+         kprintf("softawer Guard Extensions: %h\n", thing.sgx);
+      }
       if(r.int_no == 13) kprintf("GP fault\n");
 
    }
 
    if(r.int_no == 6) kprintf("invalid opcode\n");
 
-   uint64_t errorCode;
-
    uint64_t int_ch = r.int_no + '0';
    //putch(int_ch, 2, 0);           //set 3e character to the error code (single digit only)
-   __asm__ volatile ("pop %rax");
-   __asm__ volatile ("mov %%rax, %0" : "=r"(errorCode));
-   kprintf("int: error code: %h\n", errorCode);
    __asm__ volatile ("cli; hlt"); //halt when exception comes in
 
 }
 
 uint64_t* saved_rsp = 0;
 void irq_handler(registers_t r){
-   //kprintf("irq %i got triggerd from %h\n", r.int_no, r.rip);
+//   kprintf("irq %i got triggerd from %h\n", r.int_no, r.rip);
 
    if(r.int_no > 0){
 
       //resolve and call handler
       isr_t handler = routineHandlers[r.int_no];
+      //kprintf("num: %i, handler addr: %h\n", r.int_no, handler);
       handler(r);
 
    } 

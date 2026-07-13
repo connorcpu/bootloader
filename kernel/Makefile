@@ -17,7 +17,7 @@ run: clean compile lib test
 	cp bin/kernel.bin ../osfs/kernel.bin
 
 bin/interruptASM.o:
-	nasm interrupt.asm -f elf64 -o bin/interruptASM.o -w+zeroing
+	nasm interrupt.asm -f elf64 -o bin/interruptASM.o -w+zeroing -w+gnu-elf-extensions
 
 
 compile: ${OBJ}

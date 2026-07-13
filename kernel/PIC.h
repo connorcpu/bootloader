@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include "utils.h"
 
 #define PIC1         0x20 //offset because design mistake, 0-32 are for intel stuff so keyboard being 1 is not gonna work
 #define PIC2         0xA0

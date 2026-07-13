@@ -2,8 +2,9 @@
 #include "io.h"
 #include <stdint.h>
 #include "debug.h"
+#include "utils.h"
 
-uint64_t* PML4;
+uint64_t* higherPML4;
 
 uint8_t* freeMemAddr;
 uint8_t* kmallocFreeMem;
@@ -22,13 +23,46 @@ void pagingInit(){
       i++;
    }*/
 
-
-   PML4 = (uint64_t*) PML4ADDR; 
-
+   //time to move everything to new, higherHalf paging tabel
+   
+   //this line works because the data is in both mappings at the same virtual address
    freeMemAddr = (uint8_t*)0x5000000;
-   for(uint16_t i = 0; i < 220; i++){
-      mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
+
+   //allocate fresh pml4
+   higherPML4 = alloc_page();
+   
+   //map some fresh pages so we can do more allocation
+   for(uint16_t i = 0; i < 22; i++){
+      mmPage((uint8_t*)0x5000000 + (i*0x1000),(uint8_t*)0x5000000 + (i*0x1000), 0x0, higherPML4);
    }
+
+   //map kernel itself
+   for(uint8_t i = 0; i < 10; i++){
+      mmPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
+   }
+
+//   uint64_t toMap = ((VBEMIS.pitch * VBEMIS.height) / 0x1000) + 1;
+   uint64_t toMap = (((1920*3)*1080)/0x1000)+1;
+   kprintf("remapping framebuffer in %i pages\n", toMap);
+   for(int i = 0; i < toMap; i++){
+ //     mmPage((uint8_t*)VBEMIS.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
+      mmPage((uint8_t*)0xFD000000 + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
+   }
+   kprintf("remapped framebuffer\n");
+   
+   for(uint8_t i = 0; i < 18; i++){
+      mmPage((uint8_t*)(0x1000*i) + 0x80000, (uint8_t*)(0x1000*i)+0x80000, 0x0, higherPML4);
+   }
+   kprintf("mapped old stack\n");
+
+   __asm__ volatile ("mov %0, %%cr3" : : "r"(higherPML4));
+
+   kprintf("switched to higher-half memory map\n");
+
+
+   /*for(uint16_t i = 0; i < 20; i++){
+      mapPage((uint8_t*)0x5001000 + (i*0x1000),(uint8_t*)0x5001000 + (i*0x1000), 0x0);
+   }*/
 
 //      mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
    //just put empty memory at double the physical space of the kernel, and just C->D for virtual memory space; more than plenty
@@ -85,21 +119,29 @@ uint8_t* kmalloc(uint32_t size){
 //so turns out that the addresses stored in the page structure are interpreted as physical addresses. therefore we are kinda forced to identity map the space where we allocate fresh pages
 void* alloc_page(void){
 
+   //this is where the next entries are stored you dummy
+   //ofcourse it should be 0x1000 you need space to store the lower entries
    void* page = (void*)freeMemAddr;
-   //freeMemAddr += 0x1000;
-   //freeMemAddr += 0x20;
    freeMemAddr += 0x1000;
-   kprintf("feeMemAddr: %h\n", freeMemAddr);
    return page;
 
 }
 
+
 uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
 
-#define PAGE_ALIGN(x) ((x) & ~0xFFF)
+   mmPage(physAddr, virtAddr, flags, (void*)higherPML4);
 
-   //physAddr = PAGE_ALIGN(physAddr);
-   //virtAddr = PAGE_ALIGN(virtAddr);
+}
+
+uint8_t mmPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags, void* PML4addr){
+
+#define PAGE_ALIGN(x) ((x) & ~0xFFF);
+
+   uint64_t* PML4 = (uint64_t*) PML4addr; 
+
+   physAddr = (uint8_t*)PAGE_ALIGN((uint64_t)physAddr);
+   virtAddr = (uint8_t*)PAGE_ALIGN((uint64_t)virtAddr);
    //
 
 
@@ -122,20 +164,28 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
     //  kprintf("pml4 was thi issue\n");
       uint64_t* pdpt = alloc_page(); //if it does not exist, allocate one
       //we should 0 the page but thats applications problems
-      PML4[p4idx] = (uint64_t)pdpt | 0x01 | (0x01 << 1); //set the entry to contain the address to the pdpt that we allocated, the present bit and the writable bit
+      PML4[p4idx] = (uint64_t)pdpt | (uint64_t)(flags & 0xFFF) | 0x01 | (0x01 << 1); //set the entry to contain the address to the pdpt that we allocated, the present bit and the writable bit
+
+   }else if(flags & 0xFFF){ //there are flags, we should prob update them
+
+      PML4[p4idx] |= (uint64_t)(flags & 0xFFF);
 
    }
 
    uint64_t* pdpt = (uint64_t*)(PML4[p4idx] & ~0xFFF); // the & should make sure we only grab address (~ means not)
-   //kprintf("pdpt: %h\n", pdpt);
+  //kprintf("pdpt: %h\n", pdpt);
 
    if (!(pdpt[pdptidx] & 0x01)) {
       //kprintf("pdpt was the issue\n");
       
       uint64_t* pd = alloc_page(); //allocate because it's not there
 
-      pdpt[pdptidx] = (uint64_t)pd | 0x01 | (0x01 << 1);
+      pdpt[pdptidx] = (uint64_t)pd | (uint64_t)(flags & 0xFFF) | 0x01 | (0x01 << 1);
 
+
+   }else if(flags & 0xFFF){ //there are flags, we should prob update them
+
+      pdpt[pdptidx] |= (uint64_t)(flags & 0xFFF);
 
    }
 
@@ -146,16 +196,20 @@ uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags){
     //  kprintf("pd was the issue\n");
 
       uint64_t* pt = alloc_page();
-      pd[pdidx] = (uint64_t)pt | 0x01 | (0x01 << 1);
+      pd[pdidx] = (uint64_t)pt | (uint64_t)(flags & 0xFFF) | 0x01 | (0x01 << 1); //this line is not causing the GP faults
 
    
+   }else if(flags & 0xFFF){ //there are flags, we should prob update them
+
+      pd[pdidx] |= (uint64_t)(flags & 0xFFF);
+
    }
 
    uint64_t* pt = (uint64_t*)(pd[pdidx] & ~0xFFF);
    //kprintf("pt: %h\n", (uint64_t)pt);
    //kprintf("page contents: %d\n", pt[ptidx]);
 
-   pt[ptidx] = (uint64_t)physAddr | (uint64_t)flags | (uint64_t)0x01 | (0x01 << 1);
+   pt[ptidx] = (uint64_t)physAddr | (uint64_t)(flags & 0xFFF) | (uint64_t)0x01 | (0x01 << 1);
 
    invlpg((void*)virtAddr);
 

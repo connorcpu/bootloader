@@ -1,7 +1,18 @@
+[default abs]
+[default rel]
+[extern rsp_s]
+[extern rbp_s]
+[extern rsp_u]
+[extern rbp_u]
+
 %macro isr_err_stub 1
 isr_stub_%+%1:
    cli
-   push qword 0 ;almost certain i forgot this line
+   ;push qword 0 ;almost certain i forgot this line; nope: this is auto pushed error code
+   mov qword [rsp_u], rsp
+   mov qword [rbp_u], rbp
+   mov rbp, [rbp_s]
+   ;mov rsp, rsp_s
    push qword %1
    jmp isr_common
 %endmacro
@@ -9,6 +20,10 @@ isr_stub_%+%1:
 %macro isr_no_err_stub 1
 isr_stub_%+%1:
    cli
+   mov qword [rsp_u], rsp
+   mov qword [rbp_u], rbp
+   mov rbp, [rbp_s]
+   ;mov rsp, rsp_s
    push qword 0
    push qword %1
    jmp isr_common
@@ -17,7 +32,10 @@ isr_stub_%+%1:
 %macro irq_stub 2
 irq_stub_%+%1:
    cli
-
+   mov qword [rsp_u], rsp
+   mov qword [rbp_u], rbp
+   mov rbp, [rbp_s]
+   ;mov rsp, rsp_s
    push qword 0
    push qword %2 
    ;call irq_handler
@@ -69,8 +87,12 @@ isr_common:
     pop r10
     pop r11
 
-    add rsp, 16
-    ;sti
+    add rsp, 16; this undos the int_no and error code pushes
+
+    mov rsp, qword [rsp_u]
+    mov rbp, qword [rbp_u]
+
+    sti
     iretq
 
 irq_common:
@@ -121,8 +143,10 @@ irq_common:
    pop r11
 
    add rsp, 16
-   ;sti 
-   xchg bx, bx
+   mov rsp, qword [rsp_u]
+   mov rbp, qword [rbp_u]
+   sti ;needed since iretq
+   ;xchg bx, bx
    iretq
 
 

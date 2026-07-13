@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include "stdbool.h"
-#include "utils.h"
 
 #define VIDEO_ADDRESS 0xb8000
 

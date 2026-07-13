@@ -3,14 +3,21 @@
 #include <stdint.h>
 #include "memory.h"
 #include "debug.h"
+#include "tss.h"
 
 elf64Header_t* header;
 
+extern tss_t* tss;
+
+uint64_t rsp_s;
+uint64_t rbp_s;
+
 uint8_t executeElf(fileHeader_t* file){
 
+   //bochsBreak();
    header = (elf64Header_t *) file;
 
-   //kprintf("magic num: %h\n", header->magic);
+   kprintf("magic num: %h\n", header->magic);
 
    if (header->magic != 0x464C457F) {
       kprintf("elf: magic number is fucked\n");
@@ -76,10 +83,10 @@ uint8_t executeElf(fileHeader_t* file){
 
 
          do{
-            mapPage((uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, (uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, 0x0);
+            mapPage((uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, (uint8_t*)(programHeaderTable[i].p_vaddr) + sizeLeft, 0x4);
       //      kprintf("mapping page %h\n", programHeaderTable[i].p_vaddr + sizeLeft);
             sizeLeft -= 0x1000;
-         }while(sizeLeft > 0x0000);
+         }while(sizeLeft >= 0x0000);
       }
       
       //not that the pages are mapped, time to copy the data
@@ -105,7 +112,41 @@ uint8_t executeElf(fileHeader_t* file){
    //now just jump to entry point in theory
    void (*program)(void) = (void (*)())header->programEntryOffset;
    kprintf("elf: jumping to program at %h\n", program);
-   program();
+
+   mapPage((uint8_t*)0x10000, (uint8_t*)0x10000, 0x4); //should create a user page
+   //store stack pointers in the TSS
+   rsp_s = 0x0;
+   rbp_s = 0x0;
+   __asm__ volatile("mov %%rsp, %0" : "=r"(rsp_s));
+   __asm__ volatile("mov %%rbp, %0" : "=r"(rbp_s));
+   tss->RSP0_l = rsp_s;
+   tss->RSP0_h = (rsp_s >> 32);
+   kprintf("saving %h\n", rbp_s);
+
+   __asm__ volatile(
+         "mov $0x23, %%ax\n\t"
+         "mov %%ax, %%ds\n\t"
+         "mov %%ax, %%es\n\t"
+         "mov %%ax, %%gs\n\t"
+         "mov %%ax, %%fs\n\t"
+         "mov $0x10FFF, %%rbp\n\t"
+
+
+         //"mov %%rsp, %%rax\n\t"
+         "xchg %%bx, %%bx\n\t"
+         "pushq $0x23\n\t"
+         //"pushq %%rax\n\t"
+         "pushq $0x10FFF\n\t"
+         "pushfq\n\t"
+         "pushq $0x1b\n\t"
+         "pushq %0\n\t"
+         "iretq\n\t"
+         :
+         : "r"(program)
+         : "rax", "memory"
+         );
+
+   //program();
 
    return 0;
 

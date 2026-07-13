@@ -44,7 +44,11 @@ processes:
    - setup userspace and stack, then use iretq to "return" to the starting address of the program which should be loaded onto the stack beforehand
    - articals: getting to ring 3; TSS (maybe also GDT)
 
+current problem: while the stack seems to switch correctly, for some reason trying to execute elf shits the bed due to a rbp-56 to resolve file :shrug:
+
 next up: more syscalls -> setup to terminal and propper userspace programs
+
+   - BRUH, syscalls never save any form of register (or atleast restore) and we are wondering WHY IT CLOBERS STUFF???? AM I STUPID
    - baponkar.github.io/Osdev-Notes/
    - setup TSS & switch to sysret at some point (also do ring 3 execution)
    - we should move the kernel memory map out of the lower address space to free it up for program mapping

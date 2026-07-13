@@ -4,10 +4,17 @@
 #include "syscalls/write.h"
 #include "syscalls/open.h"
 #include "syscalls/poll.h"
+#include "syscalls/exit.h"
 #include "debug.h"
 #include "interrupt.h"
+#include "utils.h"
+#include "tss.h"
 
 uint64_t VBEIBA;
+
+extern tss_t* tss;
+extern uint64_t rsp_s;
+extern uint64_t rbp_s;
 
 uint64_t getVBEIBA(){
 
@@ -17,6 +24,7 @@ uint64_t getVBEIBA(){
 
 uint8_t keyboardReady = 0;
 uint8_t scancode = 0;
+void idle();
 
 uint8_t getKeyboard(){
    uint8_t tmp = keyboardReady;
@@ -111,7 +119,10 @@ uint64_t saved_rdx = -1;
 uint64_t saved_r10 = -1;
 uint64_t saved_r8 = -1;
 uint64_t saved_r9 = -1;
+uint64_t saved_rsp_s = -1;
+uint64_t saved_rbp_s = -1;
 uint64_t ret = -1;
+uint64_t newrsp = -1;
 
 __attribute__((naked))void handleSyscall(){
 
@@ -136,8 +147,26 @@ __attribute__((naked))void handleSyscall(){
        "mov %%r10, saved_r10(%%rip)\n\t"
        "mov %%r8,  saved_r8(%%rip)\n\t"
        "mov %%r9,  saved_r9(%%rip)\n\t"
+       "mov %%rsp, saved_rsp_s(%%rip)\n\t"
+       "mov %%rbp, saved_rbp_s(%%rip)\n\t"
        :::
    );
+
+   //kprintf("going to load rsp: %h, and rbp: %h\n", rsp_s, rbp_s);
+
+   __asm__ volatile(
+       "mov %%ss, %%ax\n\t"
+       "mov %%ax, %%ds\n\t"
+       "mov %%ax, %%es\n\t"
+       "mov %%ax, %%fs\n\t"
+       "mov %%ax, %%gs\n\t"
+       "mov %%ax, %%es\n\t"
+       "mov %0, %%rsp\n\t"
+       "mov %1, %%rbp\n\t"
+       :: "r"(rsp_s), "r"(rbp_s): "rax"
+       //:::
+    );
+
 /*   __asm__ volatile("mov %%rcx, %0\n\t"
                   "mov %%rax, %1\n\t"
                   "mov %%rdi, %2\n\t"
@@ -149,7 +178,11 @@ __attribute__((naked))void handleSyscall(){
                   : "=m" (ecx), "=m"(syscallNr), "=m"(rdi), "=m"(rsi), "=m"(rdx), "=m"(r10), "=m"(r8), "=m"(r9));
 */
 //   kprintf("registered syscall number: %d, return addr: %h\n", saved_rax, saved_rcx);
-   
+  
+   //insert prologue here
+   //
+   //save callee saved registers here (rbx, rdx, etc) to restore later
+
    ret = -1;
    
    switch(saved_rax){
@@ -166,6 +199,10 @@ __attribute__((naked))void handleSyscall(){
       case 0x07:
          ret = sysPoll((pollfd_t*) saved_rdi, (uint8_t)saved_rsi, (uint16_t)saved_rdx);
          break;
+      case 0x3c:
+         ret = sysExit(saved_rdi);
+         idle();
+         break;
 
       default: 
          kprintf("syscall number %h not found \n", saved_rax);
@@ -180,23 +217,31 @@ __attribute__((naked))void handleSyscall(){
          : "r"(ecx) : "ecx");*/
 
    __asm__ volatile(
-         "mov $0x10, %%ax\n\t"
+         "mov %%rsp, %0\n\t"
+         "mov %%rbp, %1\n\t"
+         : "=r"(rsp_s), "=r"(rbp_s)::
+      );
+   tss->RSP0_l = rsp_s;
+   tss->RSP0_h = (rsp_s >> 32);
+
+   __asm__ volatile( //restore callee saved registers here
+         "mov $0x23, %%ax\n\t"
          "mov %%ax, %%ds\n\t"
          "mov %%ax, %%es\n\t"
          "mov %%ax, %%gs\n\t"
          "mov %%ax, %%fs\n\t"
+         "mov %2, %%rbp\n\t"
 
-         "mov %%rsp, %%rax\n\t"
-         "pushq $0x10\n\t"
-         "pushq %%rax\n\t"
+         "pushq $0x23\n\t"
+         "pushq %1\n\t"
          "sti\n\t"
          "pushfq\n\t"
-         "pushq $0x08\n\t"
+         "pushq $0x1b\n\t"
          "pushq %0\n\t"
          "mov ret(%%rip), %%rax\n\t"
          "iretq\n\t"
          :
-         : "r"(saved_rcx)
+         : "r"(saved_rcx), "r"(saved_rsp_s), "r"(saved_rbp_s)
          : "rax", "memory"
          );
 

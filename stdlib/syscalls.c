@@ -48,3 +48,11 @@ uint8_t poll(pollfd_t* fds, uint8_t nfds, uint16_t timeout){
 
 
 }
+
+uint8_t exit(uint32_t errorCode){
+
+   __asm__ volatile ("mov %0, %%edi\n\t"
+         "mov $60, %%rax\n\t"
+         "syscall\n\t" : :"r"(errorCode) :);
+
+}

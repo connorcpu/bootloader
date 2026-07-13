@@ -21,7 +21,29 @@ typedef struct {
 
 typedef struct {
 
+//unsigned int sgx : 1, : 8, ss : 1, pk : 1, infet : 1, resw : 1, u : 1, w : 1, p : 1;
+
+   //char bs : 1, ss : 1, pk : 1, infet : 1, resw : 1, u : 1, w : 1, p : 1;
+   char p : 1, w : 1, u : 1, resw : 1, infet : 1, pk : 1, ss : 1, bs : 1;
+   char sgx : 8;
+   /*int sgx : 1;
+   int res : 8;
+   int ss : 1;
+   int pk : 1;
+   int infet : 1;
+   int resw : 1;
+   int u : 1;
+   int w : 1;
+   int p : 1;*/
+
+
+}__attribute__((packed)) pageFaultError_t;
+//;} pageFaultError_t;
+
+typedef struct {
+
    uint64_t ds;
+   //no clue why but the combined line is incorrect
    uint64_t r11, r10, r9, r8;
    uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
    //uint64_t r11, r10, r9, r8, rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;

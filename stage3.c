@@ -13,8 +13,11 @@ typedef struct bootArgs {
    uint64_t VBEInfoBlockAddr;
    uint64_t E820Addr;
    uint64_t kernelPML4Addr;
+   uint64_t framebuffer;
 
 }__attribute__((packed)) bootArgs_t;
+
+extern VbeModeInfoStructure_t VbeModeInfoStructure;
 
 extern int _start() {
 
@@ -60,8 +63,16 @@ extern int _start() {
 
    //cheating to make it easier
    //this is where we put new pages in the kernel, has to be identity mapped or go with the complicated route (future)
-   mapPage((uint8_t*)0x5000000, (uint8_t*)0x5000000, 0x0);
-   //mapPage((uint8_t*)0x50001000,(uint8_t*)0x50001000, 0x0);
+   mapPage((uint8_t*)0x5000000,(uint8_t*)0x5000000, 0x0);
+   mapPage((uint8_t*)0x5001000,(uint8_t*)0x5001000, 0x0);
+   mapPage((uint8_t*)0x5002000,(uint8_t*)0x5002000, 0x0);
+   mapPage((uint8_t*)0x5003000,(uint8_t*)0x5003000, 0x0);
+   mapPage((uint8_t*)0x5004000,(uint8_t*)0x5004000, 0x0);
+   mapPage((uint8_t*)0x5005000,(uint8_t*)0x5005000, 0x0);
+   mapPage((uint8_t*)0x5006000,(uint8_t*)0x5006000, 0x0);
+   mapPage((uint8_t*)0x5007000,(uint8_t*)0x5007000, 0x0);
+   mapPage((uint8_t*)0x5008000,(uint8_t*)0x5008000, 0x0);
+   mapPage((uint8_t*)0x5009000,(uint8_t*)0x5009000, 0x0);
 
    kmalloc(8);
 
@@ -81,7 +92,9 @@ extern int _start() {
    //setup kernel args
    bootArgs_t argsB;
    argsB.kernelPML4Addr = (uint64_t) PML4ADDR;
-   //argsB.Vbe
+   argsB.VBEInfoBlockAddr = (uint64_t)&VbeModeInfoStructure;
+   argsB.framebuffer = 0x2000000;
+   kprintf("vga sent: %h\n", (uint64_t)&VbeModeInfoStructure);
 
    //run kernel
    //executeRaw(testFile);
