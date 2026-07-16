@@ -44,7 +44,7 @@ extern int _start() {
 
    //read MBR
    //uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
-   initSerial();
+//   initSerial();
 
    //init memory
    pagingInit();
@@ -93,8 +93,10 @@ extern int _start() {
    bootArgs_t argsB;
    argsB.kernelPML4Addr = (uint64_t) PML4ADDR;
    argsB.VBEInfoBlockAddr = (uint64_t)&VbeModeInfoStructure;
-   argsB.framebuffer = 0x2000000;
-   kprintf("vga sent: %h\n", (uint64_t)&VbeModeInfoStructure);
+   argsB.framebuffer = VbeModeInfoStructure.framebuffer;
+   kprintf("fb sent: %h\n", argsB.framebuffer);
+   kprintf("vbe sent: %h\n", (uint64_t)&VbeModeInfoStructure);
+   kprintf("vga sent: %h\n", (uint64_t)VbeModeInfoStructure.framebuffer);
 
    //run kernel
    //executeRaw(testFile);

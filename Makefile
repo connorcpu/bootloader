@@ -35,7 +35,16 @@ bin/%.o: %.c ${HEADERS}
 	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -c $< -o $@
 #	clang -std=c17 -ffreestanding -mno-red-zone -mcmodel=kernel -fno-stack-protector -fpic -fpie -gdwarf -fwrapv -Werror -pipe -c $< -o $@
 	
-iso: bin/os.iso
+#iso: bin/os.iso
+iso: clean image
+	dd if=/dev/zero of=bin/diskISO.iso bs=512 count=200000
+	dd if=bin/qemu.img of=bin/diskISO.iso conv=notrunc bs=512 seek=0 count=1
+
+#VDI does get executed, just doesn't quite work
+vbox: clean image
+	qemu-img convert -f raw -O vdi bin/qemu.img bin/vbox.vdi
+	vboxmanage internalcommands sethduuid bin/vbox.vdi 9188b32b-d649-4a2a-baaa-b696e296be9a
+	vboxmanage startvm "operating system test"
 
 bin/os.iso: compile
 	dd if=bin/comb.o of=osfs/iso.o

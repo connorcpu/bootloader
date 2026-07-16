@@ -24,7 +24,7 @@ jmp programSpace
 %include "disk.asm"
 %include "utils.asm"
 
-helloMsg: db "Booting your operating system...", 0xD, 0xA, 0x00
+helloMsg: db "Booting autismoS...", 0xD, 0xA, 0x00
 postReadMsg: db "the second stage was read into memory", 0xd, 0xa, 0x00
 
 times 494 - ($ - $$) db 0

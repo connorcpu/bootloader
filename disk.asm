@@ -3,11 +3,12 @@ programSpace equ 0x8000 ;make ABSOLUTELY DUBBLY SURE that this number is the sam
 
 read_disk:
    mov ah, 0x02 ; read sectors
-   mov al, 0x50 ; read 16 sectors
+   mov al, 0x2e ; read 16 sectors
    mov ch, 0x0 
    mov cl, 0x02; read from the second sector
    mov dh, 0x0 ; from first disk thingys
    mov dl, [diskNum]
+   ;mov dl, 0h
    mov bx, programSpace
    int 13h
    jc error 
@@ -19,7 +20,7 @@ error:
    jmp $
 
 diskNum:
-   db 0
+   db 0x80
 
 errorMsg: db "an error occured while reading the kernel", 0x0D, 0x0A, 0x0
    

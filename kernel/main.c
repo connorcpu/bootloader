@@ -41,11 +41,13 @@ int _start(bootArgs_t args){
 
    kprintf("ker: pml4: %h\n", args.kernelPML4Addr);
 
-   kprintf("vga: %h\n", args.VBEInfoBlockAddr);
+   kprintf("vbe: %h\n", args.VBEInfoBlockAddr);
 
    vbe = *((VbeModeInfoStructure_t*)arguments.VBEInfoBlockAddr);
    //vga_mem = (uint8_t*)vbe.framebuffer;
    vga_mem = (uint8_t*)arguments.framebuffer;
+   kprintf("vga: %h\n", vbe.framebuffer );
+   kprintf("vga2: %h\n", vga_mem);
 
    PIC_sendEOI(0x03);
 
