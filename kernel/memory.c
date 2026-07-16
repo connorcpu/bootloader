@@ -49,8 +49,8 @@ void pagingInit(){
    for(int i = 0; i < toMap; i++){
  //     mmPage((uint8_t*)VBEMIS.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
 //      mmPage((uint8_t*)0xFD000000 + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
-    mmPage((uint8_t*)0xe0000000 + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
-//      mmPage((uint8_t*)vbe.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
+//    mmPage((uint8_t*)0xe0000000 + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
+      mmPage((uint8_t*)vbe.framebuffer + (i * 0x1000), (uint8_t*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
    }
    kprintf("remapped framebuffer\n");
    

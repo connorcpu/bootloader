@@ -41,13 +41,10 @@ int _start(bootArgs_t args){
 
    kprintf("ker: pml4: %h\n", args.kernelPML4Addr);
 
-   kprintf("vbe: %h\n", args.VBEInfoBlockAddr);
-
-   vbe = *((VbeModeInfoStructure_t*)arguments.VBEInfoBlockAddr);
-   //vga_mem = (uint8_t*)vbe.framebuffer;
+   //for global usuage
+   vbe = *((VbeModeInfoStructure_t*)args.VBEInfoBlockAddr);
+   //for local usage
    vga_mem = (uint8_t*)arguments.framebuffer;
-   kprintf("vga: %h\n", vbe.framebuffer );
-   kprintf("vga2: %h\n", vga_mem);
 
    PIC_sendEOI(0x03);
 
@@ -99,7 +96,7 @@ int _start(bootArgs_t args){
 
       kprintf("ker: testing syscalls\n");
 
-      executeElf(exef);
+//      executeElf(exef);
 
       kprintf("ker: returned to kernel code\n");
    }
