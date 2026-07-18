@@ -48,6 +48,7 @@ void pciDetectAll(){
 
          if((vendor = pciRead(i, j, 0, 0)) != 0xFFFF){
 
+            headerType = (uint8_t)(pciRead(i, j, 0, 14) & 0xFF);
             device = pciRead(i, j, 0, 0x2);
 
             uint16_t tmp = pciRead(i, j, 0, 0x8);
@@ -57,10 +58,30 @@ void pciDetectAll(){
             subclass = (uint8_t)(tmp2 & 0xFF);
             class = (uint8_t)((tmp2 >> 8) & 0xFF);
 
-            headerType = (uint8_t)(pciRead(i, j, 0, 14) & 0xFF);
 
             kprintf("vendor: %h, dev: %h, class: %h, subclass: %h, progIF: %h, headerType: %h\n"
                   , vendor, device, class, subclass, progIF, headerType);
+            if(headerType & 0x80){
+               for(uint8_t k = 1; k < 8; k++){
+
+
+                  headerType = (uint8_t)(pciRead(i, j, k, 14) & 0xFF);
+                  device = pciRead(i, j, k, 0x2);
+
+                  if(device == 0xFFFF){continue;}
+                  uint16_t tmp = pciRead(i, j, k, 0x8);
+                  progIF = (uint8_t)(tmp >> 8) & 0xFF;
+
+                  tmp2 = pciRead(i, j, k, 10);
+                  subclass = (uint8_t)(tmp2 & 0xFF);
+                  class = (uint8_t)((tmp2 >> 8) & 0xFF);
+
+
+                  kprintf("vendor: %h, dev: %h, class: %h, subclass: %h, progIF: %h, headerType: %h\n"
+                        , vendor, device, class, subclass, progIF, headerType);
+
+               }
+            }
          }
          
       }

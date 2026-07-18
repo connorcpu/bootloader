@@ -97,6 +97,7 @@ next up: more syscalls -> setup to terminal, or PCI or better memory management
 
 - qemu PCI devs: 
    - intel, bridge:host bridge
-   - intel, bridge:ISA bridge
+   - intel, bridge:ISA bridge (header type 0x80 means multifuncional)
+      - intel, mass storage controller:IDE controller, ISA Compatiblilyt mode-only controller, supports bus mastering
    - bogus, VGA-compatible controller:VGA controller
    - intel, network controller:Ethernet controller
