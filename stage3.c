@@ -44,7 +44,7 @@ extern int _start() {
 
    //read MBR
    //uint8_t status = ide_read_sectors(0, 1, 0, 0x10, 0x80000);
-//   initSerial();
+   initSerial();
 
    //init memory
    pagingInit();
@@ -56,7 +56,7 @@ extern int _start() {
    initFrame();
 
    //mapping pages for kernel
-   for(int i = 0; i < 9; i++){
+   for(int i = 0; i < 10; i++){
       mapPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xC0000000 + (i*0x1000)), 0x0);
       kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
    }

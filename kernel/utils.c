@@ -25,6 +25,22 @@ void outb(uint16_t port, uint8_t val){
 
 }
 
+void outl(uint16_t port, uint32_t val){
+
+   uint16_t p = port;
+   __asm__ volatile("out %0, %1\n\t" : : "r" (val), "r" (p) : );
+
+}
+
+uint32_t inl(uint16_t port){
+
+   uint32_t ret;
+   uint16_t p = port;
+   __asm__("in %%edx, %%eax" : "=a" (ret) : "d" (p));
+   return ret;
+
+}
+
 uint8_t inb(uint16_t port){
 
    uint8_t ret;

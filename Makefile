@@ -54,3 +54,5 @@ bin/os.iso: compile
 clean:
 	rm bin/* -f
 	rm serial.log -f
+	rm bochsSerial.txt
+	touch bochsSerial.txt

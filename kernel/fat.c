@@ -85,7 +85,10 @@ uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
       return -1;
    }
 
-   return loadClusterChain(file.startingCluster, (void *)loadAddr);
+   kprintf("to clusterchain: %h\n", loadAddr);
+   uint8_t ret = loadClusterChain(file.startingCluster, (void *)loadAddr);
+   //kprintf("buh: %h\n", loadAddr);
+   return ret;
   // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
       
 }
@@ -164,6 +167,7 @@ fileHeader_t findFile(char* fileName){
 uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
    uint32_t addr = (uint32_t)loadAddr;
+   kprintf("addr val: %h\naddr loc: %h\n loadAddr val: %h\n loadAddr: %h\n", addr, &addr, loadAddr, &loadAddr);
    uint32_t currentCluster = (uint32_t)firstCluster;
 
    uint8_t done = 0;
@@ -175,6 +179,7 @@ uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
       //2. increment loadAddr
       //addr += 0x200;
       addr = addr + ( bootsect.sectsPerCluster * bootsect.bytesPerSect);
+      kprintf("new value addr: %h & loadAddr: %h\n", addr, loadAddr);
 
       //3. find whatever the next currentcluster should be
       uint32_t nextFat = fat[currentCluster] & 0x0FFFFFF; //this should mask it so we ignore the top 4 reserved bits
@@ -184,6 +189,7 @@ uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
    }while (!done);
    kprintf("fat: loaded file\n");
+   kprintf("new value addr: %h & loadAddr: %h\n", addr, loadAddr);
 
 }
 

@@ -39,7 +39,7 @@ void pagingInit(){
    }
 
    //map kernel itself
-   for(uint8_t i = 0; i < 10; i++){
+   for(uint8_t i = 0; i < 11; i++){
       mmPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
    }
 

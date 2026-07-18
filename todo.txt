@@ -51,8 +51,6 @@ next up: more syscalls -> setup to terminal, or PCI or better memory management
    - BRUH, syscalls never save any form of register (or atleast restore) and we are wondering WHY IT CLOBERS STUFF???? AM I STUPID
    - baponkar.github.io/Osdev-Notes/
    - switch to sysret at some point
-   - we should move the kernel memory map out of the lower address space to free it up for program mapping
-   - for the sysret to work we need to setup TSS which appearently gets called upon ring transition to fix stacks, only when moving up tho so idk lol
    - syscalls to implement:
       - read (to file/fd)
       - write (to file/fd)
@@ -96,3 +94,9 @@ next up: more syscalls -> setup to terminal, or PCI or better memory management
    - gcc can figure out that if an register is used for output it gets clobbered
    - use "r" as constraint when you want the var to go throuh some register, lets compiler choose
    - use "g" if you really don't give a shit
+
+- qemu PCI devs: 
+   - intel, bridge:host bridge
+   - intel, bridge:ISA bridge
+   - bogus, VGA-compatible controller:VGA controller
+   - intel, network controller:Ethernet controller

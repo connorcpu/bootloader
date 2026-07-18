@@ -9,6 +9,8 @@ void io_wait(void);
 int tolower(int character); 
 int toupper(int character); 
 int strcmp (const char* str1, const char* str2);
+uint32_t inl(uint16_t port);
+void outl(uint16_t port, uint32_t val);
 
 typedef struct VbeModeInfoStructure{
 

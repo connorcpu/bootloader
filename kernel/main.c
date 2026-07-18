@@ -11,6 +11,7 @@
 #include "syscalls/fileDescriptor.h"
 #include "utils.h"
 #include "tss.h"
+#include "PCI.h"
 
 typedef struct bootArgs {
    
@@ -66,8 +67,8 @@ int _start(bootArgs_t args){
    //bochsBreak();
 
    //make sure not to declare local vars before this point to ensure stack transitions propperly
-   //__asm__ volatile ("mov $0xBFFFFF00, %rsp");
-   //__asm__ volatile ("mov %rsp, %rbp");
+   __asm__ volatile ("mov $0xBFFFFF00, %rsp");
+   __asm__ volatile ("mov %rsp, %rbp");
 
 
    kprintf("ker: loading GDT\n");
@@ -86,17 +87,31 @@ int _start(bootArgs_t args){
    
    setupSyscall(arguments.VBEInfoBlockAddr);
 
+   pciDetectAll();
+   
+   kprintf("KERNEL: initialization complete, have fun\n");
+
+   //finished setting up
+
+
+
+
+   //starting tests
+
    mapPage((uint8_t*)0x2000000, (uint8_t*)0xD000000, 0x0);
    mapPage((uint8_t*)0x2001000, (uint8_t*)0xD001000, 0x0);
    mapPage((uint8_t*)0x2002000, (uint8_t*)0xD002000, 0x0);
    fileHeader_t* exef = (fileHeader_t*) 0xD000000;
-   if(openFile("syscall.elf", exef) == -1){
+   kprintf("allocted file at %h, pointer stored at %h\n", exef, &exef);
+   uint8_t retval = openFile("syscall.elf", exef);
+   kprintf("passing: %h\n", exef);
+   if(retval == -1){
       kprintf("ker: did not find syscall test file\n");
    }else{
 
       kprintf("ker: testing syscalls\n");
 
-//      executeElf(exef);
+      executeElf(exef);
 
       kprintf("ker: returned to kernel code\n");
    }
@@ -105,6 +120,8 @@ int _start(bootArgs_t args){
 }
 
 void idle(){
+
+   kprintf("KERNEL: staring idle\n");
 
    uint8_t rgb[3];
    rgb[0] = 255;

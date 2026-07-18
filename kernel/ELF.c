@@ -14,6 +14,7 @@ uint64_t rbp_s;
 
 uint8_t executeElf(fileHeader_t* file){
 
+   kprintf("test: %h @ %h\n", file, &file);
    //bochsBreak();
    header = (elf64Header_t *) file;
 
@@ -133,7 +134,7 @@ uint8_t executeElf(fileHeader_t* file){
 
 
          //"mov %%rsp, %%rax\n\t"
-         "xchg %%bx, %%bx\n\t"
+         //"xchg %%bx, %%bx\n\t"
          "pushq $0x23\n\t"
          //"pushq %%rax\n\t"
          "pushq $0x10FFF\n\t"
