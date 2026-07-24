@@ -1,6 +1,7 @@
 #include "fat.h"
 uint8_t executeElf(fileHeader_t* file);
 void executeRaw(fileHeader_t* file);
+uint8_t loadElf(char* filename);
 
 typedef struct elfHeader{
 

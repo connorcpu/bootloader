@@ -12,6 +12,12 @@ extern tss_t* tss;
 uint64_t rsp_s;
 uint64_t rbp_s;
 
+uint8_t loadElf(char* filename){
+
+   return executeElf((fileHeader_t*)loadFile(filename));
+
+}
+
 uint8_t executeElf(fileHeader_t* file){
 
    kprintf("test: %h @ %h\n", file, &file);
@@ -70,7 +76,7 @@ uint8_t executeElf(fileHeader_t* file){
    kprintf("program enty offset: %h\n", header->programEntryOffset);
    kprintf("section header table offset: %h\n", header->sectionHeaderOffset);*/
 
-   //page table still loaded in lower half........... this WILL be an issue eventually
+   //page table still loaded in lower half........... this WILL be an issue eventually; this is now fixed
    //loading time bitch
    for(uint8_t i = 0; i < header->programHeaderEntryCount; i++){
       

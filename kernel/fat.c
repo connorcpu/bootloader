@@ -59,18 +59,19 @@ void fatInit(){
    
 }
 
-uint8_t loadFile(char* fileName){
+uint8_t* loadFile(char* fileName){
 
    fileHeader_t file = findFile(fileName);
    
    if(file.fileSize == -1) {
       kprintf("fat: could not find file\n"); 
-      return -1;
+      return (uint8_t*)-1;
    }
 
    uint8_t* loc = kmalloc(file.fileSize);
 
-   return loadClusterChain(file.startingCluster, (void*)loc);
+   return (uint8_t*)loadClusterChain(file.startingCluster, (void*)loc);
+   //return loc;
 
 }
 
@@ -86,7 +87,7 @@ uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
    }
 
    kprintf("to clusterchain: %h\n", loadAddr);
-   uint8_t ret = loadClusterChain(file.startingCluster, (void *)loadAddr);
+   uint8_t ret = (uint8_t)loadClusterChain(file.startingCluster, (void *)loadAddr);
    //kprintf("buh: %h\n", loadAddr);
    return ret;
   // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
@@ -164,7 +165,7 @@ fileHeader_t findFile(char* fileName){
 }
 
 //function takes in index of first cluster, then loads that cluster to loadAddr, increment with clustersize and load next cluster in chain
-uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
+uint8_t* loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
    uint32_t addr = (uint32_t)loadAddr;
    kprintf("addr val: %h\naddr loc: %h\n loadAddr val: %h\n loadAddr: %h\n", addr, &addr, loadAddr, &loadAddr);
@@ -190,6 +191,8 @@ uint8_t loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
    }while (!done);
    kprintf("fat: loaded file\n");
    kprintf("new value addr: %h & loadAddr: %h\n", addr, loadAddr);
+   kprintf("returning %h\n", loadAddr);
+   return (uint8_t*)loadAddr;
 
 }
 

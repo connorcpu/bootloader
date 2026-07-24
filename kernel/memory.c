@@ -39,7 +39,7 @@ void pagingInit(){
    }
 
    //map kernel itself
-   for(uint8_t i = 0; i < 11; i++){
+   for(uint8_t i = 0; i < 10; i++){
       mmPage((uint8_t*)(0x6000000 + (i*0x1000)), (uint8_t*)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
    }
 
@@ -86,27 +86,20 @@ void pagingInit(){
 
    //just map some shit in advance, way simpler :(
    //needs to be rediculusly large because fat needs a rediculus amout of space (0.8 mb)
-   for(uint8_t i = 0; i < 196; i++){
-      mapPage((uint8_t*)0x60001000 + (i*0x1000),(uint8_t*)0x60001000 + (i*0x1000), 0x0);
-   }
+  // for(uint8_t i = 0; i < 196; i++){
+   //   mapPage((uint8_t*)0x60001000 + (i*0x1000),(uint8_t*)0x60001000 + (i*0x1000), 0x0);
+   //}
 
 }
 
 uint8_t* kmalloc(uint32_t size){
 
-   if(kmallocFreeMem + size >= allocEnd){
+      
+   for(uint16_t i = 0; kmallocFreeMem + size >= allocEnd; i++){
 
-      //this identity maps, that is wrong
-//      kprintf("shiii\n");
-      mapPage((uint8_t*)(allocEnd + 1), (uint8_t*)(allocEnd + 1), 0x0);
-      allocEnd += 0x1000;
-
-      /*while(kmalocFreeMem + size > allocEnd){
-         mapPage((uint8_t*)(allocEnd + 1)
-
-      }*/
-
-      //((kmallocFreeMem + size) - allocEnd)
+      //damn, works like magic jeez
+      mapPage((uint8_t*)(kmallocFreeMem + (0x1000*i) - 0x5c000000), (uint8_t*)(kmallocFreeMem + (0x1000 * i)), 0x0);
+      allocEnd += 1000;
 
    }
 
