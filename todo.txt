@@ -72,6 +72,10 @@ next up: more syscalls -> setup to terminal, or PCI or better memory management
    - we mighhhttt wanna do some PCI stuff, seems doable
    - look at SYSV ABI
 
+   - memory map is in higher, half
+   - loadfile(char* filename) is a thing
+   - loadElf(char* filename) is a thing
+   - stack is higher half
 
 - objdump
    - -d / -D to disassembly

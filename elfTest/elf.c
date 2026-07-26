@@ -1,6 +1,8 @@
 #include "../stdlib/syscalls.h"
 #include "../stdlib/stdio.h"
 
+#define POLLIN 0x001
+
 
 void drawRect(uint8_t _rgb[], uint8_t* loc, uint16_t width, uint16_t height);
 void repos();
@@ -20,6 +22,9 @@ uint16_t blockGap = 200;
 
 bool lost = false;
 
+pollfd_t pfd;
+char buff[256];
+
 void _start(){
 
    char c = 'C';
@@ -27,61 +32,26 @@ void _start(){
    kprintf("hello from %c code, now with %s\n", c, testStr);
    fd = open("/dev/fb", 0x0, 0x0);
 
-   //var substition currently NOT working
    kprintf("recieved fd: %d\n", fd);
-   kprintf("local variable allocated at: %h\n", &c);
-   /*uint8_t rgb[3];
-   rgb[0] = 255;
-   rgb[1] = 0;
-   rgb[2] = 0;*/
+
+   pfd.fd = 0;
+   pfd.events = POLLIN;
+
+   for(uint8_t i = 0; i < 255; i++){
+      buff[i] = 0;
+   }
+
    playerColour[0] = 255;
    playerColour[1] = 0;
    playerColour[2] = 0;
 
-   //drawRect(rgb);
 
-   //uint8_t* loc = buffer+1920*3*10;
-   //uint8_t* loc = buffer;
-
-   for(uint8_t i = 0; i < 500; i++){
-
-      //repos();
+   while(true){
+   
       draw();
-      if(lost) {
+      if(lost){
          exit(0);
       }
-
-      /*for(uint8_t j = 0; j < 255; j++){
-         playerColour[1] = j;
-         draw();
-      }
-
-      for(uint8_t k = 255; k > 0; k--){
-         playerColour[0] = k;
-         draw();
-      }
-
-      for(uint8_t l = 0; l < 255; l++){
-         playerColour[2] = l;
-         draw();
-      }
-
-      for(uint8_t m = 255; m > 0; m--){
-         playerColour[1] = m;
-         draw();
-      }
-
-      for(uint8_t n = 0; n < 255; n++){
-         playerColour[0] = n;
-         draw();
-      }
-
-      for(uint8_t o = 255; o > 0; o--){
-         playerColour[2] = o;
-         draw();
-      }*/
-   
-      //if(i >= 4) i = 0;
 
    }
 
@@ -96,9 +66,10 @@ uint8_t red[3];
 
 void checkCollision(){
 
-   if(playerHeight + velocity < 0 || playerHeight + velocity + 50 >= 1920){
+   //874 works, 873 does not
+   if(playerHeight + velocity < 0 || playerHeight + velocity + 50 >= 1080){
       
-      kprintf("you went out of bounds\n");
+      kprintf("you went out of bounds, %i, %i\n", playerHeight, velocity);
       lost = true;
 
    }
@@ -123,11 +94,35 @@ void draw(){
 
    drawRect(black, (uint8_t*)0, 1920, 1080); //this one is faulty
    //drawRect(playerColour, (uint8_t*)(1920*3*playerHeight), 50, 50);
-   if(poll(0,0,0) == 0x39) {
+   //if(poll(0,0,0) == 0x39) {
+   
+   char result = -1;
+
+   //array of pollfd_t's, int of how many fd's. optional timeout
+   if(poll(&pfd, 1, 0)){
+
+      //fd, buffer, size
+      if(read(0, buff, 1) != 0){
+         
+         if(buff[0] == 57){
+            velocity = -10;
+         }else{
+            velocity += 1;
+         }
+
+      }
+   for(uint8_t i = 0; i < 255; i++){
+      buff[i] = 0;
+   }
+      
+
+   }
+
+   /*if(){
       velocity = -10;
    }else{
       velocity += 1;
-   }
+   }*/
 
    if(blockX - blockVel <= 0) {
       blockX = 1820;
@@ -151,10 +146,6 @@ void draw(){
 
 
 void drawRect(uint8_t _rgb[], uint8_t* where, uint16_t width, uint16_t height){
-
-   //uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
-   //uint8_t* where = buffer;
-   //repos();
 
    where += (uint64_t)buffer;
 

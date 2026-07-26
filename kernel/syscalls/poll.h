@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+#define POLLIN 0x001
+#define POLLPRI 0x002
+#define POLLOUT 0x004
+
 typedef struct pollfd{
    uint16_t fd;
    uint8_t events;

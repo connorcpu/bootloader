@@ -4,12 +4,17 @@
 
 uint16_t sysPoll(pollfd_t *fds, uint8_t nfds, uint16_t timeout){
 
-   //temporary implementation because wtf is file devices 
 
-//   kprintf("getting poll\n");
-   if(getKeyboard()){
+   for(uint8_t i = 0; i < nfds; i++){
 
-      return getScancode(); 
+      if(fds[i].fd == 0){
+
+         //while(getKeyboard() == false){
+         //}
+
+         return 1;
+
+      }
 
    }
 

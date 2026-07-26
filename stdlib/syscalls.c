@@ -49,6 +49,20 @@ uint8_t poll(pollfd_t* fds, uint8_t nfds, uint16_t timeout){
 
 }
 
+uint8_t read(uint64_t fd, uint8_t* buf, uint64_t size){
+
+   //syscall #0
+   
+   ret = -1;
+
+   __asm__ volatile ("mov %0, %%rdi" : : "r" (fd) : "rdi");
+   __asm__ volatile ("mov %0, %%rsi" : : "r" (buf) : "rsi");
+   __asm__ volatile ("mov %0, %%rdx" : : "r" (size) : "rdx");
+   __asm__ volatile ("mov $0, %%rax" : : : "rax");
+   __asm__ volatile ("syscall");
+   __asm__ volatile ("mov %%rax, %0" : "=r" (ret) : :);
+}
+
 uint8_t exit(uint32_t errorCode){
 
    __asm__ volatile ("mov %0, %%edi\n\t"

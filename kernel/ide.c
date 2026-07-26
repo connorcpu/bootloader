@@ -254,7 +254,7 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
 }
 
 
-uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t numSects, uint16_t selector, uint32_t edi){
+uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t numSects, uint16_t selector, uint64_t edi){
 
    uint8_t lba_mode /* 0=chs, 1=lba28, 2=lba48 */, dma, cmd;
    uint8_t lba_io[6];
@@ -422,7 +422,7 @@ uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t n
 
 }
 
-uint8_t ide_read_sectors(uint8_t drive, uint8_t numssects, uint32_t lba, uint16_t es, uint32_t edi){
+uint8_t ide_read_sectors(uint8_t drive, uint8_t numssects, uint32_t lba, uint16_t es, uint64_t edi){
 
    //check if drive is real 
    if (drive > 3 || ide_devices[drive].reserved == 0) package[0] = 0x1; //drive not found

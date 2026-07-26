@@ -35,8 +35,10 @@ uint8_t getKeyboard(){
 }
 
 uint8_t getScancode(){
+   uint8_t temp = scancode;
+   scancode = -1;
 
-   return scancode;
+   return temp;
 
 }
 

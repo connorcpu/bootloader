@@ -1,1 +1,2 @@
-void sysRead(uint64_t rdi, uint64_t rsi, uint64_t rdx);
+#include <stddef.h>
+size_t sysRead(uint64_t rdi, uint64_t rsi, uint64_t rdx);

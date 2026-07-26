@@ -91,5 +91,5 @@ void ide_write(uint8_t channel, uint8_t reg, uint8_t data);
 void ide_read_buffer(uint8_t channel, uint8_t reg, uint32_t buffer, uint32_t quads);
 uint8_t ide_polling(uint8_t channel, uint32_t advanced_check);
 uint8_t ide_print_error(uint32_t drive, uint8_t err);
-uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t numSects, uint16_t selector, uint32_t edi);
-uint8_t ide_read_sectors(uint8_t drive, uint8_t numssects, uint32_t lba, uint16_t es, uint32_t edi);
+uint8_t ide_ata_access(uint8_t direction, uint8_t drive, uint32_t lba, uint8_t numSects, uint16_t selector, uint64_t edi);
+uint8_t ide_read_sectors(uint8_t drive, uint8_t numssects, uint32_t lba, uint16_t es, uint64_t edi);

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 #define PML4ADDR 0x1000
 
@@ -23,10 +24,9 @@ enum E820MemBlockType {
 };
 
 void pagingInit();
-//uint32_t kmalloc(uint32_t size, uint32_t* physAddr);
 uint8_t* kmalloc(uint32_t size);
-uint8_t mapPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags);
-uint8_t mmPage(uint8_t* physAddr, uint8_t* virtAddr, uint16_t flags, void* PML4addr);
+uint8_t mapPage(void* physAddr, void* virtAddr, uint16_t flags);
+uint8_t mmPage(void* physAddr, void* virtAddr, uint16_t flags, void* PML4addr);
 void* memcpy(void* dest, void* src, uint32_t size);
 void* alloc_page(void);
-
+void* mmap(size_t length, uint16_t flags);

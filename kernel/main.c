@@ -35,8 +35,6 @@ extern tss_t tss;
 int _start(bootArgs_t args){
 
    __asm__ volatile ("xchg %bx, %bx");
-   //__asm__ volatile ("mov $0xbFFFFFFF, %rsp");
-   //__asm__ volatile ("mov %rsp, %rbp");
 
    kprintf("ker: kernel loaded\n");
 
@@ -44,6 +42,7 @@ int _start(bootArgs_t args){
 
    //for global usuage
    vbe = *((VbeModeInfoStructure_t*)args.VBEInfoBlockAddr);
+
    //for local usage
    vga_mem = (uint8_t*)arguments.framebuffer;
 
@@ -54,6 +53,7 @@ int _start(bootArgs_t args){
    pagingInit();
 
    kprintf("mapping stack\n");
+
    for(uint8_t i = 5; i > 0; i--){
    
       mapPage((uint8_t*)(0x6000000 - (i*0x1000)), (uint8_t*)(0xc0000000-(i*0x1000)), 0x0);
@@ -64,7 +64,6 @@ int _start(bootArgs_t args){
    arguments = args;
 
    kprintf("switching stacks\n");
-   //bochsBreak();
 
    //make sure not to declare local vars before this point to ensure stack transitions propperly
    __asm__ volatile ("mov $0xBFFFFF00, %rsp");
@@ -74,8 +73,6 @@ int _start(bootArgs_t args){
    kprintf("ker: loading GDT\n");
 
    loadGDT();
-
-   kprintf("tss: %h\n", tss);
 
    ideInit(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
 
@@ -97,7 +94,6 @@ int _start(bootArgs_t args){
 
 
    //starting tests
-
    if(loadElf("syscall.elf") == -1){
       kprintf("ker: error during elf loading\n");
    }
@@ -106,9 +102,9 @@ int _start(bootArgs_t args){
 
 
    //idling
-
    idle();
    return 0;
+
 }
 
 void idle(){
@@ -153,8 +149,6 @@ void idle(){
          drawRect(rgb);
       }
    
-      //if(i >= 4) i = 0;
-
    }
 
    return;
@@ -166,7 +160,6 @@ void drawRect(uint8_t _rgb[]){
 
    uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
    uint8_t* where = vga_mem;
-   //uint8_t* where = (uint8_t*)0x2000000;
 
    for(uint16_t j = 0; j < 200; j++){
 
