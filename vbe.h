@@ -1,8 +1,3 @@
-#include <stdint.h>
-int initFrame();
-void drawRect(int x, int y, int width, int height, int colour);
-void putpixel(uint16_t* screen, uint16_t x, unsigned short y, unsigned char colour);
-
 typedef struct VbeInfoStructure{
 
    int8_t signature[4];	// must be "VESA" to indicate valid VBE support

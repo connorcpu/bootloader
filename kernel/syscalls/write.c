@@ -36,7 +36,7 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
          //3. (file, not special)
          uint8_t* ptr = retrievefd(fd);
          //this line trips it
-         if(ptr != -1){
+         if(ptr != (void*)-1){
             memcpy(ptr, (void*)rsi, rdx);
          }
 

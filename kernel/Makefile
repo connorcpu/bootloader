@@ -22,9 +22,9 @@ bin/interruptASM.o:
 
 compile: ${OBJ}
 	x86_64-elf-gcc -ffreestanding -Wint-to-pointer-cast -mno-red-zone -m64 -mcmodel=large -c main.c -o bin/main.o
-	#$(MAKE) -C syscalls
+#  $(MAKE) -C syscalls
 	ld -T linker.ld $^
-	#ld -T linker.ld $(COMPOBJ)
+#  ld -T linker.ld $(COMPOBJ)
 #	cp bin/main.bin bin/kernel.bin
 	objcopy -O binary bin/main.bin bin/kernel.bin
 
@@ -35,8 +35,8 @@ lib:
 	$(MAKE) -C ../stdlib
 
 test:
-	#nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
-	#ld -o ../osfs/syscall.elf bin/syscall.elf
+#  nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
+#  ld -o ../osfs/syscall.elf bin/syscall.elf
 	x86_64-elf-gcc ../elfTest/elf.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -o ../osfs/syscall.elf
 
 clean:

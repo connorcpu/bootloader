@@ -73,13 +73,13 @@ void ide_read_buffer(uint8_t channel, uint8_t reg, uint32_t buffer, uint32_t qua
       ide_write(channel, ATA_REG_CONTROL, 0x80 | channels[channel].nIEN);
    //asm("pushw %es; movw %ds, %ax; movw %ax, %es");
    if (reg < 0x08) 
-      insl(channels[channel].base + reg - 0x00, (void *)buffer, quads);
+      insl(channels[channel].base + reg - 0x00, (void *)(uint64_t)buffer, quads);
    else if (reg < 0x0c) 
-      insl(channels[channel].base + reg - 0x06, (void *)buffer, quads);
+      insl(channels[channel].base + reg - 0x06, (void *)(uint64_t)buffer, quads);
    else if (reg < 0x0e) 
-      insl(channels[channel].ctrl + reg - 0x0a, (void *)buffer, quads);
+      insl(channels[channel].ctrl + reg - 0x0a, (void *)(uint64_t)buffer, quads);
    else if (reg < 0x16) 
-      insl(channels[channel].bmide + reg - 0x0e, (void *)buffer, quads);
+      insl(channels[channel].bmide + reg - 0x0e, (void *)(uint64_t)buffer, quads);
    //asm("popw %es;");
    if(reg > 0x07 && reg < 0x0c)
       ide_write(channel, ATA_REG_CONTROL, channels[channel].nIEN);
@@ -203,7 +203,7 @@ void ideInit(uint32_t bar0, uint32_t bar1, uint32_t bar2, uint32_t bar3, uint32_
          }
 
          //read identify space
-         ide_read_buffer(i, ATA_REG_DATA, (uint32_t)ide_buf, 128);
+         ide_read_buffer(i, ATA_REG_DATA, (uint64_t)ide_buf, 128);
 
          //read device params
          ide_devices[count].reserved = 1;

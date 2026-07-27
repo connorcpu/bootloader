@@ -63,7 +63,7 @@ void loadGDT(){
    tss = (tss_t*)kmalloc(sizeof(tss_t));
    kprintf("tss: %h\n", tss);
    uint64_t limit = sizeof(tss_t) - 1;
-   tssEntry->baseLow = (uint32_t)tss & 0xFFFFFF;
+   tssEntry->baseLow = (uint64_t)tss & 0xFFFFFF;
    tssEntry->baseHigh = ((uint64_t)tss >> 24) & 0xFF; //shouldn't even need the & 0xFF;
    tssEntry->limitLow = limit;
    tssEntry->limitHigh = (limit >> 16) & 0xF;

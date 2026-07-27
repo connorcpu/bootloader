@@ -53,7 +53,7 @@ void fatInit(){
    kprintf("read fat\n");
 
    //load root dir
-   uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint32_t)rootaddr);
+   uint8_t status = ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(ebrsect.rootCluster), 0x10, (uint64_t)rootaddr);
    rootFiles = rootaddr;
    kprintf("loading root dir at %h\n", (uint64_t)rootFiles);
    
@@ -77,7 +77,7 @@ uint8_t* loadFile(char* fileName){
 
 }
 
-uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
+uint8_t* openFile(char* fileName, fileHeader_t* loadAddr){
 
    fileHeader_t file = findFile(fileName); 
 
@@ -85,10 +85,10 @@ uint8_t openFile(char* fileName, fileHeader_t* loadAddr){
 
    if(file.fileSize == -1) {
       kprintf("fat: could not find file\n"); 
-      return -1;
+      return (uint8_t*)-1;
    }
 
-   uint8_t ret = (uint8_t)loadClusterChain(file.startingCluster, (void *)loadAddr);
+   uint8_t* ret = loadClusterChain(file.startingCluster, (void *)loadAddr);
    //kprintf("buh: %h\n", loadAddr);
    return ret;
   // return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
@@ -168,7 +168,7 @@ fileHeader_t findFile(char* fileName){
 //function takes in index of first cluster, then loads that cluster to loadAddr, increment with clustersize and load next cluster in chain
 uint8_t* loadClusterChain(uint16_t firstCluster, fileHeader_t* loadAddr){
 
-   uint32_t addr = (uint32_t)loadAddr;
+   uint64_t addr = (uint64_t)loadAddr;
    uint32_t currentCluster = (uint32_t)firstCluster;
 
    uint8_t done = 0;

@@ -37,20 +37,20 @@ void pagingInit(){
 
    //map kernel itself
    for(uint8_t i = 0; i < 10; i++){
-      mmPage((void*)(0x6000000 + (i*0x1000)), (void*)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
+      mmPage((void*)(uint64_t)(0x6000000 + (i*0x1000)), (void*)(uint64_t)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
    }
 
    //map framebuffer
    uint64_t toMap = (((1920*3)*1080)/0x1000)+1;
    kprintf("remapping framebuffer in %i pages at %h\n", toMap, vbe.framebuffer);
    for(int i = 0; i < toMap; i++){
-      mmPage((void*)vbe.framebuffer + (i * 0x1000), (void*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
+      mmPage((void*)(uint64_t)vbe.framebuffer + (i * 0x1000), (void*)0x2000000 + (i*0x1000), 0x0, higherPML4); //map "physical" video mem to 4GiB
    }
    kprintf("remapped framebuffer\n");
    
    //map old stack
    for(uint8_t i = 0; i < 18; i++){
-      mmPage((void*)(0x1000*i) + 0x80000, (void*)(0x1000*i)+0x80000, 0x0, higherPML4);
+      mmPage((void*)(uint64_t)(0x1000*i) + 0x80000, (void*)(uint64_t)(0x1000*i)+0x80000, 0x0, higherPML4);
    }
    kprintf("mapped old stack\n");
 

@@ -18,7 +18,7 @@ image: compile
 
 run: clean image
 #	qemu-system-x86_64 -hda bin/qemu.img  > /dev/null 2>&1
-	#-hdd does funcy shit
+#	hdd does funcy shit
 	qemu-system-x86_64 -drive file=bin/qemu.img,if=ide,index=0,media=disk,format=raw -serial stdio -m 128M |& tee serial.log
 
 compile: ${OBJ} 

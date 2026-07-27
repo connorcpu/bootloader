@@ -104,7 +104,7 @@ uint8_t executeElf(fileHeader_t* file){
       if(programHeaderTable[i].p_filesz < programHeaderTable[i].p_memsz){
          
          uint8_t* where = (uint8_t*)(programHeaderTable[i].p_vaddr + programHeaderTable[i].p_filesz);
-         while(where <= programHeaderTable[i].p_memsz){
+         while((uint64_t)where <= programHeaderTable[i].p_memsz){
             *where = 0x00;
             where++;
          }

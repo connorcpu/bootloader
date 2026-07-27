@@ -115,7 +115,8 @@ getVesa:
 
    .NoModes:
       jmp $
-    
+
+[section .bss]
 [extern VbeInfoStructure]
 VbeInfoStructure:
    .signature resb 4
@@ -173,7 +174,7 @@ VbeModeInfoStructure:
    .offScreenMomSize resw 1
    .reserved2 resb 206
    ;times 256 db 0
-
+[section .text]
 
 setVga:
 
@@ -246,13 +247,13 @@ setVga:
    mov si, [.offset]
    jmp .find_mode
 
-.error2
+.error2:
    mov bx, errorMsg2
    call print
    cli 
    hlt
 
-.error1
+.error1:
    mov bx, errorMsg
    call print
 
@@ -521,6 +522,7 @@ startLongMode:
 ;   mov ecx, 500
 ;   rep stosq
 
+[default abs]
    mov rax, 0xABCDEF12345689
    mov byte [0xB8000], 'C'
    mov byte [0xB8002], 'O'

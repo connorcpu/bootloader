@@ -56,7 +56,7 @@ int _start(bootArgs_t args){
 
    for(uint8_t i = 5; i > 0; i--){
    
-      mapPage((uint8_t*)(0x6000000 - (i*0x1000)), (uint8_t*)(0xc0000000-(i*0x1000)), 0x0);
+      mapPage((uint8_t*)(uint64_t)(0x6000000 - (i*0x1000)), (uint8_t*)(uint64_t)(0xc0000000-(i*0x1000)), 0x0);
       kprintf("%i: mapping %h, to %h\n", i, (0xc0000000-(i*0x1000)), (0x6000000-(i*0x1000)));
 
    }

@@ -131,8 +131,8 @@ void draw(){
    }
 
    //draw blocks
-   drawRect(red, (uint8_t*) (blockX * 3), 100, blockHeight);
-   drawRect(red, (uint8_t*) ((blockX * 3) + (1920*3*(blockHeight + blockGap))), 100, (1080-(blockHeight + blockGap)));
+   drawRect(red, (uint8_t*)(uint64_t) (blockX * 3), 100, blockHeight);
+   drawRect(red, (uint8_t*)(uint64_t) ((blockX * 3) + (1920*3*(blockHeight + blockGap))), 100, (1080-(blockHeight + blockGap)));
 
    checkCollision();
    if(lost) return;
@@ -140,7 +140,7 @@ void draw(){
    playerHeight += velocity;
 
 
-   drawRect(playerColour, (uint8_t*)(1920*3*playerHeight + (50*3)), 70, 50);
+   drawRect(playerColour, (uint8_t*)(uint64_t)(1920*3*playerHeight + (50*3)), 70, 50);
    write(fd, buffer, (1920*3*1080));
 }
 
