@@ -61,4 +61,367 @@ The kernel takes a parameter block, the idea is to have the bootloader and kerne
 
 While basically all code is written by myself, inspired or based on others work and help (love wiki.OSDEV.org). I _never_ understood IDE and the entire file is coppied form the wiki.
 It is the only code that in no sense got written or edited by me.
+``` dot
+digraph O {
 
+   rankdir=LR
+
+   subgraph cluster_boot_asm {
+      style=filled;
+      color=lightgrey;
+      "Booting autismoS...";
+      "print #2";
+      label = "boot.asm";
+   }
+   
+   subgraph cluster_disk_asm {
+      "read_disk";
+      label = "disk.asm";
+   }
+   
+   subgraph cluster_stage2_asm {
+      label = "stage2.asm";
+      subgraph cluster_16_bits {
+      label = "16 bits";
+         A20;
+         E820;
+         "Load basic GDT";
+         subgraph cluster_vesa{
+            "get VESA controller info";
+            "get info about VESA mode";
+            "see if VESA mode is correct" [shape=box];
+            label="vesa stuff"
+            "get VESA controller info" -> "get info about VESA mode";
+            "get info about VESA mode" -> "see if VESA mode is correct";
+            "see if VESA mode is correct" -> "get info about VESA mode" [label="no"]
+         
+         }
+         "print #2" -> A20;
+         A20 -> "Load basic GDT";
+         "Load basic GDT" -> "get VESA controller info";
+         "see if VESA mode is correct" -> E820 [label="yes"]
+      }
+      subgraph cluster_32_bits {
+         label = "32 bits";
+         setupPaging;
+         editBasicGDT;
+         checkCpuid;
+         checkCpuid -> setupPaging -> editBasicGDT;
+      }
+      E820 -> checkCpuid;
+      
+      subgraph cluster_64_bits {
+         label="64 bits"
+         "setupStack (0x90000)"
+      }
+      
+      subgraph cluster_handleIRQISR {
+         label = "irq/isr";
+         Bisr_common;
+         Birq_common;
+      
+      }
+      
+   }
+   
+   subgraph cluster_stage3 {
+     label = "stage3.c" 
+      "_start()";
+   }
+   
+   subgraph cluster_bootIO{
+      label = "io.c"
+      BioInit;
+      Bcls;
+      Bkprintf;
+      Bprint;
+      Bformat;
+      Bi2h;
+      Bi2a;
+      Bprintch;
+      Bkprintf -> Bformat;
+      Bformat -> Bprintch [label="(ch != %)"]
+      Bformat -> Bprintch [label="%c"]
+      Bformat -> Bi2a -> Bprint
+      Bformat -> Bi2h -> Bkprintf
+   }
+   
+   subgraph cluster_bootIDE {
+      label = "ide.c";
+      BideInit;
+      Bide_write;
+      Bide_read;
+      Bide_read_buffer;
+      Bide_read_sectors;
+      Bide_polling
+      Bide_ata_access;
+      Bide_print_error;
+      BideInit -> Bide_write;
+      BideInit -> Bide_read;
+      BideInit -> Bide_read_buffer;
+      Bide_read -> Bide_write;
+      Bide_write -> Bide_write;
+      Bide_read_buffer -> Bide_write;
+      Bide_read_buffer -> Bide_read;
+      Bide_read_sectors -> Bide_ata_access; 
+      Bide_read_sectors -> Bide_print_error
+      Bide_ata_access -> Bide_write
+      Bide_ata_access -> Bide_read;
+      Bide_ata_access -> Bide_polling;
+   }
+   
+   subgraph cluster_bootutils{
+      label = "utils.c"
+      Binb;
+      Binsl;
+      Boutls;
+      Boutb;
+      Binvlpg;
+   }
+   
+   subgraph cluster_bootDebug{
+      label = "debug.c"
+      BinitSerial;
+   }
+   
+   subgraph cluster_bootMemory{
+      label = "memory.c"
+      BpagingInit;
+      BmapPage;
+      Bkmalloc;
+      Balloc_page;
+      Bmempcy;
+      BpagingInit -> BmapPage;
+      Bkmalloc -> BmapPage;
+      BmapPage -> Balloc_page;
+      BmapPage -> Binvlpg;
+   }
+   
+   subgraph cluster_bootFat{
+      label = "fat.c"
+      BfatInit;
+      BopenFile;
+      BloadClusterChain;
+      BopenFile -> BloadClusterChain
+   }
+   
+   start -> "Booting autismoS...";
+   "Booting autismoS..." -> "read_disk";
+   read_disk -> "print #2";
+   editBasicGDT -> "setupStack (0x90000)";
+   "setupStack (0x90000)" -> "_start()";
+   Bide_read -> Binb
+   Bide_write -> Boutb
+   Bide_read_buffer -> Binsl
+   BfatInit -> Bkmalloc;
+   BfatInit -> Bide_read_sectors;
+   BfatInit -> BmapPage;
+   BloadClusterChain -> Bide_read_sectors;
+   "_start()" -> BioInit [label=1];
+   "_start()" -> Bcls [label=2];
+   "_start()" -> BideInit [label=3];
+   "_start()" -> BinitSerial [label=4];
+   "_start()" -> BpagingInit [label=5];
+   "_start()" -> BfatInit [label=6];
+   "_start()" -> BmapPage [color=blue];
+   "_start()" -> BopenFile [label=7,color=blue];
+   "_start()" -> Bkprintf [color=blue];
+   "_start()" -> Bkmalloc [color=blue]
+   
+   
+   subgraph cluster_kernel{
+      label = "kernel"
+      
+      subgraph cluster_main{
+         label = "main.c"
+         main;
+      }
+
+      subgraph cluster_debug{
+         label = "debug.c"
+         writeSerial;
+      }
+
+      subgraph cluster_ELF{
+         label = "ELF.c"
+         loadElf;
+         executeElf;
+         loadElf -> executeElf;
+      }
+   
+      subgraph cluster_fat{
+         label = "fat.c"
+         fatInit;
+         loadFile;
+         findFile;
+         openFile;
+         loadClusterChain;
+         clusterToLba;
+         loadFile -> findFile;
+         loadFile -> loadClusterChain;
+         openFile -> findFile;
+         openFile -> loadClusterChain;
+      }
+
+      subgraph cluster_GDT{
+         label = "GDT.c"
+         loadGDT;
+      }
+
+      subgraph cluster_ide{
+         label = "ide.c";
+         ideInit;
+         ide_write;
+         ide_read;
+         ide_read_buffer;
+         ide_read_sectors;
+         ide_polling
+         ide_ata_access;
+         ide_print_error;
+         ideInit -> ide_write;
+         ideInit -> ide_read;
+         ideInit -> ide_read_buffer;
+         ide_read -> ide_write;
+         ide_write -> ide_write;
+         ide_read_buffer -> ide_write;
+         ide_read_buffer -> ide_read;
+         ide_read_sectors -> ide_ata_access; 
+         ide_read_sectors -> ide_print_error
+         ide_ata_access -> ide_write
+         ide_ata_access -> ide_read;
+         ide_ata_access -> ide_polling;
+      }
+
+      subgraph cluster_interrupt{
+         label = "interrupt.c"
+         createIDT;
+         idt_set_descriptor;
+         registerInterupt;
+         exceptionHandler;
+         irq_handler;
+         createIDT -> idt_set_descriptor;
+      }
+
+      subgraph cluster_interruptASM{
+         label = "interrupt.asm"
+         1 [color=green];
+         2 [color=green];
+         "..." [color=green];
+         39 [color=green];
+         isr_stub;
+         isr_stub_err;
+         irq_stub;
+         isr_common;
+         irq_common;
+         1 -> isr_stub;
+         2 -> isr_stub;
+         "..." -> isr_stub;
+         "..." -> isr_stub_err;
+         "..." -> irq_stub;
+         39 -> irq_stub;
+         isr_stub -> isr_common;
+         isr_stub_err -> isr_common;
+         irq_stub -> irq_common;
+      }
+
+      subgraph cluster_io{
+         label = "io.c"
+         kprintf;
+         ioInit;
+         putch;
+         print;
+         printch;
+         format;
+         i2a;
+         i2h;
+         kprintf -> format;
+         format -> printch [label="(ch != %)"];
+         format -> print;
+         format -> printch [label="%c"];
+         format -> i2a -> print;
+         format -> i2h -> print;
+         print -> printch -> print
+         i2h -> kprintf
+         printch -> putch
+      }
+      
+      subgraph cluster_memory{
+         label = "memory.c"
+         pagingInit;
+         alloc_page;
+         mmPage;
+         mapPage;
+         kmalloc;
+         memcpy;
+         pagingInit -> alloc_page;
+         pagingInit -> mmPage;
+         pagingInit -> mapPage;
+         kmalloc -> mapPage;
+         mapPage -> mmPage;
+         mmPage -> alloc_page;
+         mmap -> mapPage;
+      }
+
+      subgraph cluster_PCI{
+         label = "PCI.c"
+         main;
+      }
+
+      subgraph cluster_PIC{
+         label = "PIC.c"
+         PIC_sendEOI;
+         PIC_remap
+      }
+
+      subgraph cluster_syscall{
+         label = "syscall.c"
+         main;
+      }
+
+      subgraph cluster_utils{
+         label = "utils.c"
+         outb;
+         inb;
+         io_wait;
+         invlpg
+      }
+      
+      printch -> writeSerial;
+      putch -> writeSerial;
+      writeSerial -> outb;
+      PIC_sendEOI -> outb;
+      PIC_remap -> io_wait;
+      PIC_remap -> outb;
+      createIDT -> PIC_remap;
+      createIDT -> inb;
+      irq_handler -> PIC_sendEOI;
+      isr_common -> exceptionHandler;
+      irq_common -> irq_handler;
+      mmPage -> invlpg;
+      loadGDT -> kmalloc;
+      fatInit -> kmalloc;
+      fatInit -> ide_read_sectors;
+      fatInit -> mapPage;
+      loadFile -> kmalloc;
+      loadClusterChain -> ide_read_sectors;
+      loadElf -> loadFile;
+      executeElf -> mapPage;
+      executeElf -> memcpy;
+      ide_read -> inb;
+      ide_write ->outb;
+      main -> kprintf [color=blue];
+      main -> PIC_sendEOI [label=1];
+      main -> createIDT [label=2];
+      main -> pagingInit [label=3];
+      main -> mapPage [color=blue];
+      main -> loadGDT [label=4];
+      main -> ideInit [label=5];
+      main -> fatInit [label=6];
+      main -> loadElf [color=blue];
+   
+   }
+   "_start()" -> main [label=8,color=red]
+  
+   start [shape=Mdiamond];
+}
+```

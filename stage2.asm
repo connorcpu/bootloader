@@ -1,4 +1,4 @@
-;[eorg 0x8000]
+;[org 0x8000]
 jmp do_shit
 
 %include "gdt.asm"
