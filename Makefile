@@ -12,7 +12,7 @@ image: compile
 	sudo kpartx -a bin/qemu.img 
 	mkfs.fat -F32 -v -I '/dev/mapper/loop0p4' -n 'AUTISM FS  '
 	sudo mount /dev/mapper/loop0p4 /media/osfat 
-	sudo cp osfs/* /media/osfat 
+	sudo cp -r osfs/* /media/osfat 
 	sudo umount /media/osfat
 	sudo kpartx -d bin/qemu.img
 

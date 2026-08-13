@@ -97,45 +97,97 @@ uint8_t* openFile(char* fileName, fileHeader_t* loadAddr){
 
 fileHeader_t findFile(char* fileName){
 
-/*   bool found = false;
+   bool found = false;
    fileHeader_t* currentDir = rootFiles;
-   uint8_t toSearch[] = fileName;
-   uint8_t searching[12] = {0};
+   uint8_t* toSearch = fileName;
+   //uint8_t searching[12] = {0};
+   uint8_t* searching = kmalloc(12);
+   uint8_t* searchName = fileName;
+
+   for(uint8_t i = 0; i < 12; i++){
+      searching[i] = 0x0;
+   }
+
+   kprintf("current: %h\n root: %h\n", currentDir, rootFiles);
 
    while(!found){
 
+      kprintf("searchName: %s\n", searchName);
+
       //for(uint8_t j = 1; j < len(searchName); j++){
-      for(uint8_t j = 1; j < 11; j++){
+      for(uint8_t i = 0; i < 11; i++){
 
          if (searchName[i] == '/') {
+
          
+            //searching = (char*)searchName + i + 1;
+            uint8_t endingIdx = 0;
+            for(uint8_t j = i + 1; j < 15; j++){
+               kprintf("%c\n", searchName[j]);
+               if (searchName[j] == '/'){
+                  endingIdx = j - 1;
+                  kprintf("endingIdx: %d\n", endingIdx);
+                  break;
+               }
+               else if (searchName[j] == '\0') {
+                  endingIdx = j+ 1;
+                  kprintf("yes\n");
+                  break;
+               }
+            }
+            
+            memcpy(searching, searchName + i + 1, endingIdx - (i));
+            
             break;
          }
 
-         searching[i] = searchName[i + 1];
 
       }
 
+
+
+      kprintf("searching: %s\n", searching);
+
       uint16_t i = 0;
-      while(currentDir[i] != 0){
+      while(currentDir[i].name[0] != 0){
 
          uint8_t name[12] = {0};
          getFileName(&currentDir[i], name);
 
-         if (strcmp(name, fileName) == 0) {
+
+            kprintf("name: %s\n", name);
+         if (strcmp(name, searching) == 0) {
          
             //found the file
 //            return loadClusterChain();
-            return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+            //return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+            if((currentDir[i].attributes & 0x10) == 0x10){
+               //dir case
+               kprintf("found\n");
+               for(uint8_t i = 1; i < 11; i++){if(searchName[i] == '/'){searchName = searchName + i;}}
+               fileHeader_t* tmp = (fileHeader_t*)kmalloc(512);
+               loadClusterChain(currentDir[i].startingCluster, tmp);
+               currentDir = tmp;
+               //found = true;
+               break;
+            }else if((currentDir[i].attributes & 0x20) == 0x20){
+               
+               //file case
+               fileHeader_t tmpFile = currentDir[i];
+               currentDir = rootFiles;
+               found = true;
+               return tmpFile;
+
+            }
 
          }
 
-         i++;
+         i += 1;
 
       }
 
    }
-*/
+
    //one file takes 4x8bits, first file should be ignored cause that's the root dir, so i < 8 is 3 files max
    for (uint8_t i = 1; i < 24; i++) {
 
@@ -269,16 +321,27 @@ uint8_t getFileName(fileHeader_t* file, uint8_t* name){
    
    }
 
-   name[length] = '.';
+   kprintf("attr: %h, ", file->attributes);
+
+   if((file->attributes & 0x20) == 0x20){
+
+      kprintf("f: ");
+
+      name[length] = '.';
    
-   for(uint8_t k = 0; k < 3; k++){
+      for(uint8_t k = 0; k < 3; k++){
 
-      name[length + k + 1] = tolower(file->extension[k]);
+         name[length + k + 1] = tolower(file->extension[k]);
 
+      }
+      name[length + 4] = '\0';
+
+      return length + 4;
+   }else if((file->attributes & 0x10) == 0x10){
+      kprintf("d: ");
+      name[length] = '\0';
+      return length + 1;
    }
 
-   name[length + 4] = '\0';
-
-   return length + 4;
 
 }

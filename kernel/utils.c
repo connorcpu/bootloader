@@ -28,7 +28,8 @@ void outb(uint16_t port, uint8_t val){
 void outl(uint16_t port, uint32_t val){
 
    uint16_t p = port;
-   __asm__ volatile("out %0, %1\n\t" : : "r" (val), "r" (p) : );
+   __asm__ volatile("out %0, %1\n\t" : : "r" (val), "r" (p)
+           : );
 
 }
 

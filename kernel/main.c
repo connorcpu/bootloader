@@ -51,6 +51,28 @@ int _start(bootArgs_t args){
    createIDT();
 
    pagingInit();
+   bochsBreak();
+
+   uint64_t _cr0;
+   uint64_t _cr4;
+   __asm__ volatile("movq %%cr0, %0" : "=r"(_cr0) :: );
+   __asm__ volatile("movq %%cr4, %0" : "=r"(_cr4) :: );
+   kprintf("cr4: %h\ncr0: %h\n", _cr4, _cr0);
+   _cr0 &= ~(1 << 2);
+   _cr0 |= (1 << 1);
+   _cr4 |= (1 << 9);
+   _cr4 |= (1 << 10);
+   asm volatile("mov %0, %%cr0" :: "r"((uint64_t)_cr0): "memory");
+   asm volatile("mov %0, %%cr4" :: "r"((uint64_t)_cr4): "memory");
+
+   /*__asm__ volatile ("movq %%cr0, %%rax\t\n"
+         "andb 0xFB, %%al\t\n"
+         "or 0x2, %%ax\t\n"
+         "mov %%rax, %%cr0\t\n"
+         "mov %%cr4, %%rax\t\n"
+         "or (3 << 9), %%ax\t\n"
+         "mov %%rax, %%cr4\t\n" 
+         :::);*/
 
    kprintf("mapping stack\n");
 
@@ -91,10 +113,14 @@ int _start(bootArgs_t args){
    //finished setting up
 
 
+   loadFile("/objects/cube.obj");
 
+   //__asm__ volatile ("cli\t\nhlt");
+   //due to compiler BS, there HAS, to be a line of code between 2 loadFile statements :)
+   kprintf("loading renderer\n");
 
    //starting tests
-   if(loadElf("syscall.elf") == -1){
+   if(loadElf("/renderer.elf") == -1){
       kprintf("ker: error during elf loading\n");
    }
 
