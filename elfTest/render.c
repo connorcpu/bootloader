@@ -3,7 +3,7 @@
 #include "../stdlib/math.h"
 #include "../stdlib/graphics.h"
 
-int64_t points[24];
+float points[24];
 uint8_t buffer[6220800];
 int64_t translate[3];
 uint64_t scale = 100;
@@ -25,6 +25,7 @@ typedef struct object{
    uint16_t facecount;
    float translate[3];
    float rotate[4];
+   uint8_t fd;
    
 
 } object_t;
@@ -37,71 +38,75 @@ void draw();
 //void putPixel(int64_t x, int64_t y);
 void checkInput();
 //void drawLine(int64_t x1, int64_t y1, int64_t x2, int64_t y2);
-int64_t* applyTransform(int64_t _points[]);
+int64_t* applyTransform(float _points[]);
 int64_t* projectPoints(int64_t _points[]);
 
 uint8_t color[3];
+uint8_t keyfd;
 
 void _start(){
 
-   //read in the file
-   uint8_t cube = open("/objects/cube.obj", 0x0, 0x0);
+   object_t cube;
+   uint8_t cubefd = open("/objects/cube.obj", 0x0, 0x0);
+   cube.fd = cubefd;
+   kprintf("fd: %d\n", cubefd);
+   cube.points = (float*)&points;
+   objects[0] = cube;
+
+   keyfd = open("/dev/keyboard", 0x0, 0x0);
+
 
    color[0] = 255;
    color[1] = 0;
    color[2] = 255;
 
+   kprintf("size: %d\n", sizeof(objects));
+   for(uint8_t o = 0; o < sizeof(objects)/sizeof(object_t); o++){
 
-   points[0] = 1; //0
-   points[1] = 1;
-   points[2] = 1;
+      char* lineBuf = readLine(objects[o].fd);
+      //kprintf("linebuf: %s\n", lineBuf);
+   
+      for(uint8_t i = 0; i < 8; i++){
+         
+         char* lbuf = readLine(objects[o].fd);
+         char floatbuff[256] = {0};
 
-   points[3] = 1; //1
-   points[4] = -1;
-   points[5] = 1;
+         if(lbuf[0] == 'v' && lbuf[1] == ' '){
 
-   points[6] = -1; //2
-   points[7] = 1;
-   points[8] = 1;
+            float tmp = parseFloat(lbuf + 2);
+            objects[o].points[(i*3)] = tmp;
+            uint8_t k = 1;
 
-   points[9] = -1; //3 
-   points[10] = -1;
-   points[11] = 1;
+            for(uint8_t j = 2; j < 255 && k < 3; j++){
 
+               if(lbuf[j] == ' '){
 
-   points[12] = 1; //4
-   points[13] = 1;
-   points[14] = -1;
+                  objects[o].points[(i*3)+k] = parseFloat(lbuf + j + 1); 
+                  k++;
 
-   points[15] = 1; //5
-   points[16] = -1;
-   points[17] = -1;
-
-   points[18] = -1; //6
-   points[19] = 1;
-   points[20] = -1;
-
-   points[21] = -1; //7
-   points[22] = -1;
-   points[23] = -1;
+               }
+            }
+         }
+      }
+   }
 
    edges[0] = 0; //back plane
    edges[1] = 1;
    edges[2] = 0;
-   edges[3] = 2;
-   edges[4] = 2;
-   edges[5] = 3;
-   edges[6] = 3;
-   edges[7] = 1;
+   edges[3] = 3;
+   edges[4] = 1;
+   edges[5] = 2;
+   edges[6] = 2;
+   edges[7] = 3;
 
    edges[8] = 4; //front plane
    edges[9] = 5;
    edges[10] = 4;
-   edges[11] = 6;
-   edges[12] = 6;
-   edges[13] = 7;
-   edges[14] = 7;
-   edges[15] = 5;
+   edges[11] = 7;
+   edges[12] = 5;
+   edges[13] = 6;
+   edges[14] = 6;
+   edges[15] = 7;
    
    edges[16] = 0; //connection
    edges[17] = 4;
@@ -115,11 +120,12 @@ void _start(){
    kprintf("starting renderer\n");
 
    fd = open("/dev/fb", 0x0, 0x0);
+   kprintf("recieved: %d\n", fd);
 
    pfd.fd = 0;
    pfd.events = 0x001;
 
-   translate[2] = 1;
+   translate[2] = 2;
 
    while(!stop){
       checkInput();
@@ -133,8 +139,8 @@ void _start(){
 
 void checkInput(){
 
-   if(poll(&pfd, 1, 0)){
-      if(read(0, buff, 1) != 0){
+   //if(poll(&pfd, 1, 0)){
+      if(read(keyfd, (uint8_t*)buff, 1) != 0){
    
          switch(buff[0]){
             
@@ -158,7 +164,7 @@ void checkInput(){
          }
 
       }
-   }
+   //}
 
 }
 
@@ -196,7 +202,7 @@ void draw(){
 
 }
 
-int64_t* applyTransform(int64_t _points[]){
+int64_t* applyTransform(float _points[]){
 
    for(uint8_t i = 0; i < 24; i += 3){
 

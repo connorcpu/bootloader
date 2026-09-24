@@ -53,3 +53,68 @@ float roundf(float x){
   return x;
 
 }
+
+enum parse_state {
+    INITIAL,
+    DECIMAL,
+};
+
+typedef enum parse_state parse_state;
+
+float parseFloat(char *text) {
+    float x = 0;
+    int d = 0;
+
+    char *s = text;
+    parse_state state = INITIAL;
+
+    if (*s == '-')
+        s++;
+
+    while (*s && *s != ' ' && *s != '\n') {
+        switch (state) {
+            case INITIAL:
+                if (*s >= '0' && *s <= '9') {
+                    x *= 10;
+                    x += *s - '0';
+                } else if (*s == '.') {
+                    state = DECIMAL;
+                } else {
+                    return NAN;
+                }
+
+                s++;
+                break;
+            case DECIMAL:
+                if (*s >= '0' && *s <= '9') {
+                    x *= 10;
+                    x += *s - '0';
+                    d += 1;
+                } else {
+                    return NAN;
+                }
+
+                s++;
+                break;
+        }
+    }
+
+    float y = x / ipow(10, d);
+    return *text == '-' ? -y : y;
+}
+
+int ipow(int base, int exp){
+
+   int result = 1;
+   for(;;){
+      
+      if(exp & 1)result *= base;
+      exp >>= 1;
+      if(!exp) break;
+      base *= base;
+
+   }
+   return result;
+
+}
+

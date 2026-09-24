@@ -37,12 +37,14 @@ lib:
 test:
 #  nasm ../elfTest/syscalltest.asm -f elf64 -o bin/syscall.elf
 #  ld -o ../osfs/syscall.elf bin/syscall.elf
-	x86_64-elf-gcc ../elfTest/elf.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -o ../osfs/syscall.elf
-	x86_64-elf-gcc ../elfTest/render.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -o ../osfs/renderer.elf
+	x86_64-elf-gcc ../elfTest/elf.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -m64 -o ../osfs/syscall.elf
+	x86_64-elf-gcc ../elfTest/render.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -m64 -o ../osfs/renderer.elf
+	x86_64-elf-gcc ../elfTest/console.c -fPIC -L ../stdlib/bin -static -lautism -nostdlib -nostartfiles -ffreestanding --entry=_start -m64 -o ../osfs/console.elf
 	mkdir ../osfs/objects/
 	cp ../cube.obj ../osfs/objects/
 
 clean:
 	rm ../osfs/* -f -r
+	cp -r ../staticFS/* ../osfs
 	rm bin/* -rf
 	mkdir bin/syscalls

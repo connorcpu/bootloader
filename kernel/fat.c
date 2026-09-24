@@ -108,30 +108,25 @@ fileHeader_t findFile(char* fileName){
       searching[i] = 0x0;
    }
 
-   kprintf("current: %h\n root: %h\n", currentDir, rootFiles);
-
    while(!found){
 
       kprintf("searchName: %s\n", searchName);
 
+      //this part finds what subdir or file we are looking for eg: /dev/fd -> find subdir dev
       //for(uint8_t j = 1; j < len(searchName); j++){
       for(uint8_t i = 0; i < 11; i++){
 
          if (searchName[i] == '/') {
-
          
             //searching = (char*)searchName + i + 1;
             uint8_t endingIdx = 0;
             for(uint8_t j = i + 1; j < 15; j++){
-               kprintf("%c\n", searchName[j]);
                if (searchName[j] == '/'){
                   endingIdx = j - 1;
-                  kprintf("endingIdx: %d\n", endingIdx);
                   break;
                }
                else if (searchName[j] == '\0') {
                   endingIdx = j+ 1;
-                  kprintf("yes\n");
                   break;
                }
             }
@@ -148,42 +143,52 @@ fileHeader_t findFile(char* fileName){
 
       kprintf("searching: %s\n", searching);
 
+      //this part takes the extracted subdir or file and tries to find it in the current dir
       uint16_t i = 0;
-      while(currentDir[i].name[0] != 0){
+      while(currentDir[i].name[0] != 0 || found){
 
          uint8_t name[12] = {0};
          getFileName(&currentDir[i], name);
 
 
+         if(currentDir[i].attributes != 0xF && currentDir[i].attributes != 0x00){
             kprintf("name: %s\n", name);
+         }
+
+         //found what we are looking for
          if (strcmp(name, searching) == 0) {
          
-            //found the file
-//            return loadClusterChain();
-            //return ide_read_sectors(0, bootsect.sectsPerCluster, clusterToLba(rootFiles[i].startingCluster), 0x10, (uint32_t)loadAddr);
+            //dir case
             if((currentDir[i].attributes & 0x10) == 0x10){
-               //dir case
                kprintf("found\n");
-               for(uint8_t i = 1; i < 11; i++){if(searchName[i] == '/'){searchName = searchName + i;}}
+               for(uint8_t i = 1; i < 11; i++){if(searchName[i] == '/'){searchName = searchName + i; break;}}
                fileHeader_t* tmp = (fileHeader_t*)kmalloc(512);
                loadClusterChain(currentDir[i].startingCluster, tmp);
                currentDir = tmp;
-               //found = true;
+               i = 0; //i gets set to 0 so that the file not found doesn't trip up when switching into a new subdir
                break;
+            //file case
             }else if((currentDir[i].attributes & 0x20) == 0x20){
                
-               //file case
                fileHeader_t tmpFile = currentDir[i];
                currentDir = rootFiles;
                found = true;
                return tmpFile;
-
             }
 
          }
 
          i += 1;
 
+      }
+
+      //while loop through the subdir exits here
+      //it does so either when it found the subdir it was looking for, or when the file was not found
+      if(currentDir[i].name[i] == 0 && currentDir[i].attributes == 0x00){
+         kprintf("file not found: %s\n", fileName);
+         fileHeader_t didNotFind;
+         didNotFind.fileSize = -1;
+         return didNotFind;
       }
 
    }
@@ -321,6 +326,7 @@ uint8_t getFileName(fileHeader_t* file, uint8_t* name){
    
    }
 
+   if(file->attributes == 0xF) return 0;
    kprintf("attr: %h, ", file->attributes);
 
    if((file->attributes & 0x20) == 0x20){

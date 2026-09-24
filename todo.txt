@@ -75,3 +75,36 @@ next up: more syscalls -> setup to terminal, or PCI or better memory management
       - intel, mass storage controller:IDE controller, ISA Compatiblilyt mode-only controller, supports bus mastering
    - bogus, VGA-compatible controller:VGA controller
    - intel, network controller:Ethernet controller
+
+
+- file operations
+   - what we want is to be able to handle files
+   - enter vfs.c
+   - the vfs keeps track of all devices, at startup it's responsible or managing the all device IO interface stuff
+   - keeps an array of entries of some type, by which it can refer them. 
+   - any file operation should go through the vfs like open read write ioctl bla bla
+   - since we are writing only for FAT32 and are married we will skip innodes
+   - if the request for a file comes in and it starts with /dev, ask the devfs driver
+   - for all other files, refer to FAT32
+   - the sugestion is to have each file store a file operations struct, allowing each file to be handled differently
+      - very usefull for implementing wierd asf drivers because they can register how a read or write should be handled
+   - when a file is opened a file struct is created and stored
+   - file descriptors corrispond to the index of the vfs array
+   - file struct needs to contain:
+      - full name with path of file?
+      - file type
+         - device
+         - file on disk
+      - file operations struct, list of function pointers that can facilitate file ops
+         - read
+         - write
+         - ioctl ?
+         - poll
+         - mmap
+         - close
+      - ring buffer head
+      - ring buffer tail
+      - ring buffer allocation start
+         - ring buffer is to be used for interrupt bassed buffering
+         - handler responsible for managing it
+         - this will be implemented by allocating a standard amount of memory, if overrun, loop back to start of allocation

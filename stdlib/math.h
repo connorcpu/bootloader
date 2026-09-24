@@ -14,6 +14,8 @@ do {                             \
    (d) = sf_u.value;             \
 }while (0)
 
+#define NAN (0.0/0.0)
+
 typedef union
 {
    float value;
@@ -23,3 +25,5 @@ typedef union
 
 uint64_t abs(int n);
 float roundf(float n);
+float parseFloat(char *text);
+int ipow(int base, int exp);

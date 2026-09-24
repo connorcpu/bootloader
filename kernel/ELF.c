@@ -14,17 +14,17 @@ uint64_t rbp_s;
 
 uint8_t loadElf(char* filename){
 
-   return executeElf((fileHeader_t*)loadFile(filename));
+   fileHeader_t* tmp = (fileHeader_t*)loadFile(filename);
+   if(tmp == -1){kprintf("could not load elf file: %s\n", filename); return -1;}
+   return executeElf(tmp);
 
 }
 
 uint8_t executeElf(fileHeader_t* file){
 
-   kprintf("test: %h @ %h\n", file, &file);
+   //kprintf("test: %h @ %h\n", file, &file);
    //bochsBreak();
    header = (elf64Header_t *) file;
-
-   kprintf("magic num: %h\n", header->magic);
 
    if (header->magic != 0x464C457F) {
       kprintf("elf: magic number is fucked\n");
@@ -128,7 +128,7 @@ uint8_t executeElf(fileHeader_t* file){
    __asm__ volatile("mov %%rbp, %0" : "=r"(rbp_s));
    tss->RSP0_l = rsp_s;
    tss->RSP0_h = (rsp_s >> 32);
-   kprintf("saving %h\n", rbp_s);
+   kprintf("saving %h\n", rsp_s);
 
    __asm__ volatile(
          "mov $0x23, %%ax\n\t"
@@ -136,14 +136,14 @@ uint8_t executeElf(fileHeader_t* file){
          "mov %%ax, %%es\n\t"
          "mov %%ax, %%gs\n\t"
          "mov %%ax, %%fs\n\t"
-         "mov $0x10FFF, %%rbp\n\t"
+         "mov $0x10F08, %%rbp\n\t"
 
 
          //"mov %%rsp, %%rax\n\t"
          //"xchg %%bx, %%bx\n\t"
          "pushq $0x23\n\t"
          //"pushq %%rax\n\t"
-         "pushq $0x10FFF\n\t"
+         "pushq $0x10F08\n\t"
          "pushfq\n\t"
          "pushq $0x1b\n\t"
          "pushq %0\n\t"

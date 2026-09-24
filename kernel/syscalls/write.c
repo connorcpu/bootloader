@@ -1,9 +1,9 @@
 #include "write.h"
-#include "fileDescriptor.h"
 #include "../io.h"
 #include "../memory.h"
 #include <stdint.h>
 #include "../debug.h"
+#include "../vfs.h"
 
 void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
 
@@ -34,12 +34,16 @@ void sysWrite(uint64_t rdi, uint64_t rsi, uint64_t rdx){
          break;
       default:
          //3. (file, not special)
-         uint8_t* ptr = retrievefd(fd);
+/*         uint8_t* ptr = retrievefd(fd)->disk->loc;
          //this line trips it
          if(ptr != (void*)-1){
             memcpy(ptr, (void*)rsi, rdx);
          }
+*/
+         vfsfile_t* file = retrievefd(rdi);
+         if(!file->inUse) return;
 
+         file->fops->write(file, (void*)rsi, rdx);
    }
    return;
 }

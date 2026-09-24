@@ -36,7 +36,7 @@ void pagingInit(){
    //freeMemAddr = mmap(0x16000, 0x0);
 
    //map kernel itself
-   for(uint8_t i = 0; i < 10; i++){
+   for(uint8_t i = 0; i < 15; i++){
       mmPage((void*)(uint64_t)(0x6000000 + (i*0x1000)), (void*)(uint64_t)(0xc0000000 + (i*0x1000)), 0x0, higherPML4);
    }
 

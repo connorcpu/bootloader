@@ -14,3 +14,4 @@ void kprintf(char *string, ...);
 void format(char *string, va_list args);
 void i2h(uint64_t decn, char* buffer);
 void i2a(uint64_t num, char* buffer);
+void f2a(float x, char* p);

@@ -66,6 +66,12 @@ void format(char *string, va_list args){
          case 'h':
             i2h(va_arg(args, uint64_t), buf);
             break;
+         case 'f':
+            double tmp = va_arg(args, double);
+            if(tmp < 0.0f){buf[0] = '-'; f2a(-tmp, buf + 1);}else{
+            f2a(tmp, buf);}
+            print(buf);
+            break;
          case '%':
             printch(ch);
             break;
@@ -141,6 +147,36 @@ void i2a(uint64_t num, char* buffer){
    }
    *buffer == 0;
 
+}
+
+void f2a(float x, char* p)
+{
+  int n,i=0,k=0;
+  n=(int)x;
+  while(n>0)
+  {
+    x/=10;
+    n=(int)x;
+    i++;
+ }
+ if(i == 0){*p = 0; i++;}
+ *(p+i) = '.';
+ x *= 10;
+ n = (int)x;
+ x = x-n;
+ while((n>0)||(i>k))
+ {
+   if(k == i)
+        k++;
+   *(p+k)='0'+n;
+   x *= 10;
+   n = (int)x;
+   x = x-n;
+   k++;
+ }
+ /* Null-terminated string */
+ //if(k == 0){k += 2;}
+ *(p+k) = '\0';
 }
 
 void printch(char ch){

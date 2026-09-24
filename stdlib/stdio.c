@@ -79,6 +79,12 @@ void format(char *string, va_list args){
          case 'h':
             i2h(va_arg(args, uint64_t), buf);
             break;
+         case 'f':
+            double tmp = va_arg(args, double);
+            if(tmp < 0.0f){buf[0] = '-'; f2a(-tmp, buf + 1);}else{
+            f2a(va_arg(args, double), buf);}
+            print(buf);
+            break;
          case '%':
             printch(ch);
             break;
@@ -170,3 +176,111 @@ void printch(char ch){
    return;
 }
 
+char ptr[255];
+
+char* readLine(uint8_t fd){
+   for(uint8_t i = 0; i < 255; i++){ ptr[i] = 0x00;}
+
+   uint8_t i = 0;
+   do{
+      if(ptr[i] == 'EOF')return ptr;
+      read(fd, ptr + i, 1);
+     // kprintf("%c", ptr[i]);
+      i++;
+   } while(ptr[i-1] != '\n');
+
+   return ptr;
+
+}
+
+void f2a(float x, char* p)
+{
+  int n,i=0,k=0;
+  n=(int)x;
+  while(n>0)
+  {
+    x/=10;
+    n=(int)x;
+    i++;
+ }
+ if(i == 0){*p = 0; i++;}
+ *(p+i) = '.';
+ x *= 10;
+ n = (int)x;
+ x = x-n;
+ while((n>0)||(i>k))
+ {
+   if(k == i)
+        k++;
+   *(p+k)='0'+n;
+   x *= 10;
+   n = (int)x;
+   x = x-n;
+   k++;
+ }
+ /* Null-terminated string */
+ *(p+k) = '\0';
+}
+
+char k2a(uint8_t keycode){
+
+   switch(keycode){
+
+      case 0x1e:
+         return 'a';
+      case 0x30:
+         return 'b';
+      case 0x2e:
+         return 'c';
+      case 0x20:
+         return 'd';
+      case 0x12:
+         return 'e';
+      case 0x21:
+         return 'f';
+      case 0x22:
+         return 'g';
+      case 0x23:
+         return 'h';
+      case 0x17:
+         return 'i';
+      case 0x24:
+         return 'j';
+      case 0x25:
+         return 'k';
+      case 0x26:
+         return 'l';
+      case 0x32:
+         return 'm';
+      case 0x31:
+         return 'n';
+      case 0x18:
+         return 'o';
+      case 0x19:
+         return 'p';
+      case 0x10:
+         return 'q';
+      case 0x13:
+         return 'r';
+      case 0x1f:
+         return 's';
+      case 0x14:
+         return 't';
+      case 0x16:
+         return 'u';
+      case 0x2f:
+         return 'v';
+      case 0x11:
+         return 'w';
+      case 0x2d:
+         return 'x';
+      case 0x15:
+         return 'y';
+      case 0x2c:
+         return 'z';
+      default:
+         return ' ';
+
+   }
+
+}

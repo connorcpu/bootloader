@@ -56,7 +56,7 @@ extern int _start() {
    //initFrame();
 
    //mapping pages for kernel
-   for(uint8_t i = 0; i < 10; i++){
+   for(uint8_t i = 0; i < 15; i++){
       mapPage((uint8_t*)(uint64_t)(0x6000000 + (i*0x1000)), (uint8_t*)(uint64_t)(0xC0000000 + (i*0x1000)), 0x0);
       kprintf("%i: mappping page at phys: %h, to virt: %h\n", i, (0x6000000 + (i*0x1000)), (0xc0000000 + (i*0x1000)));
    }

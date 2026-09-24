@@ -88,7 +88,7 @@ void exceptionHandler(registers_t r){
 
 uint64_t* saved_rsp = 0;
 void irq_handler(registers_t r){
-//   kprintf("irq %i got triggerd from %h\n", r.int_no, r.rip);
+   //kprintf("irq %i got triggerd from %h\n", r.int_no, r.rip);
 
    if(r.int_no > 0){
 

@@ -12,6 +12,8 @@
 #include "utils.h"
 #include "tss.h"
 #include "PCI.h"
+#include "vfs.h"
+#include "font.h"
 
 typedef struct bootArgs {
    
@@ -51,7 +53,7 @@ int _start(bootArgs_t args){
    createIDT();
 
    pagingInit();
-   bochsBreak();
+   //bochsBreak();
 
    uint64_t _cr0;
    uint64_t _cr4;
@@ -101,10 +103,13 @@ int _start(bootArgs_t args){
    fatInit();
 
    startfd();
+   init();
 
    __asm__ volatile("sti");
    
    setupSyscall(arguments.VBEInfoBlockAddr);
+
+   initFont();
 
    pciDetectAll();
    
@@ -113,14 +118,27 @@ int _start(bootArgs_t args){
    //finished setting up
 
 
-   loadFile("/objects/cube.obj");
+   //loadFile("/objects/cube.obj");
 
    //__asm__ volatile ("cli\t\nhlt");
    //due to compiler BS, there HAS, to be a line of code between 2 loadFile statements :)
-   kprintf("loading renderer\n");
+//   kprintf("loading renderer\n");
+
+   
+   //kprintf("%f\n", parseFloat("123"));
+   //kprintf("%f\n", parseFloat("123.5"));
+   //kprintf("%f\n", parseFloat("-123.5"));
+   kprintf("%f\n", -123.56f);
+   kprintf("%f\n", 1.0f);
+   kprintf("%f\n", -1.0f);
+   kprintf("%f\n", 0.0f);
+   kprintf("%f\n", 0.1f);
+
+   kprintf("align: %d\n", __alignof__(float));
+   kprintf("align: %d\n", __alignof__(double));
 
    //starting tests
-   if(loadElf("/renderer.elf") == -1){
+   if(loadElf("/console.elf") == -1){
       kprintf("ker: error during elf loading\n");
    }
 
@@ -186,6 +204,10 @@ void drawRect(uint8_t _rgb[]){
 
    uint8_t* volatile vga_mem = (uint8_t *)0x2000000;
    uint8_t* where = vga_mem;
+
+   //comment these 1, both or none of these lines to select which corner
+   where += (1080-200)*3*1920;
+   //where += (1920-300)*3;
 
    for(uint16_t j = 0; j < 200; j++){
 

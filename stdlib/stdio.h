@@ -12,3 +12,7 @@ void kprintf(char *string, ...);
 void format(char *string, va_list args);
 void i2h(uint64_t decn, char* buffer);
 void i2a(uint64_t num, char* buffer);
+char* readLine(uint8_t fd);
+float a2f(char* str);
+void f2a(float x, char* p);
+char k2a(uint8_t keycode);

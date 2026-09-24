@@ -22,32 +22,12 @@ uint64_t getVBEIBA(){
 
 }
 
-uint8_t keyboardReady = 0;
-uint8_t scancode = 0;
 void idle();
-
-uint8_t getKeyboard(){
-   uint8_t tmp = keyboardReady;
-   if(keyboardReady == 1) keyboardReady = 0; //if statement for the rare case the interupt occurs between checking and updating
-
-   return tmp;
-
-}
-
-uint8_t getScancode(){
-   uint8_t temp = scancode;
-   scancode = -1;
-
-   return temp;
-
-}
 
 void setupSyscall(uint64_t VBEInfoBlockAddr){
 
    //btw also handle the VBEInfo block for now
    VBEIBA = VBEInfoBlockAddr;
-
-   registerInterupt(0x1, &handleKeyboard);
 
    //STAR = 0xc0000081
    //LSTAR = 0xc0000082
@@ -190,7 +170,7 @@ __attribute__((naked))void handleSyscall(){
    switch(saved_rax){
 
       case 0x00:
-         sysRead(saved_rdi, saved_rsi, saved_rdx);
+         ret = sysRead(saved_rdi, saved_rsi, saved_rdx);
          break;
       case 0x01:
          sysWrite(saved_rdi, saved_rsi, saved_rdx);
@@ -217,6 +197,8 @@ __attribute__((naked))void handleSyscall(){
          "sysretq" 
          : 
          : "r"(ecx) : "ecx");*/
+
+   //kprintf("returning to %h & %h\n", saved_rsp_s, saved_rbp_s);
 
    __asm__ volatile(
          "mov %%rsp, %0\n\t"
@@ -252,18 +234,5 @@ __attribute__((naked))void handleSyscall(){
    //store ECX for returning later
    //handle syscall according to yet undetermined syscall table
    //setup and execute iretq, later try sysret
-
-}
-
-void handleKeyboard(){
-   //kprintf("registerd keyboard input\n");
-
-   keyboardReady = 1;
-   uint8_t sc = inb(0x60);
-   if(sc <= 0x7f){
-      scancode = sc;
-   }
-
-//   kprintf("code: %h\n", scancode);
 
 }
