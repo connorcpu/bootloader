@@ -63,6 +63,17 @@ uint8_t read(uint64_t fd, uint8_t* buf, uint64_t size){
    __asm__ volatile ("mov %%rax, %0" : "=r" (ret) : :);
 }
 
+uint8_t ioctl(uint64_t fd, uint64_t cmd, uint64_t arg){
+
+   __asm__ volatile ("mov %0, %%rdi" : : "r" (fd) : "rdi");
+   __asm__ volatile ("mov %0, %%rsi" : : "r" (cmd) : "rsi");
+   __asm__ volatile ("mov %0, %%rdx" : : "r" (arg) : "rdx");
+   __asm__ volatile ("mov $16, %%rax" : : : "rax");
+   __asm__ volatile ("syscall");
+   __asm__ volatile ("mov %%rax, %0" : "=r" (ret) : :);
+
+}
+
 uint8_t exit(uint32_t errorCode){
 
    __asm__ volatile ("mov %0, %%edi\n\t"

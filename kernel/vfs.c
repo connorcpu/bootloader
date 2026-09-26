@@ -61,6 +61,7 @@ void init(){
    ttyfo->write = &ttyWrite;
    ttyfo->open = &devOpen;
    tty.fops = ttyfo;
+   ttyfo->ioctl = &ttyioctl;
 
    //ring test 
    /*device_t* testdev = (device_t*)kmalloc(sizeof(device_t));
@@ -128,6 +129,29 @@ uint8_t devOpen(vfsfile_t* file){
    files[fd] = *file;
 
    return fd;
+
+}
+
+uint8_t ttyioctl(vfsfile_t* file, uint64_t cmd, void* arg){
+
+   switch(cmd){
+
+      case 0:
+         //set
+         file->disk->seekLoc = (uint64_t)arg;
+         break;
+      case 1:
+         //mov forward
+         file->disk->seekLoc += (uint64_t)arg;
+         break;
+      case 2:
+         //mov backward
+         file->disk->seekLoc -= (uint64_t)arg;
+         break;
+      default:
+         kprintf("invalid cmd\n");
+
+   }
 
 }
 

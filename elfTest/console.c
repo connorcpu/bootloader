@@ -28,6 +28,8 @@ void _start(){
 
    write(fd, "AutismOS > ", 11);
 
+   uint8_t linenum = 0;
+
    while(true){
 
       //if(poll(&pfd, 1, 0)){
@@ -35,9 +37,22 @@ void _start(){
       uint64_t red = read(keyfd, buff, 1);
          if(red != 0){
             if(buff[0] <= 0x7f && buff[0] != 0x00 && buff[0] >= 0x00){
-               buff[0] = k2a(buff[0]);
+               if(buff[0] == 0x1c){
+                  //enter
+                  ioctl(fd, 0, (linenum + 1) * (1920/8));
+                  write(fd, "AutismOS > ", 11);
+                  linenum++;
 
-               write(fd, buff, 1);
+               }else if(buff[0] == 0x0e){
+                  //backspace
+                  ioctl(fd, 2, 1);
+                  write(fd, " ", 1);
+                  ioctl(fd, 2, 1);
+               }else{
+                  buff[0] = k2a(buff[0]);
+
+                  write(fd, buff, 1);
+               }
             }
             buff[0] = 0x00;
 
@@ -46,7 +61,5 @@ void _start(){
       //}
 
    }
-
-
 
 }

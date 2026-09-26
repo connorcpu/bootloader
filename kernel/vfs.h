@@ -66,3 +66,4 @@ uint64_t fbWrite(vfsfile_t* file, void* buff, uint64_t count);
 uint64_t keyRead(vfsfile_t* file, void* buff, uint64_t count);
 void handleKeys();
 uint64_t ttyWrite(vfsfile_t* file, void* buff, uint64_t count);
+uint8_t ttyioctl(vfsfile_t* file, uint64_t cmd, void* arg);

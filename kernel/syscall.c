@@ -5,6 +5,7 @@
 #include "syscalls/open.h"
 #include "syscalls/poll.h"
 #include "syscalls/exit.h"
+#include "syscalls/ioctl.h"
 #include "debug.h"
 #include "interrupt.h"
 #include "utils.h"
@@ -180,6 +181,9 @@ __attribute__((naked))void handleSyscall(){
          break;
       case 0x07:
          ret = sysPoll((pollfd_t*) saved_rdi, (uint8_t)saved_rsi, (uint16_t)saved_rdx);
+         break;
+      case 0x10:
+         ret = (uint64_t)sysIoctl(saved_rdi, saved_rsi, saved_rdx);
          break;
       case 0x3c:
          ret = sysExit(saved_rdi);
